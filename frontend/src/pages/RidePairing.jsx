@@ -128,17 +128,17 @@ const RidePairing = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <div className="text-center">
           <div className="animate-bounce text-6xl mb-4">🚙</div>
-          <p className="text-xl font-semibold text-gray-600">Loading rides...</p>
+          <p className="text-xl font-semibold text-gray-600 dark:text-gray-300">Loading rides...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -146,10 +146,10 @@ const RidePairing = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 dark:text-white">
             Ride Pairing 🚙
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
+          <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto mb-6">
             Going somewhere? Find others heading the same way!
             Hop in, we go campus together chale! 🚗💨
           </p>
@@ -168,7 +168,7 @@ const RidePairing = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/drivers')}
-              className="px-6 py-3 bg-ghana-yellow text-gray-800 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+              className="px-6 py-3 bg-ghana-yellow text-gray-800 dark:text-gray-900 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
             >
               🚕 Call a Driver Instead
             </motion.button>
@@ -183,7 +183,7 @@ const RidePairing = () => {
                 className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
                   filter === f
                     ? 'bg-ashesi-primary text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -206,10 +206,10 @@ const RidePairing = () => {
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="font-display text-xl font-bold mb-1">
+                  <h3 className="font-display text-xl font-bold mb-1 dark:text-white">
                     {ride.name}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     📞 {ride.contact}
                   </p>
                 </div>

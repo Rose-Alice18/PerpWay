@@ -32,15 +32,27 @@ const AdminLogin = () => {
         transition={{ duration: 0.3 }}
         className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-md w-full border-4 border-ghana-green"
       >
-        {/* Lock Icon */}
+        {/* Logo */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
           className="flex justify-center mb-6"
         >
-          <div className="w-20 h-20 bg-gradient-to-br from-ghana-red to-ghana-yellow rounded-full flex items-center justify-center shadow-lg">
-            <span className="text-4xl">🔒</span>
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative">
+              <img
+                src="/geesh.png"
+                alt="Perpway Logo"
+                className="w-20 h-20 object-contain rounded-2xl shadow-lg"
+              />
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-br from-ghana-red to-ghana-yellow rounded-full flex items-center justify-center shadow-md">
+                <span className="text-lg">🔒</span>
+              </div>
+            </div>
+            <span className="font-display text-xl font-bold bg-gradient-to-r from-ghana-red via-ghana-yellow to-ghana-green bg-clip-text text-transparent">
+              Perpway Admin
+            </span>
           </div>
         </motion.div>
 

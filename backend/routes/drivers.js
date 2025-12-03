@@ -62,4 +62,40 @@ router.patch('/:id/availability', async (req, res) => {
   }
 });
 
+// Update driver (full update for admin)
+router.put('/:id', async (req, res) => {
+  try {
+    const driver = await Driver.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Driver not found' });
+    }
+
+    res.json({ success: true, driver });
+  } catch (error) {
+    console.error('Error updating driver:', error);
+    res.status(500).json({ error: 'Failed to update driver', message: error.message });
+  }
+});
+
+// Delete driver (for admin use)
+router.delete('/:id', async (req, res) => {
+  try {
+    const driver = await Driver.findByIdAndDelete(req.params.id);
+
+    if (!driver) {
+      return res.status(404).json({ error: 'Driver not found' });
+    }
+
+    res.json({ success: true, message: 'Driver deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting driver:', error);
+    res.status(500).json({ error: 'Failed to delete driver', message: error.message });
+  }
+});
+
 module.exports = router;

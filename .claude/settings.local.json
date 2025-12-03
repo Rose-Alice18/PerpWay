@@ -5,7 +5,11 @@
       "Bash(npm start)",
       "Bash(npm install:*)",
       "Bash(curl:*)",
-      "Bash(python -m json.tool:*)"
+      "Bash(python -m json.tool:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

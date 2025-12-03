@@ -1,6 +1,6 @@
 {
-  "short_name": "The Ashway",
-  "name": "The Ashway - Our Community Hub",
+  "short_name": "Perpway",
+  "name": "Perpway - Your Community Hub",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +10,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#006B3F",
+  "theme_color": "#6366F1",
   "background_color": "#ffffff"
 }

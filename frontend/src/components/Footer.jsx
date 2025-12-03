@@ -1,55 +1,70 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* About */}
-          <div>
-            <h3 className="font-display text-xl font-bold mb-4 text-ghana-yellow">
-              The Ashway
-            </h3>
-            <p className="text-gray-300 text-sm leading-relaxed">
-              Your one-stop community hub for Ashesi University. We dey here to make your campus life smooth sotay! 🚀
-            </p>
+    <footer className="bg-[#1a1d29] text-white mt-auto border-t border-gray-800">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 py-8 md:py-10">
+        {/* Main footer content - clean single line on desktop */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+
+          {/* Left: Logo & Tagline */}
+          <div className="flex flex-col md:flex-row items-center gap-3 md:gap-8">
+            <Link to="/" className="flex items-center gap-2">
+              <span className="font-display text-xl md:text-2xl font-bold text-ghana-yellow">Perpway</span>
+            </Link>
+            <p className="text-gray-400 text-sm">Your community hub 🚀</p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-display text-xl font-bold mb-4 text-ghana-yellow">
-              Quick Links
-            </h3>
-            <ul className="space-y-2 text-sm">
-              <li><a href="/drivers" className="text-gray-300 hover:text-ghana-yellow transition-colors">Find Drivers</a></li>
-              <li><a href="/delivery" className="text-gray-300 hover:text-ghana-yellow transition-colors">Request Delivery</a></li>
-              <li><a href="/services" className="text-gray-300 hover:text-ghana-yellow transition-colors">Local Services</a></li>
-              <li><a href="/rides" className="text-gray-300 hover:text-ghana-yellow transition-colors">Carpool</a></li>
-            </ul>
-          </div>
+          {/* Center: Navigation Links */}
+          <nav className="flex items-center gap-6 md:gap-8 text-sm">
+            <Link to="/drivers" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <span>🚗</span> Drivers
+            </Link>
+            <Link to="/delivery" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <span>📦</span> Delivery
+            </Link>
+            <Link to="/services" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <span>🛍️</span> Services
+            </Link>
+            <Link to="/rides" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <span>🚙</span> Rides
+            </Link>
+          </nav>
 
-          {/* Contact */}
-          <div>
-            <h3 className="font-display text-xl font-bold mb-4 text-ghana-yellow">
-              Contact Us
-            </h3>
-            <p className="text-gray-300 text-sm mb-2">
-              For business inquiries or support:
-            </p>
-            <p className="text-ghana-yellow font-semibold">
-              info@theashway.com
-            </p>
-            <div className="flex space-x-4 mt-4">
-              <a href="#" className="text-gray-300 hover:text-ghana-yellow transition-colors text-2xl">📱</a>
-              <a href="#" className="text-gray-300 hover:text-ghana-yellow transition-colors text-2xl">💬</a>
-              <a href="#" className="text-gray-300 hover:text-ghana-yellow transition-colors text-2xl">📧</a>
+          {/* Right: Contact */}
+          <div className="flex items-center gap-4 md:gap-6">
+            <a
+              href="mailto:info@perpway.com"
+              className="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-1"
+            >
+              <span>📧</span> Contact
+            </a>
+            <div className="flex items-center gap-3">
+              <a href="https://wa.me/" className="text-gray-400 hover:text-ghana-yellow transition-colors text-xl" title="WhatsApp">
+                💬
+              </a>
+              <a href="tel:" className="text-gray-400 hover:text-ghana-red transition-colors text-xl" title="Call us">
+                📱
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-400 text-sm">
-          <p>© 2024 The Ashway. Made with ❤️ for the Ashesi community. All rights reserved.</p>
-          <p className="mt-2 italic">"Small tip go carry you far!" 😄</p>
+        {/* Bottom: Copyright & Admin Gateway */}
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-800">
+          <p className="text-gray-500 text-xs">
+            © 2024 Perpway • Made with <span className="text-ghana-red">❤️</span> for the community
+          </p>
+
+          {/* Admin Gateway - Subtle but visible */}
+          <Link
+            to="/admin/dashboard"
+            className="text-gray-700 hover:text-gray-500 transition-colors text-xs px-2 py-1 rounded hover:bg-gray-800/30"
+            title="Admin"
+          >
+            ⚙️
+          </Link>
         </div>
       </div>
     </footer>

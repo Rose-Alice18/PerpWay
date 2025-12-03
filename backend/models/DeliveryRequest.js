@@ -42,6 +42,10 @@ const deliveryRequestSchema = new mongoose.Schema({
     type: Date,
   },
   assignedRider: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'MotorRider',
+  },
+  assignedRiderName: {
     type: String,
   },
   assignedAt: {

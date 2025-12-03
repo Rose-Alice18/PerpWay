@@ -1,9 +1,9 @@
 // App-wide constants and configuration
 
-export const APP_NAME = 'The Ashway';
+export const APP_NAME = 'Perpway';
 
 export const CONTACT_INFO = {
-  email: 'info@theashway.com',
+  email: 'info@perpway.com',
   phone: '+233 XX XXX XXXX',
   location: 'Ashesi University, Berekuso, Ghana',
 };
@@ -137,7 +137,7 @@ export const MESSAGES = {
   NO_RIDES: 'No rides available. Be the first to post!',
 
   // Fun messages
-  WELCOME: 'Welcome to The Ashway! We dey here for you! 🇬🇭',
+  WELCOME: 'Welcome to Perpway! We dey here for you! 🎉',
   SMALL_TIP: 'Small tip go carry you far! 😄',
   LETS_GO: 'E be like say you ready to move? Make we go! 🚗💨',
   SORT_YOU_OUT: 'No wahala! We go sort you out! 👍',

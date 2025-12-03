@@ -18,11 +18,11 @@
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl;
+    @apply bg-white dark:bg-[#1e293b] rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl border border-transparent dark:border-gray-700;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ashesi-primary focus:border-transparent transition-all;
+    @apply w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ashesi-primary focus:border-transparent transition-all;
   }
 }
 
@@ -35,6 +35,10 @@
   background: #f1f1f1;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 5px;
@@ -42,4 +46,12 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import PaymentModal from '../components/PaymentModal';
+import LoadingSkeleton from '../components/LoadingSkeleton';
 
 const ServiceHub = () => {
   const [vendors, setVendors] = useState([]);
@@ -55,17 +56,40 @@ const ServiceHub = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin text-6xl mb-4">🛍️</div>
-          <p className="text-xl font-semibold text-gray-600">Loading services...</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 dark:text-white">
+              Local Service Hub 🛍️
+            </h1>
+            <motion.div
+              className="inline-block text-6xl mb-4"
+              animate={{
+                rotate: [0, -15, 15, -15, 0],
+                scale: [1, 1.1, 1, 1.05, 1],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              🛍️
+            </motion.div>
+            <p className="text-xl font-semibold text-gray-600 dark:text-gray-300">Loading services...</p>
+          </motion.div>
+          <LoadingSkeleton type="card" count={6} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -73,10 +97,10 @@ const ServiceHub = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 dark:text-white">
             Local Service Hub 🛍️
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8">
+          <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto mb-8">
             Find the best local service providers around Berekuso.
             Barbers, tailors, food vendors - we get all of them here! 💯
           </p>
@@ -92,7 +116,7 @@ const ServiceHub = () => {
                 className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                   selectedCategory === category.id
                     ? 'bg-ashesi-primary text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 <span className="mr-2">{category.icon}</span>
@@ -108,68 +132,104 @@ const ServiceHub = () => {
           animate={{ opacity: 1 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {filteredVendors.map((vendor, index) => {
-            const isRevealed = revealedContacts.has(vendor.id);
+          <AnimatePresence mode="popLayout">
+            {filteredVendors.map((vendor, index) => {
+              const isRevealed = revealedContacts.has(vendor.id);
 
-            return (
-              <motion.div
-                key={vendor.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="card relative overflow-hidden"
-              >
+              return (
+                <motion.div
+                  key={vendor.id}
+                  layout
+                  initial={{ opacity: 0, y: 50, scale: 0.9, rotateY: -15 }}
+                  animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 100,
+                    damping: 15,
+                    delay: index * 0.08
+                  }}
+                  whileHover={{
+                    y: -15,
+                    scale: 1.03,
+                    rotateZ: [0, 1, -1, 0],
+                    transition: { type: 'spring', stiffness: 300, damping: 20 }
+                  }}
+                  className="card relative overflow-hidden group cursor-pointer"
+                >
                 {/* Category Badge */}
-                <div className="absolute top-4 right-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-ghana-red via-ghana-yellow to-ghana-green text-white">
+                <motion.div
+                  className="absolute top-4 right-4 z-10"
+                  initial={{ scale: 0, x: 50 }}
+                  animate={{ scale: 1, x: 0 }}
+                  transition={{ delay: index * 0.08 + 0.2, type: 'spring', stiffness: 200 }}
+                >
+                  <motion.span
+                    className="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-ghana-red via-ghana-yellow to-ghana-green text-white shadow-lg"
+                    whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                  >
                     {categories.find((c) => c.id === vendor.category)?.icon}{' '}
                     {vendor.category.toUpperCase()}
-                  </span>
-                </div>
+                  </motion.span>
+                </motion.div>
 
                 {/* Vendor Image/Icon */}
-                <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                <motion.div
+                  className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-600 dark:to-gray-700 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative group/img"
+                  whileHover={{ scale: 1.02 }}
+                >
                   {vendor.image ? (
-                    <img
+                    <motion.img
                       src={vendor.image}
                       alt={vendor.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110"
                     />
                   ) : (
-                    <div className="text-6xl">
+                    <motion.div
+                      className="text-6xl"
+                      animate={{
+                        y: [0, -8, 0],
+                        rotate: [0, 5, -5, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: index * 0.2
+                      }}
+                    >
                       {categories.find((c) => c.id === vendor.category)?.icon || '🏪'}
-                    </div>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Vendor Info */}
-                <h3 className="font-display text-xl font-bold mb-2">
+                <h3 className="font-display text-xl font-bold mb-2 dark:text-white">
                   {vendor.name}
                 </h3>
 
                 <div className="space-y-2 mb-4">
-                  <p className="text-gray-600 flex items-center">
+                  <p className="text-gray-600 dark:text-gray-300 flex items-center">
                     <span className="mr-2">📍</span>
                     <span className="font-semibold">{vendor.location}</span>
                   </p>
 
                   {vendor.hours && (
-                    <p className="text-gray-600 flex items-center">
+                    <p className="text-gray-600 dark:text-gray-300 flex items-center">
                       <span className="mr-2">🕒</span>
                       <span>{vendor.hours}</span>
                     </p>
                   )}
 
                   {vendor.speciality && (
-                    <p className="text-gray-600 flex items-center">
+                    <p className="text-gray-600 dark:text-gray-300 flex items-center">
                       <span className="mr-2">⭐</span>
                       <span className="italic">"{vendor.speciality}"</span>
                     </p>
                   )}
 
                   {vendor.priceRange && (
-                    <p className="text-gray-600 flex items-center">
+                    <p className="text-gray-600 dark:text-gray-300 flex items-center">
                       <span className="mr-2">💰</span>
                       <span className="font-semibold">{vendor.priceRange}</span>
                     </p>
@@ -180,7 +240,7 @@ const ServiceHub = () => {
                       <span className="text-yellow-500 mr-2">
                         {'⭐'.repeat(Math.floor(vendor.rating))}
                       </span>
-                      <span className="font-semibold text-gray-700">
+                      <span className="font-semibold text-gray-700 dark:text-gray-300">
                         {vendor.rating}/5.0
                       </span>
                     </div>
@@ -189,7 +249,7 @@ const ServiceHub = () => {
 
                 {/* Description */}
                 {vendor.description && (
-                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
                     {vendor.description}
                   </p>
                 )}
@@ -237,13 +297,14 @@ const ServiceHub = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full mt-3 py-2 border-2 border-ghana-yellow text-ghana-yellow font-semibold rounded-lg hover:bg-ghana-yellow hover:text-white transition-all duration-300"
+                  className="w-full mt-3 py-2 border-2 border-ghana-yellow text-ghana-yellow dark:text-ghana-yellow font-semibold rounded-lg hover:bg-ghana-yellow hover:text-white dark:hover:text-gray-900 transition-all duration-300"
                 >
                   👍 Recommend ({vendor.recommendations || 0})
                 </motion.button>
               </motion.div>
             );
           })}
+          </AnimatePresence>
         </motion.div>
 
         {/* No Results */}
@@ -254,10 +315,10 @@ const ServiceHub = () => {
             className="text-center py-16"
           >
             <div className="text-6xl mb-4">😕</div>
-            <h3 className="text-2xl font-bold text-gray-700 mb-2">
+            <h3 className="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">
               No vendors found
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Try changing your category or check back later!
             </p>
           </motion.div>
