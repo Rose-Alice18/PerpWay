@@ -1,0 +1,67 @@
+# DigitalOcean App Platform Specification
+# This file configures your Perpway application for deployment on DigitalOcean
+
+name: perpway
+region: nyc
+
+# Backend Service
+services:
+  - name: backend
+    environment_slug: node-js
+    github:
+      branch: main
+      deploy_on_push: true
+      repo: Rose-Alice18/PerpWay
+    source_dir: /
+
+    build_command: npm install
+    run_command: node backend/server.js
+
+    http_port: 5000
+
+    instance_count: 1
+    instance_size_slug: basic-xxs
+
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: MONGODB_URI
+        scope: RUN_TIME
+        type: SECRET
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: EMAIL_USER
+        scope: RUN_TIME
+        type: SECRET
+      - key: EMAIL_PASS
+        scope: RUN_TIME
+        type: SECRET
+      - key: ADMIN_EMAIL
+        value: roselinetsatsu@gmail.com
+      - key: FRONTEND_URL
+        value: ${APP_URL}
+
+    health_check:
+      http_path: /api/drivers
+
+# Frontend Service (Static Site)
+static_sites:
+  - name: frontend
+    github:
+      branch: main
+      deploy_on_push: true
+      repo: Rose-Alice18/PerpWay
+    source_dir: /frontend
+
+    build_command: npm install && npm run build
+    output_dir: build
+
+    envs:
+      - key: REACT_APP_API_URL
+        value: ${backend.PUBLIC_URL}
+
+    routes:
+      - path: /
