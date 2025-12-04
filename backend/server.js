@@ -38,32 +38,23 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/motor-riders', motorRiderRoutes);
 app.use('/api/categories', categoryRoutes);
 
-// Serve static files from React app in production
-if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-  // Serve React app for any route that's not an API route
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+// API health check and welcome route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Perpway API! ✨',
+    status: 'running',
+    environment: process.env.NODE_ENV || 'development',
+    endpoints: {
+      drivers: '/api/drivers',
+      vendors: '/api/vendors',
+      delivery: '/api/delivery',
+      rides: '/api/rides',
+      payments: '/api/payments',
+      motorRiders: '/api/motor-riders',
+      categories: '/api/categories',
+    },
   });
-} else {
-  // Welcome route for development
-  app.get('/', (req, res) => {
-    res.json({
-      message: 'Welcome to Perpway API! ✨',
-      endpoints: {
-        drivers: '/api/drivers',
-        vendors: '/api/vendors',
-        delivery: '/api/delivery',
-        rides: '/api/rides',
-        payments: '/api/payments',
-        motorRiders: '/api/motor-riders',
-        categories: '/api/categories',
-      },
-    });
-  });
-}
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
