@@ -35,13 +35,19 @@ router.post('/admin/login', async (req, res) => {
     }
 
     // Generate JWT token
+    const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+
+    if (!process.env.JWT_SECRET) {
+      console.warn('⚠️ WARNING: JWT_SECRET not found in environment variables, using fallback');
+    }
+
     const token = jwt.sign(
       {
         email: ADMIN_CREDENTIALS.email,
         role: ADMIN_CREDENTIALS.role,
         name: ADMIN_CREDENTIALS.name
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: '24h' }
     );
 
