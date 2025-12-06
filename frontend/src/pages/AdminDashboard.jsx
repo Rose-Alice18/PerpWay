@@ -680,7 +680,7 @@ const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV }) => {
         authorizedBy: 'Admin Roseline'
       }, getAuthHeaders());
       alert('✅ Delivery authorized successfully!');
-      fetchAllData();
+      fetchData();
     } catch (error) {
       console.error('Error authorizing delivery:', error);
       alert('❌ Failed to authorize delivery: ' + (error.response?.data?.error || error.message));
@@ -793,7 +793,7 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
 
     try {
       const response = await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
-      await fetchAllData();
+      await fetchData();
 
       // Ask if they want to send document
       if (confirm(`✅ Assigned to default rider ${defaultRider.name}!\n\nWould you like to send the delivery document to the rider?`)) {
@@ -820,7 +820,7 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     try {
       await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/status`, { status: newStatus }, getAuthHeaders());
       alert(`✅ Status updated to ${newStatus}!`);
-      fetchAllData();
+      fetchData();
     } catch (error) {
       console.error('Error updating status:', error);
       alert(`❌ Failed to update status: ${error.response?.data?.error || error.message}`);
