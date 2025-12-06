@@ -64,10 +64,6 @@ const AdminDashboard = () => {
     'Ama Serwaa'
   ];
 
-  useEffect(() => {
-    fetchAllData();
-  }, []);
-
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -110,6 +106,12 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('userAuthenticated');
