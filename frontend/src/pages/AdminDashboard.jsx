@@ -10,6 +10,20 @@ import {
 
 /* eslint-disable no-restricted-globals */
 
+// API configuration - defined at module level so all components can access
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+// Helper function to get auth headers - defined at module level
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  };
+};
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
@@ -26,20 +40,6 @@ const AdminDashboard = () => {
 
   // Filter states
   const [loading, setLoading] = useState(true);
-
-  // API base URL
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-  // Helper function to get auth headers
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('authToken');
-    return {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    };
-  };
 
   // Check authentication
   useEffect(() => {
