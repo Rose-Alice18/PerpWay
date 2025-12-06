@@ -177,135 +177,76 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      {/* Sidebar */}
-      <motion.aside
-        animate={{ width: sidebarOpen ? 256 : 80 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-white dark:bg-gray-800 shadow-2xl hidden md:flex flex-col border-r border-gray-200 dark:border-gray-700"
-      >
-        {/* Sidebar Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-center">
-            {sidebarOpen ? (
-              <h2 className="font-display text-xl font-bold bg-gradient-to-r from-ashesi-primary to-ghana-red bg-clip-text text-transparent">
-                Perpway
-              </h2>
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold text-lg">
-                P
-              </div>
-            )}
-          </div>
+      {/* Sidebar - Clean icon-based design */}
+      <aside className="w-20 bg-[#1e293b] dark:bg-[#0f172a] hidden md:flex flex-col items-center py-4 space-y-2">
+        {/* Logo/Home */}
+        <button
+          onClick={() => navigate('/')}
+          className="w-14 h-14 rounded-2xl bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold text-xl shadow-lg hover:scale-105 transition-transform mb-4"
+          title="Home"
+        >
+          P
+        </button>
+
+        {/* Menu Items */}
+        <div className="flex-1 w-full flex flex-col items-center space-y-2 overflow-y-auto">
+          {menuItems.map((item) => (
+            <motion.button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200 relative ${
+                activeTab === item.id
+                  ? 'bg-ashesi-primary shadow-lg shadow-ashesi-primary/50'
+                  : 'bg-gray-700/50 dark:bg-gray-800/50 hover:bg-gray-600/50 dark:hover:bg-gray-700/50'
+              }`}
+              title={item.name}
+            >
+              <span>{item.icon}</span>
+              {activeTab === item.id && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+            </motion.button>
+          ))}
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-2">
-          <div className="space-y-1">
-            {/* Home Button */}
-            <button
-              onClick={() => navigate('/')}
-              className={`w-full flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200`}
-              title="Home"
-            >
-              <span className="text-xl">🏠</span>
-              {sidebarOpen && <span className="text-sm">Home</span>}
-            </button>
-
-            {/* Dashboard Button */}
-            <button
-              onClick={() => navigate('/admin/dashboard')}
-              className={`w-full flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-200`}
-              title="Admin Dashboard"
-            >
-              <span className="text-xl">📊</span>
-              {sidebarOpen && <span className="text-sm">Dashboard</span>}
-            </button>
-
-            {/* Divider */}
-            {sidebarOpen && (
-              <div className="py-2">
-                <div className="border-t border-gray-200 dark:border-gray-700"></div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 px-2 font-semibold">ADMIN PANEL</p>
-              </div>
-            )}
-
-            {menuItems.map((item) => (
-              <motion.button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                whileHover={{ scale: sidebarOpen ? 1.02 : 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className={`w-full flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl font-semibold transition-all duration-200 ${
-                  activeTab === item.id
-                    ? 'bg-gradient-to-r from-ashesi-primary to-ghana-red text-white shadow-lg'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                title={item.name}
-              >
-                <span className={`text-xl ${activeTab === item.id ? '' : item.color}`}>
-                  {item.icon}
-                </span>
-                {sidebarOpen && <span className="text-sm whitespace-nowrap">{item.name}</span>}
-                {activeTab === item.id && sidebarOpen && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="ml-auto w-2 h-2 rounded-full bg-white"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </motion.button>
-            ))}
-          </div>
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={handleLogout}
-            className={`w-full flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl font-semibold bg-red-50 dark:bg-red-900/20 text-ghana-red hover:bg-red-100 dark:hover:bg-red-900/30 transition-all`}
-            title="Logout"
-          >
-            <span className="text-xl">🚪</span>
-            {sidebarOpen && <span className="text-sm">Logout</span>}
-          </button>
-        </div>
-      </motion.aside>
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="w-14 h-14 rounded-2xl bg-red-500/20 hover:bg-red-500/30 flex items-center justify-center text-2xl text-red-400 hover:text-red-300 transition-all mt-auto"
+          title="Logout"
+        >
+          🚪
+        </button>
+      </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-3 md:px-4 py-3">
-          <div className="flex items-center gap-2 md:gap-3">
-            {/* Hamburger Menu - Hidden on mobile since sidebar is hidden */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="hidden md:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-            >
-              <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
+          <div className="flex items-center justify-between">
             {/* Page Title */}
-            <div className="flex-1">
-              <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white truncate">
-                {menuItems.find(m => m.id === activeTab)?.name || 'Dashboard'}
-              </h1>
-            </div>
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+              {menuItems.find(m => m.id === activeTab)?.name || 'Dashboard'}
+            </h1>
 
             {/* User Info */}
-            <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold text-xs md:text-sm">
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-full">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold text-sm">
                 R
               </div>
-              <span className="text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:block">Roseline</span>
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:block">Admin Roseline</span>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-3 md:p-6">
+        <main className="flex-1 overflow-y-auto p-3 md:p-6 pb-20 md:pb-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -3734,6 +3675,33 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
           </motion.div>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1e293b] dark:bg-[#0f172a] border-t border-gray-700 z-50">
+        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+          {menuItems.slice(0, 4).map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
+                activeTab === item.id
+                  ? 'bg-ashesi-primary text-white'
+                  : 'text-gray-400 hover:bg-gray-700/50'
+              }`}
+            >
+              <span className="text-xl mb-0.5">{item.icon}</span>
+              <span className="text-[10px] font-medium">{item.name}</span>
+            </button>
+          ))}
+          <button
+            onClick={() => navigate('/')}
+            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-gray-400 hover:bg-gray-700/50 transition-all"
+          >
+            <span className="text-xl mb-0.5">🏠</span>
+            <span className="text-[10px] font-medium">Home</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 };

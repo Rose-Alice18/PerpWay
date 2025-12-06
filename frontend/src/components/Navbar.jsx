@@ -381,6 +381,20 @@ const Navbar = () => {
                       <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{userRole} Account</p>
                     </div>
 
+                    {/* Admin Dashboard Link */}
+                    {userRole === 'admin' && (
+                      <Link
+                        to="/admin/dashboard"
+                        onClick={() => setShowUserMenu(false)}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-ashesi-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors border-b border-gray-200 dark:border-gray-700"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                          <span>📊</span>
+                        </div>
+                        <span className="font-medium">Dashboard</span>
+                      </Link>
+                    )}
+
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-3 text-ghana-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
@@ -525,6 +539,16 @@ const Navbar = () => {
                     <span className="mr-2">{userRole === 'admin' ? '👨‍💼' : '👤'}</span>
                     {userName}
                   </div>
+                  {userRole === 'admin' && (
+                    <Link
+                      to="/admin/dashboard"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full text-left px-4 py-3 rounded-lg font-medium text-ashesi-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all my-1 block"
+                    >
+                      <span className="mr-2">📊</span>
+                      Dashboard
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       handleLogout();
