@@ -11,9 +11,26 @@ const app = express();
 connectDatabase();
 
 // Middleware
-// CORS configuration for production
+// CORS configuration for production - allow multiple origins
+const allowedOrigins = [
+  'http://localhost:2000',
+  'http://localhost:3000',
+  'https://perpway.app',
+  'https://www.perpway.app',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:2000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
