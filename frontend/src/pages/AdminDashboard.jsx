@@ -27,7 +27,7 @@ const getAuthHeaders = () => {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default on mobile
 
   // Data states
   const [deliveries, setDeliveries] = useState([]);
@@ -177,8 +177,18 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar - Clean icon-based design */}
-      <aside className="w-20 bg-[#1e293b] dark:bg-[#0f172a] hidden md:flex flex-col items-center py-4 space-y-2">
+      <aside className={`w-20 bg-[#1e293b] dark:bg-[#0f172a] flex flex-col items-center py-4 space-y-2 fixed md:static h-full z-50 transition-transform duration-300 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0`}>
         {/* Logo/Home */}
         <button
           onClick={() => navigate('/')}
@@ -193,7 +203,10 @@ const AdminDashboard = () => {
           {menuItems.map((item) => (
             <motion.button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                setSidebarOpen(false); // Close sidebar on mobile after selection
+              }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200 relative ${
@@ -226,12 +239,22 @@ const AdminDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden md:ml-0">
         {/* Top Bar */}
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
+            {/* Hamburger Menu (Mobile) */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
             {/* Page Title */}
-            <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white flex-1">
               {menuItems.find(m => m.id === activeTab)?.name || 'Dashboard'}
             </h1>
 
@@ -246,7 +269,7 @@ const AdminDashboard = () => {
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-3 md:p-6 pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto p-3 md:p-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -266,33 +289,6 @@ const AdminDashboard = () => {
             </motion.div>
           </AnimatePresence>
         </main>
-
-        {/* Mobile Bottom Navigation */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1e293b] dark:bg-[#0f172a] border-t border-gray-700 z-50">
-          <div className="grid grid-cols-5 gap-1 px-2 py-2">
-            {menuItems.slice(0, 4).map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
-                  activeTab === item.id
-                    ? 'bg-ashesi-primary text-white'
-                    : 'text-gray-400 hover:bg-gray-700/50'
-                }`}
-              >
-                <span className="text-xl mb-0.5">{item.icon}</span>
-                <span className="text-[10px] font-medium">{item.name}</span>
-              </button>
-            ))}
-            <button
-              onClick={() => navigate('/')}
-              className="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-gray-400 hover:bg-gray-700/50 transition-all"
-            >
-              <span className="text-xl mb-0.5">🏠</span>
-              <span className="text-[10px] font-medium">Home</span>
-            </button>
-          </div>
-        </nav>
       </div>
     </div>
   );
