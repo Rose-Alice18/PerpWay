@@ -11,22 +11,48 @@ const SignIn = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    // Check for admin credentials
-    if (email === 'admin@perpway.com' && password === 'perpway2025') {
-      localStorage.setItem('userAuthenticated', 'true');
-      localStorage.setItem('userRole', 'admin');
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('authTime', Date.now().toString());
-      navigate('/admin/dashboard');
-      return;
+    // Check for admin credentials - call backend API
+    if (email === 'admin@perpway.com') {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${apiUrl}/api/auth/admin/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          // Store JWT token
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('userAuthenticated', 'true');
+          localStorage.setItem('userRole', 'admin');
+          localStorage.setItem('userEmail', data.user.email);
+          localStorage.setItem('userName', data.user.name);
+          localStorage.setItem('authTime', Date.now().toString());
+          setSuccess('Admin login successful! Redirecting...');
+          setTimeout(() => navigate('/admin/dashboard'), 1000);
+          return;
+        } else {
+          setError(data.message || 'Invalid admin credentials');
+          return;
+        }
+      } catch (error) {
+        console.error('Admin login error:', error);
+        setError('Failed to connect to server. Please try again.');
+        return;
+      }
     }
 
-    // Check if user exists in localStorage
+    // Check if user exists in localStorage (regular users)
     const users = JSON.parse(localStorage.getItem('perpwayUsers') || '[]');
     const user = users.find(u => u.email === email && u.password === password);
 

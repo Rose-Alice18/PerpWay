@@ -22,6 +22,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // API Routes (must come BEFORE static files)
+const authRoutes = require('./routes/auth');
 const driverRoutes = require('./routes/drivers');
 const vendorRoutes = require('./routes/vendors');
 const deliveryRoutes = require('./routes/delivery');
@@ -30,6 +31,7 @@ const paymentRoutes = require('./routes/payments');
 const motorRiderRoutes = require('./routes/motorRiders');
 const categoryRoutes = require('./routes/categories');
 
+app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/delivery', deliveryRoutes);
@@ -45,6 +47,7 @@ app.get('/', (req, res) => {
     status: 'running',
     environment: process.env.NODE_ENV || 'development',
     endpoints: {
+      auth: '/api/auth',
       drivers: '/api/drivers',
       vendors: '/api/vendors',
       delivery: '/api/delivery',

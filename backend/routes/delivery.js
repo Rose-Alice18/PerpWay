@@ -3,6 +3,7 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 const DeliveryRequest = require('../models/DeliveryRequest');
 const MotorRider = require('../models/MotorRider');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // Create a test email transporter
 // In production, use real email credentials
@@ -138,7 +139,7 @@ router.post('/request', async (req, res) => {
 // ============ ADMIN ROUTES ============
 
 // Get all delivery requests (admin only)
-router.get('/admin/all', async (req, res) => {
+router.get('/admin/all', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const deliveries = await DeliveryRequest.find()
       .populate('assignedRider')
@@ -151,7 +152,7 @@ router.get('/admin/all', async (req, res) => {
 });
 
 // Authorize a delivery request (admin only)
-router.put('/admin/:id/authorize', async (req, res) => {
+router.put('/admin/:id/authorize', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { authorizedBy } = req.body;
     const delivery = await DeliveryRequest.findById(req.params.id);
@@ -184,7 +185,7 @@ router.put('/admin/:id/authorize', async (req, res) => {
 });
 
 // Assign rider to delivery (admin only)
-router.put('/admin/:id/assign', async (req, res) => {
+router.put('/admin/:id/assign', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { riderId } = req.body;
     const delivery = await DeliveryRequest.findById(req.params.id);
@@ -241,7 +242,7 @@ router.put('/admin/:id/assign', async (req, res) => {
 });
 
 // Quick assign to default delivery rider
-router.put('/admin/:id/assign-default', async (req, res) => {
+router.put('/admin/:id/assign-default', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const delivery = await DeliveryRequest.findById(req.params.id);
 
@@ -298,7 +299,7 @@ router.put('/admin/:id/assign-default', async (req, res) => {
 });
 
 // Update delivery status (admin/rider)
-router.put('/admin/:id/status', async (req, res) => {
+router.put('/admin/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
     const delivery = await DeliveryRequest.findById(req.params.id);
