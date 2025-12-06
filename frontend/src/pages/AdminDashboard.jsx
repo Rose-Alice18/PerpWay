@@ -27,6 +27,20 @@ const AdminDashboard = () => {
   // Filter states
   const [loading, setLoading] = useState(true);
 
+  // API base URL
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+  // Helper function to get auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('authToken');
+    return {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    };
+  };
+
   // Check authentication
   useEffect(() => {
     const isAuthenticated = localStorage.getItem('userAuthenticated');
@@ -58,28 +72,28 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
 
-      // Fetch deliveries
-      const deliveriesRes = await axios.get('http://localhost:5000/api/delivery/admin/all');
+      // Fetch deliveries (requires auth)
+      const deliveriesRes = await axios.get(`${API_URL}/api/delivery/admin/all`, getAuthHeaders());
       setDeliveries(deliveriesRes.data);
 
       // Fetch drivers
-      const driversRes = await axios.get('http://localhost:5000/api/drivers');
+      const driversRes = await axios.get(`${API_URL}/api/drivers`);
       setDrivers(driversRes.data);
 
       // Fetch rides
-      const ridesRes = await axios.get('http://localhost:5000/api/rides');
+      const ridesRes = await axios.get(`${API_URL}/api/rides`);
       setRides(ridesRes.data);
 
       // Fetch vendors
-      const vendorsRes = await axios.get('http://localhost:5000/api/vendors');
+      const vendorsRes = await axios.get(`${API_URL}/api/vendors`);
       setVendors(vendorsRes.data);
 
       // Fetch motor riders
-      const motorRidersRes = await axios.get('http://localhost:5000/api/motor-riders');
+      const motorRidersRes = await axios.get(`${API_URL}/api/motor-riders`);
       setMotorRiders(motorRidersRes.data);
 
       // Fetch categories
-      const categoriesRes = await axios.get('http://localhost:5000/api/categories');
+      const categoriesRes = await axios.get(`${API_URL}/api/categories`);
       setCategories(categoriesRes.data);
 
       // Get users from localStorage (since we're using localStorage auth)
@@ -89,6 +103,10 @@ const AdminDashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        alert('Session expired. Please login again.');
+        navigate('/signin');
+      }
       setLoading(false);
     }
   };
@@ -161,7 +179,7 @@ const AdminDashboard = () => {
       <motion.aside
         animate={{ width: sidebarOpen ? 256 : 80 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-white dark:bg-gray-800 shadow-2xl flex flex-col border-r border-gray-200 dark:border-gray-700"
+        className="bg-white dark:bg-gray-800 shadow-2xl hidden md:flex flex-col border-r border-gray-200 dark:border-gray-700"
       >
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -189,6 +207,16 @@ const AdminDashboard = () => {
             >
               <span className="text-xl">🏠</span>
               {sidebarOpen && <span className="text-sm">Home</span>}
+            </button>
+
+            {/* Dashboard Button */}
+            <button
+              onClick={() => navigate('/admin/dashboard')}
+              className={`w-full flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl font-semibold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-200`}
+              title="Admin Dashboard"
+            >
+              <span className="text-xl">📊</span>
+              {sidebarOpen && <span className="text-sm">Dashboard</span>}
             </button>
 
             {/* Divider */}
@@ -244,12 +272,12 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-          <div className="flex items-center gap-3">
-            {/* Hamburger Menu */}
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-3 md:px-4 py-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            {/* Hamburger Menu - Hidden on mobile since sidebar is hidden */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="hidden md:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             >
               <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,23 +287,23 @@ const AdminDashboard = () => {
 
             {/* Page Title */}
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white truncate">
                 {menuItems.find(m => m.id === activeTab)?.name || 'Dashboard'}
               </h1>
             </div>
 
             {/* User Info */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold text-sm">
+            <div className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold text-xs md:text-sm">
                 R
               </div>
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:block">Roseline</span>
+              <span className="text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:block">Roseline</span>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-3 md:p-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -646,11 +674,11 @@ const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV }) => {
     if (!window.confirm(confirmMessage)) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/delivery/admin/${deliveryId}/authorize`, {
+      await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/authorize`, {
         authorizedBy: 'Admin Roseline'
-      });
+      }, getAuthHeaders());
       alert('✅ Delivery authorized successfully!');
-      fetchData();
+      fetchAllData();
     } catch (error) {
       console.error('Error authorizing delivery:', error);
       alert('❌ Failed to authorize delivery: ' + (error.response?.data?.error || error.message));
@@ -729,9 +757,9 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     if (!confirm(confirmMsg)) return;
 
     try {
-      const response = await axios.put(`http://localhost:5000/api/delivery/admin/${selectedDelivery._id}/assign`, {
+      const response = await axios.put(`${API_URL}/api/delivery/admin/${selectedDelivery._id}/assign`, {
         riderId: selectedRiderId
-      });
+      }, getAuthHeaders());
 
       setShowAssignModal(false);
       setSelectedDelivery(null);
@@ -762,8 +790,8 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     if (!confirm(confirmMsg)) return;
 
     try {
-      const response = await axios.put(`http://localhost:5000/api/delivery/admin/${deliveryId}/assign-default`);
-      await fetchData();
+      const response = await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
+      await fetchAllData();
 
       // Ask if they want to send document
       if (confirm(`✅ Assigned to default rider ${defaultRider.name}!\n\nWould you like to send the delivery document to the rider?`)) {
@@ -788,9 +816,9 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     if (!confirm(confirmMsg)) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/delivery/admin/${deliveryId}/status`, { status: newStatus });
+      await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/status`, { status: newStatus }, getAuthHeaders());
       alert(`✅ Status updated to ${newStatus}!`);
-      fetchData();
+      fetchAllData();
     } catch (error) {
       console.error('Error updating status:', error);
       alert(`❌ Failed to update status: ${error.response?.data?.error || error.message}`);
