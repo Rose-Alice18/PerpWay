@@ -266,6 +266,33 @@ const AdminDashboard = () => {
             </motion.div>
           </AnimatePresence>
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1e293b] dark:bg-[#0f172a] border-t border-gray-700 z-50">
+          <div className="grid grid-cols-5 gap-1 px-2 py-2">
+            {menuItems.slice(0, 4).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
+                  activeTab === item.id
+                    ? 'bg-ashesi-primary text-white'
+                    : 'text-gray-400 hover:bg-gray-700/50'
+                }`}
+              >
+                <span className="text-xl mb-0.5">{item.icon}</span>
+                <span className="text-[10px] font-medium">{item.name}</span>
+              </button>
+            ))}
+            <button
+              onClick={() => navigate('/')}
+              className="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-gray-400 hover:bg-gray-700/50 transition-all"
+            >
+              <span className="text-xl mb-0.5">🏠</span>
+              <span className="text-[10px] font-medium">Home</span>
+            </button>
+          </div>
+        </nav>
       </div>
     </div>
   );
@@ -3675,33 +3702,6 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
           </motion.div>
         </div>
       )}
-
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1e293b] dark:bg-[#0f172a] border-t border-gray-700 z-50">
-        <div className="grid grid-cols-5 gap-1 px-2 py-2">
-          {menuItems.slice(0, 4).map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
-                activeTab === item.id
-                  ? 'bg-ashesi-primary text-white'
-                  : 'text-gray-400 hover:bg-gray-700/50'
-              }`}
-            >
-              <span className="text-xl mb-0.5">{item.icon}</span>
-              <span className="text-[10px] font-medium">{item.name}</span>
-            </button>
-          ))}
-          <button
-            onClick={() => navigate('/')}
-            className="flex flex-col items-center justify-center py-2 px-1 rounded-lg text-gray-400 hover:bg-gray-700/50 transition-all"
-          >
-            <span className="text-xl mb-0.5">🏠</span>
-            <span className="text-[10px] font-medium">Home</span>
-          </button>
-        </div>
-      </nav>
     </div>
   );
 };
