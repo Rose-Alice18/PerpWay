@@ -4773,32 +4773,32 @@ const SettingsTab = () => {
     description: ''
   });
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('authToken');
-    return {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    };
-  };
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
+  const fetchSettings = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/api/settings`, getAuthHeaders());
       setSettings(response.data);
     } catch (error) {
       console.error('Error fetching settings:', error);
-      showError('Failed to fetch settings');
+      showError('Failed to load settings. Please refresh the page.');
+      // Set default settings to prevent blank page
+      setSettings({
+        pricing: { instant: 10, nextDay: 7, weeklyStation: 5 },
+        autoAssignment: { enabled: false },
+        notificationTemplates: {},
+        businessHours: { schedule: {}, holidays: [] },
+        announcements: [],
+        sla: {},
+        general: { platformName: 'Perpway', currency: 'GH₵' }
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const updateSettings = async (updatedFields) => {
     try {
@@ -4894,8 +4894,16 @@ const SettingsTab = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="text-4xl mb-4">⚙️</div>
-          <p className="text-gray-600 dark:text-gray-400">Loading settings...</p>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="text-5xl mb-4"
+          >
+            ⚙️
+          </motion.div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-ashesi-primary mb-3"></div>
+          <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">Loading settings...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">This won't take long</p>
         </div>
       </div>
     );
