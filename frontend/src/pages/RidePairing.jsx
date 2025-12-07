@@ -558,9 +558,7 @@ const RidePairing = () => {
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     💡 <strong>Important:</strong> A taxi has 5 total seats (1 driver + 4 passengers).<br />
-                    <strong>YOU are a passenger!</strong> Select how many of the 4 passenger seats YOU need.<br />
-                    📊 <strong>You need: {formData.seatsNeeded || 1} {formData.seatsNeeded === 1 ? 'seat' : 'seats'}</strong> → <strong>Others can join: {4 - (formData.seatsNeeded || 1)} {4 - (formData.seatsNeeded || 1) === 1 ? 'seat' : 'seats'}</strong><br />
-                    <span className="text-red-600 dark:text-red-400">⚠️ Total passengers: {formData.seatsNeeded || 1} (you) + {4 - (formData.seatsNeeded || 1)} (others) = 4 max</span>
+                    <strong>You need: {formData.seatsNeeded || 1} {formData.seatsNeeded === 1 ? 'seat' : 'seats'}</strong> → <strong>Others can join: {4 - (formData.seatsNeeded || 1)} {4 - (formData.seatsNeeded || 1) === 1 ? 'seat' : 'seats'}</strong>
                   </p>
                 </div>
 
