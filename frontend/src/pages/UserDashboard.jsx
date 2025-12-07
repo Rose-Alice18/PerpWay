@@ -328,45 +328,6 @@ const UserDashboard = () => {
                 </div>
               </motion.div>
 
-              {/* Quick Stats Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <motion.div
-                  whileHover={{ scale: 1.05, rotate: 2 }}
-                  className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 shadow-xl text-white"
-                >
-                  <div className="text-4xl mb-2">📦</div>
-                  <p className="text-3xl font-black">{stats.deliveries.total}</p>
-                  <p className="text-sm text-blue-100">Total Deliveries</p>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.05, rotate: -2 }}
-                  className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl p-6 shadow-xl text-white"
-                >
-                  <div className="text-4xl mb-2">🚗</div>
-                  <p className="text-3xl font-black">{stats.rides.created + stats.rides.joined}</p>
-                  <p className="text-sm text-green-100">Total Rides</p>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.05, rotate: -2 }}
-                  className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 shadow-xl text-white"
-                >
-                  <div className="text-4xl mb-2">💰</div>
-                  <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
-                  <p className="text-sm text-orange-100">Total Spent</p>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.05, rotate: 2 }}
-                  className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 shadow-xl text-white"
-                >
-                  <div className="text-4xl mb-2">⚡</div>
-                  <p className="text-3xl font-black">{stats.rides.active}</p>
-                  <p className="text-sm text-purple-100">Active Rides</p>
-                </motion.div>
-              </div>
-
               {/* Quick Actions */}
               <div>
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
