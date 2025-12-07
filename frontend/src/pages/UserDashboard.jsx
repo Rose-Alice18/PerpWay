@@ -1085,32 +1085,32 @@ const UserDashboard = () => {
                     )}
                   </div>
 
-                    {/* Password Save/Cancel Buttons */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex gap-3 mt-6"
+                  {/* Password Save/Cancel Buttons */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-3 mt-6"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSavePassword}
+                      disabled={passwordLoading || !editedInfo.newPassword}
+                      className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleSavePassword}
-                        disabled={passwordLoading || !editedInfo.newPassword}
-                        className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {passwordLoading ? '💾 Saving...' : '✅ Save Password'}
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleCancelPassword}
-                        disabled={passwordLoading}
-                        className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        ❌ Cancel
-                      </motion.button>
-                    </motion.div>
-                  </div>
+                      {passwordLoading ? '💾 Saving...' : '✅ Save Password'}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleCancelPassword}
+                      disabled={passwordLoading}
+                      className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ❌ Cancel
+                    </motion.button>
+                  </motion.div>
+                </div>
                 ) : (
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-6 text-center">
                     <p className="text-gray-600 dark:text-gray-400">
