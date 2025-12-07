@@ -941,33 +941,6 @@ const UserDashboard = () => {
                       <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.address || 'Not set'}</p>
                     )}
                   </div>
-                  {isEditMode && (
-                    <>
-                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
-                        <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password (Optional)</label>
-                        <input
-                          type="password"
-                          value={editedInfo.newPassword || ''}
-                          onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                          placeholder="Leave blank to keep current password"
-                          className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters</p>
-                      </div>
-                      {editedInfo.newPassword && (
-                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
-                          <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Confirm New Password</label>
-                          <input
-                            type="password"
-                            value={editedInfo.confirmPassword || ''}
-                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                            placeholder="Re-enter your new password"
-                            className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
                     <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Account Type</label>
                     <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">Customer</p>
@@ -1002,6 +975,44 @@ const UserDashboard = () => {
                   </motion.div>
                 )}
               </div>
+
+              {/* Password Update Section */}
+              {isEditMode && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl"
+                >
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span className="text-2xl">🔒</span> Change Password
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
+                      <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password (Optional)</label>
+                      <input
+                        type="password"
+                        value={editedInfo.newPassword || ''}
+                        onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                        placeholder="Leave blank to keep current password"
+                        className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters</p>
+                    </div>
+                    {editedInfo.newPassword && (
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
+                        <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Confirm New Password</label>
+                        <input
+                          type="password"
+                          value={editedInfo.confirmPassword || ''}
+                          onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                          placeholder="Re-enter your new password"
+                          className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
 
               {/* Quick Settings */}
               <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">

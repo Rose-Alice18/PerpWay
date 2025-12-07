@@ -363,7 +363,7 @@ const Navbar = () => {
                     <div className="w-6 h-6 rounded-full bg-ashesi-primary/10 dark:bg-ashesi-primary/20 flex items-center justify-center text-xs font-bold">
                       {userRole === 'admin' ? '👑' : userName.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-sm font-semibold max-w-[70px] truncate">{userName}</span>
+                    <span className="text-sm font-semibold max-w-[110px] truncate">{userName}'s Dashboard</span>
                   </motion.button>
                 </Link>
 
@@ -516,7 +516,7 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-full bg-ashesi-primary/10 dark:bg-ashesi-primary/20 flex items-center justify-center text-sm font-bold">
                       {userRole === 'admin' ? '👑' : userName.charAt(0).toUpperCase()}
                     </div>
-                    <span className="font-semibold">{userName}</span>
+                    <span className="font-semibold">{userName}'s Dashboard</span>
                   </Link>
 
                   {/* Sign Out Button */}
