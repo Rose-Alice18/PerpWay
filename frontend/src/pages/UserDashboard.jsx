@@ -16,7 +16,9 @@ const UserDashboard = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedInfo, setEditedInfo] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
   const [userSettings, setUserSettings] = useState({
     emailNotifications: true,
     smsNotifications: false,
@@ -96,28 +98,11 @@ const UserDashboard = () => {
       setSaveLoading(true);
       setSuccessMessage('');
 
-      // Validate password if provided
-      if (editedInfo.newPassword) {
-        if (editedInfo.newPassword.length < 6) {
-          setSuccessMessage('Password must be at least 6 characters long.');
-          setSaveLoading(false);
-          setTimeout(() => setSuccessMessage(''), 3000);
-          return;
-        }
-        if (editedInfo.newPassword !== editedInfo.confirmPassword) {
-          setSuccessMessage('Passwords do not match. Please try again.');
-          setSaveLoading(false);
-          setTimeout(() => setSuccessMessage(''), 3000);
-          return;
-        }
-      }
-
       const response = await axios.put(`${API_URL}/api/auth/users/profile`, {
         email: userInfo.email,
         name: editedInfo.name,
         phone: editedInfo.phone,
         address: editedInfo.address,
-        newPassword: editedInfo.newPassword || undefined,
       });
 
       if (response.data.success) {
@@ -139,6 +124,55 @@ const UserDashboard = () => {
     } finally {
       setSaveLoading(false);
     }
+  };
+
+  const handleSavePassword = async () => {
+    try {
+      setPasswordLoading(true);
+      setPasswordMessage('');
+
+      // Validate password
+      if (!editedInfo.newPassword) {
+        setPasswordMessage('Please enter a new password.');
+        setPasswordLoading(false);
+        setTimeout(() => setPasswordMessage(''), 3000);
+        return;
+      }
+      if (editedInfo.newPassword.length < 6) {
+        setPasswordMessage('Password must be at least 6 characters long.');
+        setPasswordLoading(false);
+        setTimeout(() => setPasswordMessage(''), 3000);
+        return;
+      }
+      if (editedInfo.newPassword !== editedInfo.confirmPassword) {
+        setPasswordMessage('Passwords do not match. Please try again.');
+        setPasswordLoading(false);
+        setTimeout(() => setPasswordMessage(''), 3000);
+        return;
+      }
+
+      const response = await axios.put(`${API_URL}/api/auth/users/profile`, {
+        email: userInfo.email,
+        newPassword: editedInfo.newPassword,
+      });
+
+      if (response.data.success) {
+        setEditedInfo({ ...editedInfo, newPassword: '', confirmPassword: '' });
+        setPasswordMessage('Password updated successfully! 🎉');
+        setTimeout(() => setPasswordMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      setPasswordMessage(error.response?.data?.message || 'Failed to update password. Please try again.');
+      setTimeout(() => setPasswordMessage(''), 3000);
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleCancelPassword = () => {
+    setEditedInfo({ ...editedInfo, newPassword: '', confirmPassword: '' });
+    setPasswordMessage('');
   };
 
   const handleInputChange = (field, value) => {
@@ -986,14 +1020,33 @@ const UserDashboard = () => {
                   <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     <span className="text-2xl">🔒</span> Change Password
                   </h3>
+
+                  {/* Password Success Message */}
+                  <AnimatePresence>
+                    {passwordMessage && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                        className={`rounded-2xl p-4 shadow-lg mb-4 ${
+                          passwordMessage.includes('success')
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                            : 'bg-gradient-to-r from-red-500 to-pink-500'
+                        } text-white font-bold text-center`}
+                      >
+                        {passwordMessage}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="space-y-4">
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
-                      <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password (Optional)</label>
+                      <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password</label>
                       <input
                         type="password"
                         value={editedInfo.newPassword || ''}
                         onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                        placeholder="Leave blank to keep current password"
+                        placeholder="Enter new password"
                         className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                       />
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters</p>
@@ -1011,6 +1064,32 @@ const UserDashboard = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Password Save/Cancel Buttons */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-3 mt-6"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSavePassword}
+                      disabled={passwordLoading || !editedInfo.newPassword}
+                      className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {passwordLoading ? '💾 Saving...' : '✅ Save Password'}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleCancelPassword}
+                      disabled={passwordLoading}
+                      className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ❌ Cancel
+                    </motion.button>
+                  </motion.div>
                 </motion.div>
               )}
 
