@@ -177,7 +177,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay - Only show when expanded */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -185,61 +185,78 @@ const AdminDashboard = () => {
         />
       )}
 
-      {/* Sidebar - Clean icon-based design */}
-      <aside className={`w-20 bg-[#1e293b] dark:bg-[#0f172a] flex flex-col items-center py-4 space-y-2 fixed md:static h-full z-50 transition-transform duration-300 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0`}>
+      {/* Sidebar - Expandable design */}
+      <aside className={`bg-[#1e293b] dark:bg-[#0f172a] flex flex-col py-4 fixed md:static h-full z-50 transition-all duration-300 ${
+        sidebarOpen ? 'w-56' : 'w-16'
+      } md:w-20`}>
         {/* Logo/Home */}
-        <button
-          onClick={() => navigate('/')}
-          className="w-14 h-14 rounded-2xl bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold text-xl shadow-lg hover:scale-105 transition-transform mb-4"
-          title="Home"
-        >
-          P
-        </button>
+        <div className="px-2 mb-4">
+          <button
+            onClick={() => navigate('/')}
+            className={`w-full rounded-2xl bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold shadow-lg hover:scale-105 transition-all ${
+              sidebarOpen ? 'h-12 gap-2 px-3' : 'h-12 md:h-14'
+            }`}
+            title="Home"
+          >
+            <span className={sidebarOpen ? 'text-lg' : 'text-xl'}>P</span>
+            {sidebarOpen && <span className="text-sm font-semibold">Perpway</span>}
+          </button>
+        </div>
 
         {/* Menu Items */}
-        <div className="flex-1 w-full flex flex-col items-center space-y-2 overflow-y-auto">
+        <div className="flex-1 px-2 space-y-2 overflow-y-auto">
           {menuItems.map((item) => (
             <motion.button
               key={item.id}
               onClick={() => {
                 setActiveTab(item.id);
-                setSidebarOpen(false); // Close sidebar on mobile after selection
+                if (window.innerWidth < 768) {
+                  setSidebarOpen(false); // Close sidebar on mobile after selection
+                }
               }}
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: sidebarOpen ? 1.02 : 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200 relative ${
+              className={`w-full rounded-xl flex items-center transition-all duration-200 relative ${
+                sidebarOpen ? 'h-12 gap-3 px-3' : 'h-12 md:h-14 justify-center'
+              } ${
                 activeTab === item.id
-                  ? 'bg-ashesi-primary shadow-lg shadow-ashesi-primary/50'
-                  : 'bg-gray-700/50 dark:bg-gray-800/50 hover:bg-gray-600/50 dark:hover:bg-gray-700/50'
+                  ? 'bg-ashesi-primary shadow-lg shadow-ashesi-primary/50 text-white'
+                  : 'bg-gray-700/50 dark:bg-gray-800/50 hover:bg-gray-600/50 dark:hover:bg-gray-700/50 text-gray-300'
               }`}
               title={item.name}
             >
-              <span>{item.icon}</span>
-              {activeTab === item.id && (
+              {activeTab === item.id && !sidebarOpen && (
                 <motion.div
                   layoutId="activeIndicator"
                   className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
+              <span className={sidebarOpen ? 'text-xl' : 'text-lg md:text-2xl'}>{item.icon}</span>
+              {sidebarOpen && <span className="text-sm font-medium truncate">{item.name}</span>}
             </motion.button>
           ))}
         </div>
 
         {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="w-14 h-14 rounded-2xl bg-red-500/20 hover:bg-red-500/30 flex items-center justify-center text-2xl text-red-400 hover:text-red-300 transition-all mt-auto"
-          title="Logout"
-        >
-          🚪
-        </button>
+        <div className="px-2 mt-auto">
+          <button
+            onClick={handleLogout}
+            className={`w-full rounded-xl bg-red-500/20 hover:bg-red-500/30 flex items-center text-red-400 hover:text-red-300 transition-all ${
+              sidebarOpen ? 'h-12 gap-3 px-3' : 'h-12 md:h-14 justify-center'
+            }`}
+            title="Logout"
+          >
+            <span className={sidebarOpen ? 'text-xl' : 'text-lg md:text-2xl'}>🚪</span>
+            {sidebarOpen && <span className="text-sm font-medium">Logout</span>}
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden md:ml-0">
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
+        sidebarOpen ? 'md:ml-0' : 'ml-16 md:ml-0'
+      }`}>
         {/* Top Bar */}
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
           <div className="flex items-center justify-between gap-3">
