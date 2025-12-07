@@ -8,6 +8,7 @@ import Delivery from './pages/Delivery';
 import ServiceHub from './pages/ServiceHub';
 import RidePairing from './pages/RidePairing';
 import SignIn from './pages/SignIn';
+import AuthCallback from './pages/AuthCallback';
 import AdminDashboard from './pages/AdminDashboard';
 import RiderUpdate from './pages/RiderUpdate';
 import About from './pages/About';
@@ -32,6 +33,7 @@ function AppContent() {
           <Route path="/services" element={<ServiceHub />} />
           <Route path="/rides" element={<RidePairing />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/admin" element={<SignIn />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/rider-update/:riderCode" element={<RiderUpdate />} />

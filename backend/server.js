@@ -2,13 +2,30 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
 const connectDatabase = require('./config/database');
+const passport = require('./config/passport');
 
 const app = express();
 
 // Connect to MongoDB
 connectDatabase();
+
+// Session configuration (required for Passport)
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'perpway-session-secret-2025',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Middleware
 // CORS configuration for production - allow multiple origins

@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const passport = require('passport');
+const User = require('../models/User');
 
 // Admin credentials (in production, store these in database with hashed password)
 const ADMIN_CREDENTIALS = {
@@ -75,12 +77,104 @@ router.get('/verify', (req, res) => {
     return res.status(401).json({ valid: false, message: 'No token provided' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+
+  jwt.verify(token, jwtSecret, (err, user) => {
     if (err) {
       return res.status(403).json({ valid: false, message: 'Invalid or expired token' });
     }
     res.json({ valid: true, user });
   });
+});
+
+// Google OAuth routes
+router.get('/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false
+  })
+);
+
+router.get('/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/signin?error=auth_failed',
+    session: false
+  }),
+  (req, res) => {
+    try {
+      const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+
+      // Generate JWT token for the authenticated user
+      const token = jwt.sign(
+        {
+          id: req.user._id,
+          email: req.user.email,
+          name: req.user.name,
+          role: req.user.role
+        },
+        jwtSecret,
+        { expiresIn: '7d' } // 7 days for Google auth
+      );
+
+      // Redirect to frontend with token
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:2000';
+      res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
+        email: req.user.email,
+        name: req.user.name,
+        role: req.user.role,
+        profilePicture: req.user.profilePicture
+      }))}`);
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      res.redirect('/signin?error=server_error');
+    }
+  }
+);
+
+// Get current authenticated user
+router.get('/me', async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+
+    jwt.verify(token, jwtSecret, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Invalid or expired token' });
+      }
+
+      // If it's admin
+      if (decoded.role === 'admin') {
+        return res.json({
+          email: decoded.email,
+          name: decoded.name,
+          role: decoded.role
+        });
+      }
+
+      // If it's regular user, fetch from database
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      res.json({
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        profilePicture: user.profilePicture
+      });
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;
