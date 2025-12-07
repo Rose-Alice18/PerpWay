@@ -25,12 +25,12 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ghana-red/20 via-ghana-yellow/20 to-ghana-green/20 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-ghana-red/20 via-ghana-yellow/20 to-ghana-green/20 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-4">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-md w-full border-4 border-ghana-green"
+        className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 max-w-md w-full border-4 border-ghana-green dark:border-ghana-green/50"
       >
         {/* Logo */}
         <motion.div
@@ -63,10 +63,10 @@ const AdminLogin = () => {
           transition={{ delay: 0.2 }}
           className="text-center mb-8"
         >
-          <h1 className="font-display text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="font-display text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Admin Access
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Enter password to access the admin dashboard
           </p>
         </motion.div>
@@ -80,7 +80,7 @@ const AdminLogin = () => {
           className="space-y-6"
         >
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
               Admin Password
             </label>
             <input
@@ -91,7 +91,7 @@ const AdminLogin = () => {
                 setError('');
               }}
               placeholder="Enter admin password"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-ghana-green transition-colors"
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:border-ghana-green dark:focus:border-ghana-green transition-colors"
               required
               autoFocus
             />
@@ -101,10 +101,10 @@ const AdminLogin = () => {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border-2 border-red-300 rounded-xl p-3 flex items-center gap-2"
+              className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-xl p-3 flex items-center gap-2"
             >
               <span className="text-2xl">⚠️</span>
-              <p className="text-red-800 text-sm font-semibold">{error}</p>
+              <p className="text-red-800 dark:text-red-400 text-sm font-semibold">{error}</p>
             </motion.div>
           )}
 
@@ -125,7 +125,7 @@ const AdminLogin = () => {
           transition={{ delay: 0.4 }}
           className="mt-6 text-center"
         >
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             This area is restricted to authorized administrators only.
           </p>
         </motion.div>
