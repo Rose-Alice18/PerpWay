@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import FloatingDashboard from '../components/FloatingDashboard';
 
 const About = () => {
   const stats = [
@@ -272,6 +273,9 @@ const About = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Floating Dashboard Button */}
+      <FloatingDashboard />
     </div>
   );
 };

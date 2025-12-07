@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import FloatingDashboard from '../components/FloatingDashboard';
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -300,6 +301,9 @@ const FAQ = () => {
           </h3>
         </a>
       </motion.div>
+
+      {/* Floating Dashboard Button */}
+      <FloatingDashboard />
     </div>
   );
 };
