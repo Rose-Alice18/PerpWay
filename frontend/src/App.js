@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import FloatingDashboard from './components/FloatingDashboard';
 import Home from './pages/Home';
 import DriverFinder from './pages/DriverFinder';
 import Delivery from './pages/Delivery';
@@ -48,6 +49,9 @@ function AppContent() {
         </Routes>
       </main>
       {!isAdminRoute && !isUserDashboardRoute && !isRiderUpdateRoute && <Footer />}
+
+      {/* Floating Dashboard - appears on all pages when user is signed in */}
+      <FloatingDashboard />
     </div>
   );
 }

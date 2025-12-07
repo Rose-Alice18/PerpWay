@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import JoinRideModal from '../components/JoinRideModal';
 import SuccessModal from '../components/SuccessModal';
-import FloatingDashboard from '../components/FloatingDashboard';
 
 const RidePairing = () => {
   const navigate = useNavigate();
@@ -624,9 +623,6 @@ const RidePairing = () => {
         message={successMessage}
         onClose={() => setShowSuccessModal(false)}
       />
-
-      {/* Floating Dashboard Button */}
-      <FloatingDashboard />
     </div>
   );
 };

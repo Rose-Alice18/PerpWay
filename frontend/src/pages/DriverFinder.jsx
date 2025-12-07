@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import PaymentModal from '../components/PaymentModal';
 import LoadingSkeleton from '../components/LoadingSkeleton';
-import FloatingDashboard from '../components/FloatingDashboard';
 
 const DriverFinder = () => {
   const [drivers, setDrivers] = useState([]);
@@ -324,7 +323,6 @@ const DriverFinder = () => {
       </AnimatePresence>
 
       {/* Floating Dashboard Button */}
-      <FloatingDashboard />
     </div>
   );
 };

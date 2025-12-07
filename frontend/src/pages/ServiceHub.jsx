@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import PaymentModal from '../components/PaymentModal';
 import LoadingSkeleton from '../components/LoadingSkeleton';
-import FloatingDashboard from '../components/FloatingDashboard';
 
 const ServiceHub = () => {
   const [vendors, setVendors] = useState([]);
@@ -342,7 +341,6 @@ const ServiceHub = () => {
       </AnimatePresence>
 
       {/* Floating Dashboard Button */}
-      <FloatingDashboard />
     </div>
   );
 };
