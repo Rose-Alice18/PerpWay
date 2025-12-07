@@ -7,6 +7,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer
 } from 'recharts';
+import { ToastContainer } from '../components/Toast';
+import { useToast } from '../hooks/useToast';
 
 /* eslint-disable no-restricted-globals */
 
@@ -26,6 +28,7 @@ const getAuthHeaders = () => {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default on mobile
 
@@ -4220,10 +4223,10 @@ const SettingsTab = () => {
       setSaving(true);
       const response = await axios.put(`${API_URL}/api/settings`, updatedFields, getAuthHeaders());
       setSettings(response.data.settings);
-      alert('✅ Settings updated successfully!');
+      showSuccess('Settings updated successfully! Your changes are live now 🚀');
     } catch (error) {
       console.error('Error updating settings:', error);
-      alert('❌ Failed to update settings');
+      showError('Failed to update settings. Please try again!');
     } finally {
       setSaving(false);
     }
@@ -4235,10 +4238,10 @@ const SettingsTab = () => {
       setShowAddAnnouncementModal(false);
       setAnnouncementForm({ title: '', message: '', type: 'info', active: true, targetAudience: 'all', endDate: '' });
       fetchSettings();
-      alert('✅ Announcement created successfully!');
+      showSuccess('Announcement created! Everyone will see this now 📢');
     } catch (error) {
       console.error('Error creating announcement:', error);
-      alert('❌ Failed to create announcement');
+      showError('Couldn\'t create announcement. Maybe try again?');
     }
   };
 
@@ -4247,10 +4250,10 @@ const SettingsTab = () => {
     try {
       await axios.delete(`${API_URL}/api/settings/announcements/${announcementId}`, getAuthHeaders());
       fetchSettings();
-      alert('✅ Announcement deleted successfully!');
+      showSuccess('Announcement deleted! It\'s gone forever now 🗑️');
     } catch (error) {
       console.error('Error deleting announcement:', error);
-      alert('❌ Failed to delete announcement');
+      showError('Couldn\'t delete announcement. Something went wrong!');
     }
   };
 
@@ -4260,10 +4263,10 @@ const SettingsTab = () => {
       setShowAddHolidayModal(false);
       setHolidayForm({ date: '', name: '', description: '' });
       fetchSettings();
-      alert('✅ Holiday added successfully!');
+      showSuccess('Holiday added! Time to celebrate 🎉');
     } catch (error) {
       console.error('Error adding holiday:', error);
-      alert('❌ Failed to add holiday');
+      showError('Failed to add holiday. Try again maybe?');
     }
   };
 
@@ -4272,10 +4275,10 @@ const SettingsTab = () => {
     try {
       await axios.delete(`${API_URL}/api/settings/holidays/${date}`, getAuthHeaders());
       fetchSettings();
-      alert('✅ Holiday deleted successfully!');
+      showSuccess('Holiday deleted! Back to work we go 💼');
     } catch (error) {
       console.error('Error deleting holiday:', error);
-      alert('❌ Failed to delete holiday');
+      showError('Failed to delete holiday. Something broke!');
     }
   };
 
@@ -5098,6 +5101,9 @@ const SettingsTab = () => {
           </motion.div>
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 };
