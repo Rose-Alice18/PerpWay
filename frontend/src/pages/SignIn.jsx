@@ -67,8 +67,8 @@ const SignIn = () => {
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userName', user.name);
       localStorage.setItem('authTime', Date.now().toString());
-      setSuccess('Welcome back! Redirecting...');
-      setTimeout(() => navigate('/'), 1500);
+      setSuccess('Welcome back! Redirecting to your dashboard...');
+      setTimeout(() => navigate('/dashboard'), 1500);
     } else {
       setError('Invalid email or password. Please try again.');
     }
@@ -110,8 +110,8 @@ const SignIn = () => {
     localStorage.setItem('userName', name);
     localStorage.setItem('authTime', Date.now().toString());
 
-    setSuccess('Account created successfully! Redirecting...');
-    setTimeout(() => navigate('/'), 1500);
+    setSuccess('Account created successfully! Redirecting to your dashboard...');
+    setTimeout(() => navigate('/dashboard'), 1500);
   };
 
   return (

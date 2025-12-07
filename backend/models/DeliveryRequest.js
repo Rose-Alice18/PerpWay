@@ -10,6 +10,11 @@ const deliveryRequestSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  userEmail: {
+    type: String,
+    trim: true,
+    lowercase: true,
+  },
   itemDescription: {
     type: String,
     required: true,

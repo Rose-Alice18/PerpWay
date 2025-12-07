@@ -17,10 +17,34 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// GET user's delivery history
+router.get('/user/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Fetch all deliveries for this user
+    const deliveries = await DeliveryRequest.find({ userEmail: email.toLowerCase() })
+      .sort({ createdAt: -1 }); // Most recent first
+
+    res.json({
+      success: true,
+      count: deliveries.length,
+      deliveries
+    });
+  } catch (error) {
+    console.error('Error fetching user deliveries:', error);
+    res.status(500).json({ error: 'Failed to fetch delivery history' });
+  }
+});
+
 // Submit delivery request
 router.post('/request', async (req, res) => {
   try {
-    const { name, contact, itemDescription, pickupPoint, dropoffPoint, deliveryType, notes } = req.body;
+    const { name, contact, itemDescription, pickupPoint, dropoffPoint, deliveryType, notes, userEmail } = req.body;
 
     // Fetch pricing from settings
     const Settings = require('../models/Settings');
@@ -44,6 +68,7 @@ router.post('/request', async (req, res) => {
     const deliveryRequest = new DeliveryRequest({
       name,
       contact,
+      userEmail: userEmail ? userEmail.toLowerCase() : null,
       itemDescription,
       pickupPoint,
       dropoffPoint,

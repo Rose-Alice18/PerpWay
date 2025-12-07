@@ -111,9 +111,15 @@ const Delivery = () => {
     setSubmitting(true);
 
     try {
+      // Get logged-in user email from localStorage
+      const userEmail = localStorage.getItem('userEmail');
+
       // Send delivery request to backend
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      await axios.post(`${apiUrl}/api/delivery/request`, formData);
+      await axios.post(`${apiUrl}/api/delivery/request`, {
+        ...formData,
+        userEmail: userEmail || null, // Include user email if logged in
+      });
 
       // Show success animation
       setTimeout(() => {

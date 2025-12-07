@@ -10,6 +10,7 @@ import RidePairing from './pages/RidePairing';
 import SignIn from './pages/SignIn';
 import AuthCallback from './pages/AuthCallback';
 import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard';
 import RiderUpdate from './pages/RiderUpdate';
 import About from './pages/About';
 import Contact from './pages/Contact';
@@ -20,11 +21,12 @@ import Marketplace from './pages/Marketplace';
 function AppContent() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin/dashboard');
+  const isUserDashboardRoute = location.pathname.startsWith('/dashboard');
   const isRiderUpdateRoute = location.pathname.startsWith('/rider-update');
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0f172a] transition-colors duration-300">
-      {!isAdminRoute && !isRiderUpdateRoute && <Navbar />}
+      {!isAdminRoute && !isUserDashboardRoute && !isRiderUpdateRoute && <Navbar />}
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -33,6 +35,7 @@ function AppContent() {
           <Route path="/services" element={<ServiceHub />} />
           <Route path="/rides" element={<RidePairing />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/admin" element={<SignIn />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -44,7 +47,7 @@ function AppContent() {
           <Route path="/marketplace" element={<Marketplace />} />
         </Routes>
       </main>
-      {!isAdminRoute && !isRiderUpdateRoute && <Footer />}
+      {!isAdminRoute && !isUserDashboardRoute && !isRiderUpdateRoute && <Footer />}
     </div>
   );
 }
