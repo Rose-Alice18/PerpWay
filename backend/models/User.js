@@ -13,6 +13,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  password: {
+    type: String,
+    required: function() {
+      return this.authProvider === 'local';
+    }
+  },
   googleId: {
     type: String,
     sparse: true // Allows null values but ensures uniqueness when present

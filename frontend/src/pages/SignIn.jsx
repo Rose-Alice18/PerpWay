@@ -21,60 +21,48 @@ const SignIn = () => {
     setError('');
     setSuccess('');
 
-    // Check for admin credentials - call backend API
-    if (email === 'admin@perpway.com') {
-      try {
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-        const response = await fetch(`${apiUrl}/api/auth/admin/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-        const data = await response.json();
+      // Check if admin login
+      const endpoint = email === 'admin@perpway.com'
+        ? `${apiUrl}/api/auth/admin/login`
+        : `${apiUrl}/api/auth/signin`;
 
-        if (response.ok && data.success) {
-          // Store JWT token
-          localStorage.setItem('authToken', data.token);
-          localStorage.setItem('userAuthenticated', 'true');
-          localStorage.setItem('userRole', 'admin');
-          localStorage.setItem('userEmail', data.user.email);
-          localStorage.setItem('userName', data.user.name);
-          localStorage.setItem('authTime', Date.now().toString());
-          setSuccess('Admin login successful! Redirecting...');
-          setTimeout(() => navigate('/admin/dashboard'), 1000);
-          return;
-        } else {
-          setError(data.message || 'Invalid admin credentials');
-          return;
-        }
-      } catch (error) {
-        console.error('Admin login error:', error);
-        setError('Failed to connect to server. Please try again.');
-        return;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Store JWT token and user data
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userAuthenticated', 'true');
+        localStorage.setItem('userRole', data.user.role);
+        localStorage.setItem('userEmail', data.user.email);
+        localStorage.setItem('userName', data.user.name);
+        localStorage.setItem('authTime', Date.now().toString());
+
+        setSuccess(data.user.role === 'admin' ? 'Admin login successful! Redirecting...' : 'Welcome back! Redirecting to your dashboard...');
+
+        setTimeout(() => {
+          navigate(data.user.role === 'admin' ? '/admin/dashboard' : '/dashboard');
+        }, 1000);
+      } else {
+        setError(data.message || 'Invalid email or password');
       }
-    }
-
-    // Check if user exists in localStorage (regular users)
-    const users = JSON.parse(localStorage.getItem('perpwayUsers') || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-      localStorage.setItem('userAuthenticated', 'true');
-      localStorage.setItem('userRole', 'user');
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userName', user.name);
-      localStorage.setItem('authTime', Date.now().toString());
-      setSuccess('Welcome back! Redirecting to your dashboard...');
-      setTimeout(() => navigate('/dashboard'), 1500);
-    } else {
-      setError('Invalid email or password. Please try again.');
+    } catch (error) {
+      console.error('Sign in error:', error);
+      setError('Failed to connect to server. Please try again.');
     }
   };
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -90,28 +78,36 @@ const SignIn = () => {
       return;
     }
 
-    // Get existing users
-    const users = JSON.parse(localStorage.getItem('perpwayUsers') || '[]');
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    // Check if user already exists
-    if (users.some(u => u.email === email)) {
-      setError('An account with this email already exists.');
-      return;
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Store JWT token and user data
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userAuthenticated', 'true');
+        localStorage.setItem('userRole', data.user.role);
+        localStorage.setItem('userEmail', data.user.email);
+        localStorage.setItem('userName', data.user.name);
+        localStorage.setItem('authTime', Date.now().toString());
+
+        setSuccess('Account created successfully! Redirecting to your dashboard...');
+        setTimeout(() => navigate('/dashboard'), 1500);
+      } else {
+        setError(data.message || 'Signup failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      setError('Failed to connect to server. Please try again.');
     }
-
-    // Add new user
-    users.push({ name, email, password, createdAt: new Date().toISOString() });
-    localStorage.setItem('perpwayUsers', JSON.stringify(users));
-
-    // Auto sign in
-    localStorage.setItem('userAuthenticated', 'true');
-    localStorage.setItem('userRole', 'user');
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userName', name);
-    localStorage.setItem('authTime', Date.now().toString());
-
-    setSuccess('Account created successfully! Redirecting to your dashboard...');
-    setTimeout(() => navigate('/dashboard'), 1500);
   };
 
   return (
