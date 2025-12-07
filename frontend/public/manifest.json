@@ -1,7 +1,13 @@
 {
   "short_name": "Perpway",
-  "name": "Perpway - Your Community Hub",
+  "name": "Perpway - Community Hub",
+  "description": "Your Ashesi Community Hub for rides, deliveries, and local services",
   "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
@@ -10,6 +16,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#6366F1",
+  "theme_color": "#8B0000",
   "background_color": "#ffffff"
 }
