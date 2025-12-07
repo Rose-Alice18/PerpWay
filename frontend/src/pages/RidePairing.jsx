@@ -558,7 +558,8 @@ const RidePairing = () => {
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     💡 <strong>Important:</strong> A taxi has 5 total seats (1 driver + 4 passengers).<br />
-                    <strong>You need: {formData.seatsNeeded || 1} {formData.seatsNeeded === 1 ? 'seat' : 'seats'}</strong> → <strong>Others can join: {4 - (formData.seatsNeeded || 1)} {4 - (formData.seatsNeeded || 1) === 1 ? 'seat' : 'seats'}</strong>
+                    <strong>You need: {formData.seatsNeeded || 1} {formData.seatsNeeded === 1 ? 'seat' : 'seats'}</strong> → <strong>Others can join: {4 - (formData.seatsNeeded || 1)} {4 - (formData.seatsNeeded || 1) === 1 ? 'seat' : 'seats'}</strong><br />
+                    <em>Calculation: 4 - {formData.seatsNeeded || 1} = {4 - (formData.seatsNeeded || 1)} available seats. Example: Need 2 seats → 4 - 2 = 2 seats for others.</em>
                   </p>
                 </div>
 
@@ -573,6 +574,13 @@ const RidePairing = () => {
                     placeholder="Any special notes? E.g., 'Meeting at main gate', 'Stopping at Madina'"
                     className="input-field min-h-[80px] resize-none"
                   />
+                </div>
+
+                {/* Sign up information */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                  <p className="text-sm text-blue-800 dark:text-blue-200 text-center leading-relaxed">
+                    💡 <strong>Tip:</strong> Sign up on the platform to see people who join your ride, manage your dashboard, track all your rides, and contact riders for a seamless experience! But don't worry—you can still go ahead and post a ride without signing up.
+                  </p>
                 </div>
 
                 <div className="flex gap-3">
