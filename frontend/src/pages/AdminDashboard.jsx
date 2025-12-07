@@ -4504,21 +4504,12 @@ const RevenueTab = ({ deliveries, motorRiders, exportToCSV }) => {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
 
       // Fetch overview
-      const overviewRes = await axios.get(`${API_URL}/api/financials/overview?period=${period}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const overviewRes = await axios.get(`${API_URL}/api/financials/overview?period=${period}`, getAuthHeaders());
 
       // Fetch rider stats
-      const riderRes = await axios.get(`${API_URL}/api/financials/riders?period=${period}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const riderRes = await axios.get(`${API_URL}/api/financials/riders?period=${period}`, getAuthHeaders());
 
       setFinancialData(overviewRes.data);
       setRiderStats(riderRes.data.riders || []);
