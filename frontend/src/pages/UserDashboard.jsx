@@ -17,7 +17,6 @@ const UserDashboard = () => {
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
-    // Check if user is authenticated
     const isAuthenticated = localStorage.getItem('userAuthenticated');
     const userRole = localStorage.getItem('userRole');
 
@@ -26,13 +25,9 @@ const UserDashboard = () => {
       return;
     }
 
-    // Get user info
     const userName = localStorage.getItem('userName');
     const userEmail = localStorage.getItem('userEmail');
-
     setUserInfo({ name: userName, email: userEmail });
-
-    // Fetch user's data
     fetchUserData(userEmail);
   }, [navigate]);
 
@@ -41,13 +36,11 @@ const UserDashboard = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch deliveries
       const deliveryResponse = await axios.get(`${API_URL}/api/delivery/user/${email}`);
       if (deliveryResponse.data.success) {
         setDeliveries(deliveryResponse.data.deliveries);
       }
 
-      // Fetch rides
       const ridesResponse = await axios.get(`${API_URL}/api/rides/user/${email}`);
       if (ridesResponse.data.success) {
         setCreatedRides(ridesResponse.data.createdRides);
@@ -91,7 +84,6 @@ const UserDashboard = () => {
     }
   };
 
-  // Calculate stats
   const stats = {
     deliveries: {
       total: deliveries.length,
@@ -115,9 +107,9 @@ const UserDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-ashesi-primary border-t-transparent mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400 text-lg">Loading your dashboard...</p>
         </div>
       </div>
@@ -125,187 +117,329 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
       {/* User Profile Header */}
-      <div className="bg-white dark:bg-gray-800 px-4 py-6">
+      <div className="bg-white dark:bg-gray-800 px-4 py-6 shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white text-xl font-bold shadow-md">
               {userInfo.name?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                {userInfo.name || 'User'} 🔥
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                {userInfo.name || 'User'}
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">{userInfo.email}</p>
             </div>
           </div>
           <button
             onClick={() => navigate('/')}
-            className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <svg className="w-6 h-6 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* Quick Actions Button */}
-        <button
-          onClick={() => navigate('/delivery')}
-          className="w-full bg-teal-500 hover:bg-teal-600 text-white py-4 rounded-2xl font-semibold text-lg shadow-lg transition-all"
-        >
-          Request New Delivery
-        </button>
-
-        {/* Activity Summary */}
-        <div className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-lg">Activity Summary</h3>
-              <button
-                onClick={() => setActiveTab('deliveries')}
-                className="text-sm underline opacity-90 hover:opacity-100"
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm"
               >
-                See details
-              </button>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                    <span className="text-xl">📦</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Deliveries</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.deliveries.total}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500">GH₵ {stats.deliveries.totalSpent.toFixed(2)} spent</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.05 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                    <span className="text-xl">🚗</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Rides</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.rides.created + stats.rides.joined}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500">{stats.rides.created} created, {stats.rides.joined} joined</p>
+              </motion.div>
             </div>
-            <div className="text-right">
-              <p className="text-3xl font-bold">GH₵ {stats.deliveries.totalSpent.toFixed(2)}</p>
-              <p className="text-sm opacity-90">spent</p>
+
+            {/* Quick Actions */}
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => navigate('/delivery')}
+                  className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="text-3xl mb-2">📦</div>
+                  <p className="font-semibold text-sm">Request Delivery</p>
+                </button>
+                <button
+                  onClick={() => navigate('/rides')}
+                  className="bg-gradient-to-br from-green-500 to-green-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="text-3xl mb-2">🚗</div>
+                  <p className="font-semibold text-sm">Find Ride</p>
+                </button>
+                <button
+                  onClick={() => navigate('/drivers')}
+                  className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="text-3xl mb-2">🚙</div>
+                  <p className="font-semibold text-sm">Find Driver</p>
+                </button>
+                <button
+                  onClick={() => navigate('/services')}
+                  className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="text-3xl mb-2">🛍️</div>
+                  <p className="font-semibold text-sm">Services</p>
+                </button>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm divide-y divide-gray-100 dark:divide-gray-700">
+                {[...deliveries.slice(0, 3), ...createdRides.slice(0, 2)]
+                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                  .slice(0, 5)
+                  .map((item, index) => (
+                    <div key={index} className="p-4 flex items-center gap-3">
+                      <div className="text-2xl">{item.pickupPoint ? '📦' : '🚗'}</div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm text-gray-900 dark:text-white">
+                          {item.itemDescription || `${item.pickupLocation} → ${item.destination}`}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(item.status)}`}>
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
+                {deliveries.length === 0 && createdRides.length === 0 && (
+                  <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-3xl mb-2">🎯</p>
+                    <p className="text-sm">No activity yet. Start using Perpway services!</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Services Grid */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Services</h2>
+        {/* My Deliveries Tab */}
+        {activeTab === 'deliveries' && (
+          <div className="space-y-4">
+            {/* Filters */}
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {[
+                { id: 'all', label: 'All', count: deliveries.length },
+                { id: 'active', label: 'Active', count: deliveries.filter(d => ['pending', 'authorized', 'assigned', 'in-progress'].includes(d.status)).length },
+                { id: 'delivered', label: 'Delivered', count: stats.deliveries.delivered },
+                { id: 'pending', label: 'Pending', count: stats.deliveries.pending },
+              ].map(({ id, label, count }) => (
+                <button
+                  key={id}
+                  onClick={() => setFilter(id)}
+                  className={`px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${
+                    filter === id
+                      ? 'bg-ashesi-primary text-white shadow-sm'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {label} ({count})
+                </button>
+              ))}
+            </div>
+
+            {/* Deliveries List */}
+            <div className="space-y-4">
+              {filteredDeliveries.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-sm text-center">
+                  <div className="text-5xl mb-4">📦</div>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No deliveries found</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Start by requesting your first delivery!</p>
+                  <button
+                    onClick={() => navigate('/delivery')}
+                    className="px-6 py-3 bg-ashesi-primary text-white rounded-xl font-medium hover:shadow-md transition-all"
+                  >
+                    Request Delivery
+                  </button>
+                </div>
+              ) : (
+                filteredDeliveries.map((delivery) => (
+                  <div key={delivery._id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">{delivery.itemDescription}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{new Date(delivery.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(delivery.status)}`}>
+                        {delivery.status}
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-sm">
+                      <p className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">Pickup:</span> {delivery.pickupPoint}
+                      </p>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">Dropoff:</span> {delivery.dropoffPoint}
+                      </p>
+                      {delivery.price && (
+                        <p className="text-gray-900 dark:text-white font-semibold">
+                          GH₵ {delivery.price.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* My Rides Tab */}
+        {activeTab === 'rides' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Rides You Created</h2>
+              {createdRides.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm text-center">
+                  <p className="text-3xl mb-2">🚗</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No rides created yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {createdRides.map((ride) => (
+                    <div key={ride._id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {ride.pickupLocation} → {ride.destination}
+                        </p>
+                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ride.status)}`}>
+                          {ride.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(ride.departureDate).toLocaleDateString()} at {ride.departureTime}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        {ride.passengersJoined || 0} joined • {ride.availableSeats} seats available
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Rides You Joined</h2>
+              {joinedRides.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm text-center">
+                  <p className="text-3xl mb-2">🎫</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No rides joined yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {joinedRides.map((ride) => (
+                    <div key={ride._id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {ride.pickupLocation} → {ride.destination}
+                        </p>
+                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ride.status)}`}>
+                          {ride.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(ride.departureDate).toLocaleDateString()} at {ride.departureTime}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Profile Tab */}
+        {activeTab === 'profile' && (
+          <div className="space-y-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile Information</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Name</label>
+                  <p className="text-gray-900 dark:text-white font-medium">{userInfo.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Email</label>
+                  <p className="text-gray-900 dark:text-white font-medium">{userInfo.email}</p>
+                </div>
+              </div>
+            </div>
+
             <button
-              onClick={() => setActiveTab('deliveries')}
-              className="text-sm text-teal-600 dark:text-teal-400 font-semibold hover:underline"
+              onClick={handleLogout}
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-medium transition-all shadow-sm"
             >
-              See all &gt;&gt;
+              🚪 Logout
             </button>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Deliveries Card */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              onClick={() => setActiveTab('deliveries')}
-              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
-            >
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Total Deliveries</h3>
-              <p className="text-3xl font-bold">₵ {stats.deliveries.total}.00</p>
-              <p className="text-sm opacity-90 mt-1">/ {stats.deliveries.delivered} delivered</p>
-            </motion.div>
-
-            {/* Rides Card */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.05 }}
-              onClick={() => setActiveTab('rides')}
-              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
-            >
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Active Rides</h3>
-              <p className="text-3xl font-bold">₵ {(stats.rides.created + stats.rides.joined)}.00</p>
-              <p className="text-sm opacity-90 mt-1">/ {stats.rides.active} active</p>
-            </motion.div>
-
-            {/* Carpooling Card */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              onClick={() => navigate('/rides')}
-              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
-            >
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Carpooling</h3>
-              <p className="text-3xl font-bold">₵ {stats.rides.created}.00</p>
-              <p className="text-sm opacity-90 mt-1">/ {stats.rides.created} created</p>
-            </motion.div>
-
-            {/* Quick Services Card */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.15 }}
-              onClick={() => navigate('/services')}
-              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
-            >
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Quick Services</h3>
-              <p className="text-3xl font-bold">₵ 0.00</p>
-              <p className="text-sm opacity-90 mt-1">/ browse vendors</p>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Health News/Footer Section */}
-        <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📰 Updates</h2>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-              Stay tuned for latest updates on deliveries, rides, and services.
-            </p>
-            <button
-              onClick={() => navigate('/')}
-              className="text-teal-600 dark:text-teal-400 font-semibold text-sm hover:underline"
-            >
-              Return to Home →
-            </button>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 shadow-lg">
-        <div className="max-w-2xl mx-auto flex justify-around items-center">
-          {[
-            { icon: '🏠', label: 'Home', action: () => navigate('/') },
-            { icon: '📦', label: 'Deliveries', action: () => setActiveTab('deliveries') },
-            { icon: '📋', label: 'Orders', action: () => setActiveTab('deliveries') },
-            { icon: '🏪', label: 'Services', action: () => navigate('/services') },
-            { icon: '⋯', label: 'More', action: () => navigate('/') },
-          ].map((item, index) => (
-            <button
-              key={index}
-              onClick={item.action}
-              className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-            >
-              <span className="text-2xl">{item.icon}</span>
-              <span className="text-xs font-medium">{item.label}</span>
-            </button>
-          ))}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
+        <div className="max-w-2xl mx-auto px-2 py-2">
+          <div className="flex justify-around items-center">
+            {[
+              { id: 'overview', icon: '🏠', label: 'Home' },
+              { id: 'deliveries', icon: '📦', label: 'Deliveries' },
+              { id: 'rides', icon: '🚗', label: 'Rides' },
+              { id: 'profile', icon: '👤', label: 'Profile' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
+                  activeTab === tab.id
+                    ? 'text-ashesi-primary font-semibold'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                <span className="text-2xl">{tab.icon}</span>
+                <span className="text-xs">{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
