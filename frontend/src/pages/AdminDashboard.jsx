@@ -1488,7 +1488,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
 
   const handleAdd = async () => {
     try {
-      await axios.post('http://localhost:5000/api/drivers', formData);
+      await axios.post(`${API_URL}/api/drivers`, formData);
       setShowAddModal(false);
       setFormData({ name: '', contact: '', carType: '', location: '' });
       fetchData();
@@ -1500,7 +1500,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
 
   const handleEdit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/drivers/${selectedDriver._id}`, formData);
+      await axios.put(`${API_URL}/api/drivers/${selectedDriver._id}`, formData);
       setShowEditModal(false);
       setSelectedDriver(null);
       setFormData({ name: '', contact: '', carType: '', location: '' });
@@ -1515,7 +1515,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
     if (!window.confirm('Are you sure you want to delete this driver?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/drivers/${driverId}`);
+      await axios.delete(`${API_URL}/api/drivers/${driverId}`);
       fetchData();
     } catch (error) {
       console.error('Error deleting driver:', error);
@@ -1918,7 +1918,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
   const handleDeleteRide = async (rideId) => {
     if (!window.confirm('Are you sure you want to delete this ride?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/rides/${rideId}`);
+      await axios.delete(`${API_URL}/api/rides/${rideId}`);
       fetchData();
     } catch (error) {
       console.error('Error deleting ride:', error);
@@ -2335,7 +2335,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const handleDeleteVendor = async (vendorId) => {
     if (!window.confirm('Are you sure you want to delete this vendor?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/vendors/${vendorId}`);
+      await axios.delete(`${API_URL}/api/vendors/${vendorId}`);
       fetchData();
     } catch (error) {
       console.error('Error deleting vendor:', error);
@@ -2358,7 +2358,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/vendors/${selectedVendor._id}`, editForm);
+      await axios.put(`${API_URL}/api/vendors/${selectedVendor._id}`, editForm);
       fetchData();
       setShowEditModal(false);
       setSelectedVendor(null);
@@ -2371,7 +2371,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const handleAddVendor = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/vendors', newVendorForm);
+      await axios.post(`${API_URL}/api/vendors`, newVendorForm);
       fetchData();
       setShowAddModal(false);
       setNewVendorForm({
@@ -2924,7 +2924,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
   const handleAddRider = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/motor-riders', newRiderForm);
+      await axios.post(`${API_URL}/api/motor-riders`, newRiderForm);
       fetchData();
       setShowAddModal(false);
       setNewRiderForm({
@@ -2959,7 +2959,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/motor-riders/${selectedRider._id}`, editForm);
+      await axios.put(`${API_URL}/api/motor-riders/${selectedRider._id}`, editForm);
       fetchData();
       setShowEditModal(false);
       setSelectedRider(null);
@@ -2972,7 +2972,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
   const handleSetDefaultRider = async (riderId) => {
     if (!window.confirm('Set this rider as the default delivery rider?')) return;
     try {
-      await axios.put(`http://localhost:5000/api/motor-riders/${riderId}/set-default`);
+      await axios.put(`${API_URL}/api/motor-riders/${riderId}/set-default`);
       fetchData();
     } catch (error) {
       console.error('Error setting default rider:', error);
@@ -2983,7 +2983,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
   const handleDeleteRider = async (riderId) => {
     if (!window.confirm('Are you sure you want to delete this motor rider?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/motor-riders/${riderId}`);
+      await axios.delete(`${API_URL}/api/motor-riders/${riderId}`);
       fetchData();
     } catch (error) {
       console.error('Error deleting motor rider:', error);
@@ -3438,7 +3438,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/categories', newCategoryForm);
+      await axios.post(`${API_URL}/api/categories`, newCategoryForm);
       fetchData();
       setShowAddModal(false);
       setNewCategoryForm({
@@ -3467,7 +3467,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/categories/${selectedCategory._id}`, editForm);
+      await axios.put(`${API_URL}/api/categories/${selectedCategory._id}`, editForm);
       fetchData();
       setShowEditModal(false);
       setSelectedCategory(null);
@@ -3480,7 +3480,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
   const handleDeleteCategory = async (categoryId) => {
     if (!window.confirm('Are you sure you want to delete this category?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/categories/${categoryId}`);
+      await axios.delete(`${API_URL}/api/categories/${categoryId}`);
       fetchData();
     } catch (error) {
       console.error('Error deleting category:', error);
