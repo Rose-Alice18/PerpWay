@@ -1059,58 +1059,59 @@ const UserDashboard = () => {
                 </AnimatePresence>
 
                 {isPasswordEditMode ? (
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
-                      <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password</label>
-                      <input
-                        type="password"
-                        value={editedInfo.newPassword || ''}
-                        onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                        placeholder="Enter new password"
-                        className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters</p>
-                    </div>
-                    {editedInfo.newPassword && (
+                  <>
+                    <div className="space-y-4">
                       <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
-                        <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Confirm New Password</label>
+                        <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password</label>
                         <input
                           type="password"
-                          value={editedInfo.confirmPassword || ''}
-                          onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                          placeholder="Re-enter your new password"
+                          value={editedInfo.newPassword || ''}
+                          onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                          placeholder="Enter new password"
                           className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters</p>
                       </div>
-                    )}
-                  </div>
+                      {editedInfo.newPassword && (
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
+                          <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Confirm New Password</label>
+                          <input
+                            type="password"
+                            value={editedInfo.confirmPassword || ''}
+                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your new password"
+                            className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          />
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Password Save/Cancel Buttons */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex gap-3 mt-6"
-                  >
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleSavePassword}
-                      disabled={passwordLoading || !editedInfo.newPassword}
-                      className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    {/* Password Save/Cancel Buttons */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-3 mt-6"
                     >
-                      {passwordLoading ? '💾 Saving...' : '✅ Save Password'}
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleCancelPassword}
-                      disabled={passwordLoading}
-                      className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ❌ Cancel
-                    </motion.button>
-                  </motion.div>
-                </div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleSavePassword}
+                        disabled={passwordLoading || !editedInfo.newPassword}
+                        className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {passwordLoading ? '💾 Saving...' : '✅ Save Password'}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleCancelPassword}
+                        disabled={passwordLoading}
+                        className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ❌ Cancel
+                      </motion.button>
+                    </motion.div>
+                  </>
                 ) : (
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-6 text-center">
                     <p className="text-gray-600 dark:text-gray-400">
