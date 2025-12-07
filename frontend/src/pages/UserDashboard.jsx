@@ -125,417 +125,188 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b-4 border-ashesi-primary dark:border-ashesi-primary/50 py-6 px-4 shadow-lg">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* User Profile Header */}
+      <div className="bg-white dark:bg-gray-800 px-4 py-6">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+              {userInfo.name?.charAt(0).toUpperCase()}
+            </div>
             <div>
-              <motion.h1
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="text-2xl md:text-3xl font-bold mb-1 text-gray-900 dark:text-white"
-              >
-                👋 Welcome back, {userInfo.name}!
-              </motion.h1>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">{userInfo.email}</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                {userInfo.name || 'User'} 🔥
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{userInfo.email}</p>
             </div>
-            <div className="flex gap-2">
+          </div>
+          <button
+            onClick={() => navigate('/')}
+            className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          >
+            <svg className="w-6 h-6 text-gray-700 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Quick Actions Button */}
+        <button
+          onClick={() => navigate('/delivery')}
+          className="w-full bg-teal-500 hover:bg-teal-600 text-white py-4 rounded-2xl font-semibold text-lg shadow-lg transition-all"
+        >
+          Request New Delivery
+        </button>
+
+        {/* Activity Summary */}
+        <div className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-lg">Activity Summary</h3>
               <button
-                onClick={() => navigate('/')}
-                className="px-3 md:px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl transition-colors text-sm md:text-base font-medium"
+                onClick={() => setActiveTab('deliveries')}
+                className="text-sm underline opacity-90 hover:opacity-100"
               >
-                🏠 Home
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-3 md:px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-xl transition-colors text-sm md:text-base font-medium"
-              >
-                🚪 Logout
+                See details
               </button>
             </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold">GH₵ {stats.deliveries.totalSpent.toFixed(2)}</p>
+              <p className="text-sm opacity-90">spent</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Services Grid */}
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Services</h2>
+            <button
+              onClick={() => setActiveTab('deliveries')}
+              className="text-sm text-teal-600 dark:text-teal-400 font-semibold hover:underline"
+            >
+              See all &gt;&gt;
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Deliveries Card */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              onClick={() => setActiveTab('deliveries')}
+              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
+            >
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg mb-1">Total Deliveries</h3>
+              <p className="text-3xl font-bold">₵ {stats.deliveries.total}.00</p>
+              <p className="text-sm opacity-90 mt-1">/ {stats.deliveries.delivered} delivered</p>
+            </motion.div>
+
+            {/* Rides Card */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.05 }}
+              onClick={() => setActiveTab('rides')}
+              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
+            >
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg mb-1">Active Rides</h3>
+              <p className="text-3xl font-bold">₵ {(stats.rides.created + stats.rides.joined)}.00</p>
+              <p className="text-sm opacity-90 mt-1">/ {stats.rides.active} active</p>
+            </motion.div>
+
+            {/* Carpooling Card */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              onClick={() => navigate('/rides')}
+              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
+            >
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg mb-1">Carpooling</h3>
+              <p className="text-3xl font-bold">₵ {stats.rides.created}.00</p>
+              <p className="text-sm opacity-90 mt-1">/ {stats.rides.created} created</p>
+            </motion.div>
+
+            {/* Quick Services Card */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.15 }}
+              onClick={() => navigate('/services')}
+              className="bg-teal-600 dark:bg-teal-700 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition-all"
+            >
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-lg mb-1">Quick Services</h3>
+              <p className="text-3xl font-bold">₵ 0.00</p>
+              <p className="text-sm opacity-90 mt-1">/ browse vendors</p>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Health News/Footer Section */}
+        <div>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📰 Updates</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+              Stay tuned for latest updates on deliveries, rides, and services.
+            </p>
+            <button
+              onClick={() => navigate('/')}
+              className="text-teal-600 dark:text-teal-400 font-semibold text-sm hover:underline"
+            >
+              Return to Home →
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Tab Navigation */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-2 mb-6">
-          <div className="flex gap-2 overflow-x-auto">
-            {[
-              { id: 'overview', label: 'Overview', icon: '📊' },
-              { id: 'deliveries', label: 'My Deliveries', icon: '📦', count: stats.deliveries.total },
-              { id: 'rides', label: 'My Rides', icon: '🚗', count: stats.rides.created + stats.rides.joined },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-ashesi-primary to-ghana-red text-white shadow-md'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
-                {tab.count !== undefined && tab.count > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                    activeTab === tab.id ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
-                  }`}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 shadow-lg">
+        <div className="max-w-2xl mx-auto flex justify-around items-center">
+          {[
+            { icon: '🏠', label: 'Home', action: () => navigate('/') },
+            { icon: '📦', label: 'Deliveries', action: () => setActiveTab('deliveries') },
+            { icon: '📋', label: 'Orders', action: () => setActiveTab('deliveries') },
+            { icon: '🏪', label: 'Services', action: () => navigate('/services') },
+            { icon: '⋯', label: 'More', action: () => navigate('/') },
+          ].map((item, index) => (
+            <button
+              key={index}
+              onClick={item.action}
+              className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+            >
+              <span className="text-2xl">{item.icon}</span>
+              <span className="text-xs font-medium">{item.label}</span>
+            </button>
+          ))}
         </div>
-
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-l-4 border-blue-500"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center text-2xl">
-                    📦
-                  </div>
-                  <div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Total Deliveries</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.deliveries.total}</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.05 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-l-4 border-purple-500"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-2xl">
-                    💰
-                  </div>
-                  <div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Total Spent</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">GH₵{stats.deliveries.totalSpent.toFixed(2)}</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-l-4 border-green-500"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/20 flex items-center justify-center text-2xl">
-                    🚗
-                  </div>
-                  <div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Rides Created</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.rides.created}</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.15 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border-l-4 border-orange-500"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-2xl">
-                    🎫
-                  </div>
-                  <div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Rides Joined</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.rides.joined}</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🚀 Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                  onClick={() => navigate('/delivery')}
-                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                >
-                  <span className="text-2xl">📦</span>
-                  <div className="text-left">
-                    <p className="font-bold">Request Delivery</p>
-                    <p className="text-xs text-white/80">Send packages & items</p>
-                  </div>
-                </button>
-                <button
-                  onClick={() => navigate('/rides')}
-                  className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                >
-                  <span className="text-2xl">🚗</span>
-                  <div className="text-left">
-                    <p className="font-bold">Find or Post Ride</p>
-                    <p className="text-xs text-white/80">Carpool & save money</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">⏱️ Recent Activity</h2>
-              <div className="space-y-3">
-                {[...deliveries.slice(0, 3), ...createdRides.slice(0, 2)]
-                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .slice(0, 5)
-                  .map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <span className="text-2xl">{item.pickupPoint ? '📦' : '🚗'}</span>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                          {item.itemDescription || `Ride: ${item.pickupLocation} → ${item.destination}`}
-                        </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {new Date(item.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${getStatusColor(item.status)}`}>
-                        {item.status}
-                      </span>
-                    </div>
-                  ))}
-                {deliveries.length === 0 && createdRides.length === 0 && (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <p className="text-4xl mb-2">🎯</p>
-                    <p>No activity yet. Start by requesting a delivery or posting a ride!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Deliveries Tab */}
-        {activeTab === 'deliveries' && (
-          <div className="space-y-4">
-            {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg">
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: 'all', label: 'All', icon: '📋' },
-                  { id: 'active', label: 'Active', icon: '🔄' },
-                  { id: 'delivered', label: 'Delivered', icon: '✅' },
-                  { id: 'pending', label: 'Pending', icon: '⏳' },
-                ].map(({ id, label, icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => setFilter(id)}
-                    className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-                      filter === id
-                        ? 'bg-gradient-to-r from-ashesi-primary to-ghana-red text-white shadow-md'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {icon} {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Deliveries List */}
-            <div className="space-y-4">
-              {filteredDeliveries.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-lg text-center">
-                  <div className="text-6xl mb-4">📦</div>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    No deliveries found
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    Start by requesting your first delivery!
-                  </p>
-                  <button
-                    onClick={() => navigate('/delivery')}
-                    className="px-6 py-3 bg-gradient-to-r from-ashesi-primary to-ghana-red text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                  >
-                    Request Delivery
-                  </button>
-                </div>
-              ) : (
-                filteredDeliveries.map((delivery, index) => (
-                  <motion.div
-                    key={delivery._id}
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-3xl">
-                            {delivery.deliveryType === 'instant' ? '⚡' : delivery.deliveryType === 'next-day' ? '📅' : '📦'}
-                          </span>
-                          <div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                              {delivery.itemDescription}
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {new Date(delivery.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <span>📍 From:</span>
-                            <span className="font-medium">{delivery.pickupPoint}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span>📍 To:</span>
-                            <span className="font-medium">{delivery.dropoffPoint}</span>
-                          </div>
-                        </div>
-
-                        {delivery.assignedRiderName && (
-                          <div className="mt-2 flex items-center gap-2 text-sm">
-                            <span>🏍️ Rider:</span>
-                            <span className="font-medium">{delivery.assignedRiderName}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col items-end gap-3">
-                        <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${getStatusColor(delivery.status)}`}>
-                          {delivery.status.toUpperCase()}
-                        </span>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                            GH₵{delivery.price.toFixed(2)}
-                          </p>
-                          <p className={`text-sm font-semibold ${
-                            delivery.paymentStatus === 'paid' ? 'text-green-600' : 'text-orange-600'
-                          }`}>
-                            {delivery.paymentStatus === 'paid' ? '✓ Paid' : '⏳ Unpaid'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Rides Tab */}
-        {activeTab === 'rides' && (
-          <div className="space-y-6">
-            {/* Rides You Created */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🚗 Rides You Created</h2>
-              {createdRides.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p className="text-4xl mb-2">🚗</p>
-                  <p className="mb-4">You haven't created any rides yet</p>
-                  <button
-                    onClick={() => navigate('/rides')}
-                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                  >
-                    Post a Ride
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {createdRides.map((ride, index) => (
-                    <div
-                      key={ride._id}
-                      className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <p className="font-bold text-gray-900 dark:text-white">
-                            {ride.pickupLocation} → {ride.destination}
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {ride.departureDate} at {ride.departureTime}
-                          </p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getStatusColor(ride.status)}`}>
-                          {ride.status}
-                        </span>
-                      </div>
-                      <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
-                        <span>👥 {ride.joinedUsers.length} joined</span>
-                        <span>💺 {ride.availableSeats} seats left</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Rides You Joined */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🎫 Rides You Joined</h2>
-              {joinedRides.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p className="text-4xl mb-2">🎫</p>
-                  <p className="mb-4">You haven't joined any rides yet</p>
-                  <button
-                    onClick={() => navigate('/rides')}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                  >
-                    Find a Ride
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {joinedRides.map((ride, index) => (
-                    <div
-                      key={ride._id}
-                      className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <p className="font-bold text-gray-900 dark:text-white">
-                            {ride.pickupLocation} → {ride.destination}
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {ride.departureDate} at {ride.departureTime}
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Created by: {ride.name}
-                          </p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getStatusColor(ride.status)}`}>
-                          {ride.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
