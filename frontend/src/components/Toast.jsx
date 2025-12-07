@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
+const Toast = ({ message, type = 'success', onClose, duration = null }) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, duration);
+    if (duration) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, duration);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    }
   }, [onClose, duration]);
 
   const getToastStyle = () => {
@@ -108,13 +110,15 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
           </button>
         </div>
 
-        {/* Progress bar */}
-        <motion.div
-          initial={{ width: '100%' }}
-          animate={{ width: '0%' }}
-          transition={{ duration: duration / 1000, ease: 'linear' }}
-          className="h-1 bg-white/40"
-        />
+        {/* Progress bar - only show if duration is set */}
+        {duration && (
+          <motion.div
+            initial={{ width: '100%' }}
+            animate={{ width: '0%' }}
+            transition={{ duration: duration / 1000, ease: 'linear' }}
+            className="h-1 bg-white/40"
+          />
+        )}
       </div>
     </motion.div>
   );

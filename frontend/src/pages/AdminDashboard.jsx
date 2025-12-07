@@ -9,8 +9,11 @@ import {
 } from 'recharts';
 import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useConfirm } from '../hooks/useConfirm';
 
 /* eslint-disable no-restricted-globals */
+/* eslint-disable no-undef */
 
 // API configuration - defined at module level so all components can access
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -29,6 +32,7 @@ const getAuthHeaders = () => {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
+  const { confirmState, showConfirm, hideConfirm } = useConfirm();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default on mobile
 
@@ -144,8 +148,8 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching data:', error);
       if (error.response?.status === 401 || error.response?.status === 403) {
-        alert('Session expired. Please login again.');
-        navigate('/signin');
+        showError('Session expired. Please login again.');
+        setTimeout(() => navigate('/signin'), 2000);
       }
       setLoading(false);
     }
@@ -704,26 +708,31 @@ const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV }) => {
     const delivery = deliveries.find(d => d._id === deliveryId);
     if (!delivery) return;
 
-    const confirmMessage = `Authorize delivery for ${delivery.name}?\n\nItem: ${delivery.itemDescription}\nType: ${delivery.deliveryType}`;
-
-    if (!window.confirm(confirmMessage)) return;
-
-    try {
-      await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/authorize`, {
-        authorizedBy: 'Admin Roseline'
-      }, getAuthHeaders());
-      alert('✅ Delivery authorized successfully!');
-      fetchData();
-    } catch (error) {
-      console.error('Error authorizing delivery:', error);
-      alert('❌ Failed to authorize delivery: ' + (error.response?.data?.error || error.message));
-    }
+    showConfirm({
+      title: 'Authorize Delivery?',
+      message: `Authorize delivery for ${delivery.name}?\n\nItem: ${delivery.itemDescription}\nType: ${delivery.deliveryType}`,
+      confirmText: 'Yes, authorize it!',
+      cancelText: 'Nah, cancel',
+      type: 'success',
+      onConfirm: async () => {
+        try {
+          await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/authorize`, {
+            authorizedBy: 'Admin Roseline'
+          }, getAuthHeaders());
+          showSuccess('Delivery authorized successfully! 🚀');
+          fetchData();
+        } catch (error) {
+          console.error('Error authorizing delivery:', error);
+          showError('Failed to authorize delivery: ' + (error.response?.data?.error || error.message));
+        }
+      }
+    });
   };
 
   const sendDeliveryToRider = (delivery) => {
     const rider = motorRiders.find(r => r._id === delivery.assignedRider?._id || r._id === delivery.assignedRider);
     if (!rider) {
-      alert('❌ No rider assigned to this delivery');
+      showError('No rider assigned to this delivery');
       return;
     }
 
@@ -775,11 +784,11 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
 
     // Copy to clipboard and show popup
     navigator.clipboard.writeText(deliveryDoc).then(() => {
-      alert(`✅ Delivery document copied to clipboard!\n\nYou can now send this to ${rider.name} via:\n📱 WhatsApp: ${rider.whatsapp || rider.phone}\n📧 Email\n💬 SMS\n\nThe document has been copied and is ready to paste.`);
+      showSuccess(`Delivery document copied to clipboard!\n\nYou can now send this to ${rider.name} via:\n📱 WhatsApp: ${rider.whatsapp || rider.phone}\n📧 Email\n💬 SMS\n\nThe document has been copied and is ready to paste.`);
     }).catch(err => {
       console.error('Failed to copy:', err);
-      // Fallback: show the document in an alert
-      alert(deliveryDoc);
+      // Fallback: show the document in an info toast
+      showInfo(deliveryDoc);
     });
   };
 
@@ -787,28 +796,41 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     if (!selectedRiderId || !selectedDelivery) return;
 
     const rider = motorRiders.find(r => r._id === selectedRiderId);
-    const confirmMsg = `Assign delivery to ${rider?.name}?\n\n📦 Item: ${selectedDelivery.itemDescription}\n🏍️ Rider: ${rider?.name} (${rider?.phone})\n📱 Motorcycle: ${rider?.motorcycleType || 'N/A'}`;
 
-    if (!confirm(confirmMsg)) return;
+    showConfirm({
+      title: 'Assign Delivery to Rider?',
+      message: `Assign delivery to ${rider?.name}?\n\n📦 Item: ${selectedDelivery.itemDescription}\n🏍️ Rider: ${rider?.name} (${rider?.phone})\n📱 Motorcycle: ${rider?.motorcycleType || 'N/A'}`,
+      confirmText: 'Yes, assign it!',
+      cancelText: 'Nah, cancel',
+      type: 'info',
+      onConfirm: async () => {
+        try {
+          const response = await axios.put(`${API_URL}/api/delivery/admin/${selectedDelivery._id}/assign`, {
+            riderId: selectedRiderId
+          }, getAuthHeaders());
 
-    try {
-      const response = await axios.put(`${API_URL}/api/delivery/admin/${selectedDelivery._id}/assign`, {
-        riderId: selectedRiderId
-      }, getAuthHeaders());
+          setShowAssignModal(false);
+          setSelectedDelivery(null);
+          setSelectedRiderId('');
+          await fetchData();
 
-      setShowAssignModal(false);
-      setSelectedDelivery(null);
-      setSelectedRiderId('');
-      await fetchData();
-
-      // Ask if they want to send document using native confirm
-      if (confirm(`✅ Delivery assigned to ${rider.name}!\n\nWould you like to send the delivery document to the rider?`)) {
-        sendBulkDeliveriesToRider(selectedRiderId);
+          // Ask if they want to send document
+          showConfirm({
+            title: 'Send Delivery Document?',
+            message: `Delivery assigned to ${rider.name}!\n\nWould you like to send the delivery document to the rider?`,
+            confirmText: 'Yes, send it!',
+            cancelText: 'Not now',
+            type: 'success',
+            onConfirm: () => {
+              sendBulkDeliveriesToRider(selectedRiderId);
+            }
+          });
+        } catch (error) {
+          console.error('Error assigning rider:', error);
+          showError(error.response?.data?.error || 'Failed to assign rider');
+        }
       }
-    } catch (error) {
-      console.error('Error assigning rider:', error);
-      alert(`❌ ${error.response?.data?.error || 'Failed to assign rider'}`);
-    }
+    });
   };
 
   const handleQuickAssignDefault = async (deliveryId) => {
@@ -816,48 +838,67 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     const defaultRider = motorRiders.find(r => r.isDefaultDeliveryRider);
 
     if (!defaultRider) {
-      alert('❌ No default rider set!\n\nPlease set a default delivery rider in the Motor Riders tab first.');
+      showError('No default rider set!\n\nPlease set a default delivery rider in the Motor Riders tab first.');
       return;
     }
 
-    const confirmMsg = `Quick Assign to Default Rider?\n\n📦 Item: ${delivery?.itemDescription}\n🏍️ Rider: ${defaultRider.name} ⭐\n📱 Phone: ${defaultRider.phone}`;
+    showConfirm({
+      title: 'Quick Assign to Default Rider?',
+      message: `Quick Assign to Default Rider?\n\n📦 Item: ${delivery?.itemDescription}\n🏍️ Rider: ${defaultRider.name} ⭐\n📱 Phone: ${defaultRider.phone}`,
+      confirmText: 'Yes, assign it!',
+      cancelText: 'Nah, cancel',
+      type: 'info',
+      onConfirm: async () => {
+        try {
+          const response = await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
+          await fetchData();
 
-    if (!confirm(confirmMsg)) return;
-
-    try {
-      const response = await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
-      await fetchData();
-
-      // Ask if they want to send document
-      if (confirm(`✅ Assigned to default rider ${defaultRider.name}!\n\nWould you like to send the delivery document to the rider?`)) {
-        sendBulkDeliveriesToRider(defaultRider._id);
+          // Ask if they want to send document
+          showConfirm({
+            title: 'Send Delivery Document?',
+            message: `Assigned to default rider ${defaultRider.name}!\n\nWould you like to send the delivery document to the rider?`,
+            confirmText: 'Yes, send it!',
+            cancelText: 'Not now',
+            type: 'success',
+            onConfirm: () => {
+              sendBulkDeliveriesToRider(defaultRider._id);
+            }
+          });
+        } catch (error) {
+          console.error('Error quick-assigning to default rider:', error);
+          showError(error.response?.data?.error || 'Failed to assign to default rider');
+        }
       }
-    } catch (error) {
-      console.error('Error quick-assigning to default rider:', error);
-      alert(`❌ ${error.response?.data?.error || 'Failed to assign to default rider'}`);
-    }
+    });
   };
 
   const handleUpdateStatus = async (deliveryId, newStatus) => {
     const delivery = deliveries.find(d => d._id === deliveryId);
     const statusMessages = {
-      'in-progress': `Start delivery?\n\n📦 ${delivery?.itemDescription}`,
-      'delivered': `Mark as delivered?\n\n📦 ${delivery?.itemDescription}\n✅ Confirm customer received the item?`,
-      'cancelled': `Cancel this delivery?\n\n📦 ${delivery?.itemDescription}\n⚠️ This action cannot be undone.`
+      'in-progress': { msg: `Start delivery?\n\n📦 ${delivery?.itemDescription}`, type: 'info' },
+      'delivered': { msg: `Mark as delivered?\n\n📦 ${delivery?.itemDescription}\n✅ Confirm customer received the item?`, type: 'success' },
+      'cancelled': { msg: `Cancel this delivery?\n\n📦 ${delivery?.itemDescription}\n⚠️ This action cannot be undone.`, type: 'danger' }
     };
 
-    const confirmMsg = statusMessages[newStatus] || `Update status to ${newStatus}?`;
+    const { msg, type } = statusMessages[newStatus] || { msg: `Update status to ${newStatus}?`, type: 'info' };
 
-    if (!confirm(confirmMsg)) return;
-
-    try {
-      await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/status`, { status: newStatus }, getAuthHeaders());
-      alert(`✅ Status updated to ${newStatus}!`);
-      fetchData();
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert(`❌ Failed to update status: ${error.response?.data?.error || error.message}`);
-    }
+    showConfirm({
+      title: 'Update Status?',
+      message: msg,
+      confirmText: 'Yes, do it!',
+      cancelText: 'Nah, cancel',
+      type: type,
+      onConfirm: async () => {
+        try {
+          await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/status`, { status: newStatus }, getAuthHeaders());
+          showSuccess(`Status updated to ${newStatus}! 🎉`);
+          fetchData();
+        } catch (error) {
+          console.error('Error updating status:', error);
+          showError(`Failed to update status: ${error.response?.data?.error || error.message}`);
+        }
+      }
+    });
   };
 
   // Bulk send deliveries to a specific rider
@@ -868,13 +909,13 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     );
 
     if (riderDeliveries.length === 0) {
-      alert('❌ No active deliveries found for this rider');
+      showError('No active deliveries found for this rider');
       return;
     }
 
     const rider = motorRiders.find(r => r._id === riderId) || riderDeliveries[0].assignedRider;
     if (!rider) {
-      alert('❌ Rider information not found');
+      showError('Rider information not found');
       return;
     }
 
@@ -941,10 +982,10 @@ Use the link to mark deliveries as:
 
     // Copy to clipboard
     navigator.clipboard.writeText(bulkDoc).then(() => {
-      alert(`✅ Bulk delivery document copied!\n\n${riderDeliveries.length} deliveries for ${rider.name || riderDeliveries[0].assignedRiderName}\n\nYou can now send this to:\n📱 WhatsApp: ${rider.whatsapp || rider.phone || 'N/A'}\n📧 Email\n💬 SMS`);
+      showSuccess(`Bulk delivery document copied!\n\n${riderDeliveries.length} deliveries for ${rider.name || riderDeliveries[0].assignedRiderName}\n\nYou can now send this to:\n📱 WhatsApp: ${rider.whatsapp || rider.phone || 'N/A'}\n📧 Email\n💬 SMS`);
     }).catch(err => {
       console.error('Failed to copy:', err);
-      alert(bulkDoc);
+      showInfo(bulkDoc);
     });
   };
 
@@ -974,111 +1015,140 @@ Use the link to mark deliveries as:
   // Bulk Authorize
   const handleBulkAuthorize = async () => {
     if (selectedDeliveries.length === 0) {
-      alert('Please select deliveries to authorize');
+      showWarning('Please select deliveries to authorize');
       return;
     }
 
-    if (!confirm(`Authorize ${selectedDeliveries.length} deliveries?`)) return;
-
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/delivery/admin/bulk/authorize`,
-        { deliveryIds: selectedDeliveries, authorizedBy: 'Admin Roseline' },
-        getAuthHeaders()
-      );
-      alert(`✅ ${response.data.message}`);
-      setSelectedDeliveries([]);
-      fetchData();
-    } catch (error) {
-      console.error('Bulk authorize error:', error);
-      alert('❌ Failed to bulk authorize: ' + (error.response?.data?.error || error.message));
-    }
+    showConfirm({
+      title: 'Bulk Authorize Deliveries?',
+      message: `Authorize ${selectedDeliveries.length} deliveries?`,
+      confirmText: 'Yes, authorize them!',
+      cancelText: 'Nah, cancel',
+      type: 'success',
+      onConfirm: async () => {
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/delivery/admin/bulk/authorize`,
+            { deliveryIds: selectedDeliveries, authorizedBy: 'Admin Roseline' },
+            getAuthHeaders()
+          );
+          showSuccess(response.data.message);
+          setSelectedDeliveries([]);
+          fetchData();
+        } catch (error) {
+          console.error('Bulk authorize error:', error);
+          showError('Failed to bulk authorize: ' + (error.response?.data?.error || error.message));
+        }
+      }
+    });
   };
 
   // Bulk Assign
   const handleBulkAssign = async () => {
     if (selectedDeliveries.length === 0) {
-      alert('Please select deliveries to assign');
+      showWarning('Please select deliveries to assign');
       return;
     }
 
     if (!bulkRiderId) {
-      alert('Please select a rider');
+      showWarning('Please select a rider');
       return;
     }
 
     const rider = motorRiders.find(r => r._id === bulkRiderId);
-    if (!confirm(`Assign ${selectedDeliveries.length} deliveries to ${rider?.name}?`)) return;
 
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/delivery/admin/bulk/assign`,
-        { deliveryIds: selectedDeliveries, riderId: bulkRiderId },
-        getAuthHeaders()
-      );
-      alert(`✅ ${response.data.message}`);
-      setSelectedDeliveries([]);
-      setBulkRiderId('');
-      setShowBulkAssignModal(false);
-      fetchData();
-    } catch (error) {
-      console.error('Bulk assign error:', error);
-      alert('❌ Failed to bulk assign: ' + (error.response?.data?.error || error.message));
-    }
+    showConfirm({
+      title: 'Bulk Assign to Rider?',
+      message: `Assign ${selectedDeliveries.length} deliveries to ${rider?.name}?`,
+      confirmText: 'Yes, assign them!',
+      cancelText: 'Nah, cancel',
+      type: 'info',
+      onConfirm: async () => {
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/delivery/admin/bulk/assign`,
+            { deliveryIds: selectedDeliveries, riderId: bulkRiderId },
+            getAuthHeaders()
+          );
+          showSuccess(response.data.message);
+          setSelectedDeliveries([]);
+          setBulkRiderId('');
+          setShowBulkAssignModal(false);
+          fetchData();
+        } catch (error) {
+          console.error('Bulk assign error:', error);
+          showError('Failed to bulk assign: ' + (error.response?.data?.error || error.message));
+        }
+      }
+    });
   };
 
   // Bulk Mark as Delivered
   const handleBulkMarkDelivered = async () => {
     if (selectedDeliveries.length === 0) {
-      alert('Please select deliveries to mark as delivered');
+      showWarning('Please select deliveries to mark as delivered');
       return;
     }
 
-    if (!confirm(`Mark ${selectedDeliveries.length} deliveries as DELIVERED?`)) return;
-
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/delivery/admin/bulk/status`,
-        { deliveryIds: selectedDeliveries, status: 'delivered' },
-        getAuthHeaders()
-      );
-      alert(`✅ ${response.data.message}`);
-      setSelectedDeliveries([]);
-      fetchData();
-    } catch (error) {
-      console.error('Bulk mark delivered error:', error);
-      alert('❌ Failed to bulk mark as delivered: ' + (error.response?.data?.error || error.message));
-    }
+    showConfirm({
+      title: 'Mark as Delivered?',
+      message: `Mark ${selectedDeliveries.length} deliveries as DELIVERED?`,
+      confirmText: 'Yes, mark them!',
+      cancelText: 'Nah, cancel',
+      type: 'success',
+      onConfirm: async () => {
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/delivery/admin/bulk/status`,
+            { deliveryIds: selectedDeliveries, status: 'delivered' },
+            getAuthHeaders()
+          );
+          showSuccess(response.data.message);
+          setSelectedDeliveries([]);
+          fetchData();
+        } catch (error) {
+          console.error('Bulk mark delivered error:', error);
+          showError('Failed to bulk mark as delivered: ' + (error.response?.data?.error || error.message));
+        }
+      }
+    });
   };
 
   // Bulk Cancel
   const handleBulkCancel = async () => {
     if (selectedDeliveries.length === 0) {
-      alert('Please select deliveries to cancel');
+      showWarning('Please select deliveries to cancel');
       return;
     }
 
-    if (!confirm(`⚠️ Cancel ${selectedDeliveries.length} deliveries?\n\nThis action cannot be undone.`)) return;
-
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/delivery/admin/bulk/cancel`,
-        { deliveryIds: selectedDeliveries },
-        getAuthHeaders()
-      );
-      alert(`✅ ${response.data.message}`);
-      setSelectedDeliveries([]);
-      fetchData();
-    } catch (error) {
-      console.error('Bulk cancel error:', error);
-      alert('❌ Failed to bulk cancel: ' + (error.response?.data?.error || error.message));
-    }
+    showConfirm({
+      title: 'Cancel Deliveries?',
+      message: `⚠️ Cancel ${selectedDeliveries.length} deliveries?\n\nThis action cannot be undone.`,
+      confirmText: 'Yes, cancel them!',
+      cancelText: 'Nah, keep them',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/delivery/admin/bulk/cancel`,
+            { deliveryIds: selectedDeliveries },
+            getAuthHeaders()
+          );
+          showSuccess(response.data.message);
+          setSelectedDeliveries([]);
+          fetchData();
+        } catch (error) {
+          console.error('Bulk cancel error:', error);
+          showError('Failed to bulk cancel: ' + (error.response?.data?.error || error.message));
+        }
+      }
+    });
   };
 
   // Bulk Export Selected
   const handleBulkExport = () => {
     if (selectedDeliveries.length === 0) {
-      alert('Please select deliveries to export');
+      showWarning('Please select deliveries to export');
       return;
     }
 
@@ -1086,7 +1156,7 @@ Use the link to mark deliveries as:
     exportToCSV(selectedDeliveriesData, 'selected-deliveries', [
       'name', 'contact', 'itemDescription', 'pickupPoint', 'dropoffPoint', 'deliveryType', 'status', 'assignedRiderName'
     ]);
-    alert(`✅ Exported ${selectedDeliveries.length} deliveries to CSV`);
+    showSuccess(`Exported ${selectedDeliveries.length} deliveries to CSV! 📊`);
   };
 
   return (
@@ -1187,7 +1257,7 @@ Use the link to mark deliveries as:
                 )].map(r => JSON.parse(r));
 
                 if (riders.length === 0) {
-                  alert('❌ No riders with active deliveries found');
+                  showError('No riders with active deliveries found');
                   return;
                 }
 
@@ -1851,9 +1921,10 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
       setShowAddModal(false);
       setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
       fetchData();
+      showSuccess('Driver added successfully! 🚗');
     } catch (error) {
       console.error('Error adding driver:', error);
-      alert('Failed to add driver: ' + (error.response?.data?.message || error.message));
+      showError('Failed to add driver: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -1864,22 +1935,31 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
       setSelectedDriver(null);
       setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
       fetchData();
+      showSuccess('Driver updated successfully! 🎉');
     } catch (error) {
       console.error('Error updating driver:', error);
-      alert('Failed to update driver: ' + (error.response?.data?.message || error.message));
+      showError('Failed to update driver: ' + (error.response?.data?.message || error.message));
     }
   };
 
   const handleDelete = async (driverId) => {
-    if (!window.confirm('Are you sure you want to delete this driver?')) return;
-
-    try {
-      await axios.delete(`${API_URL}/api/drivers/${driverId}`);
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting driver:', error);
-      alert('Failed to delete driver: ' + (error.response?.data?.message || error.message));
-    }
+    showConfirm({
+      title: 'Delete Driver?',
+      message: 'Are you sure you want to delete this driver?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it!',
+      cancelText: 'Nah, keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/drivers/${driverId}`);
+          fetchData();
+          showSuccess('Driver deleted successfully! 🗑️');
+        } catch (error) {
+          console.error('Error deleting driver:', error);
+          showError('Failed to delete driver: ' + (error.response?.data?.message || error.message));
+        }
+      }
+    });
   };
 
   const openEditModal = (driver) => {
@@ -1906,9 +1986,10 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
 
       // Silently refresh in the background (no loading spinner)
       fetchData();
+      showSuccess(`Driver status updated to ${newStatus}! ✨`);
     } catch (error) {
       console.error('Error updating driver status:', error);
-      alert('Failed to update driver status: ' + (error.response?.data?.message || error.message));
+      showError('Failed to update driver status: ' + (error.response?.data?.message || error.message));
       // Revert optimistic update on error
       fetchData();
     }
@@ -2358,14 +2439,23 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
   });
 
   const handleDeleteRide = async (rideId) => {
-    if (!window.confirm('Are you sure you want to delete this ride?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/rides/${rideId}`);
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting ride:', error);
-      alert('Failed to delete ride');
-    }
+    showConfirm({
+      title: 'Delete Ride?',
+      message: 'Are you sure you want to delete this ride?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it!',
+      cancelText: 'Nah, keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/rides/${rideId}`);
+          fetchData();
+          showSuccess('Ride deleted successfully! 🗑️');
+        } catch (error) {
+          console.error('Error deleting ride:', error);
+          showError('Failed to delete ride');
+        }
+      }
+    });
   };
 
   const formatDate = (dateStr) => {
@@ -2533,9 +2623,14 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                   <button
                     onClick={() => {
                       if (!isRideActive(ride)) {
-                        if (window.confirm('⚠️ This ride has expired. Do you want to delete it?')) {
-                          handleDeleteRide(ride._id);
-                        }
+                        showConfirm({
+                          title: 'Delete Expired Ride?',
+                          message: '⚠️ This ride has expired. Do you want to delete it?',
+                          confirmText: 'Yes, delete it!',
+                          cancelText: 'Nah, keep it',
+                          type: 'warning',
+                          onConfirm: () => handleDeleteRide(ride._id)
+                        });
                       } else {
                         handleDeleteRide(ride._id);
                       }
@@ -2632,9 +2727,14 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                           <button
                             onClick={() => {
                               if (!isRideActive(ride)) {
-                                if (window.confirm('⚠️ This ride has expired. Do you want to delete it?')) {
-                                  handleDeleteRide(ride._id);
-                                }
+                                showConfirm({
+                                  title: 'Delete Expired Ride?',
+                                  message: '⚠️ This ride has expired. Do you want to delete it?',
+                                  confirmText: 'Yes, delete it!',
+                                  cancelText: 'Nah, keep it',
+                                  type: 'warning',
+                                  onConfirm: () => handleDeleteRide(ride._id)
+                                });
                               } else {
                                 handleDeleteRide(ride._id);
                               }
@@ -2775,14 +2875,23 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   });
 
   const handleDeleteVendor = async (vendorId) => {
-    if (!window.confirm('Are you sure you want to delete this vendor?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/vendors/${vendorId}`);
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting vendor:', error);
-      alert('Failed to delete vendor');
-    }
+    showConfirm({
+      title: 'Delete Vendor?',
+      message: 'Are you sure you want to delete this vendor?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it!',
+      cancelText: 'Nah, keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/vendors/${vendorId}`);
+          fetchData();
+          showSuccess('Vendor deleted successfully! 🗑️');
+        } catch (error) {
+          console.error('Error deleting vendor:', error);
+          showError('Failed to delete vendor');
+        }
+      }
+    });
   };
 
   const handleEditClick = (vendor) => {
@@ -2804,9 +2913,10 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
       fetchData();
       setShowEditModal(false);
       setSelectedVendor(null);
+      showSuccess('Vendor updated successfully! 🎉');
     } catch (error) {
       console.error('Error updating vendor:', error);
-      alert('Failed to update vendor');
+      showError('Failed to update vendor');
     }
   };
 
@@ -2825,9 +2935,10 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
         rating: 5,
         recommendations: 0
       });
+      showSuccess('Vendor added successfully! 🏪');
     } catch (error) {
       console.error('Error creating vendor:', error);
-      alert('Failed to create vendor');
+      showError('Failed to create vendor');
     }
   };
 
@@ -3378,9 +3489,10 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
         location: '',
         status: 'active'
       });
+      showSuccess('Motor rider added successfully! 🏍️');
     } catch (error) {
       console.error('Error creating motor rider:', error);
-      alert('Failed to create motor rider');
+      showError('Failed to create motor rider');
     }
   };
 
@@ -3405,32 +3517,51 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
       fetchData();
       setShowEditModal(false);
       setSelectedRider(null);
+      showSuccess('Motor rider updated successfully! 🎉');
     } catch (error) {
       console.error('Error updating motor rider:', error);
-      alert('Failed to update motor rider');
+      showError('Failed to update motor rider');
     }
   };
 
   const handleSetDefaultRider = async (riderId) => {
-    if (!window.confirm('Set this rider as the default delivery rider?')) return;
-    try {
-      await axios.put(`${API_URL}/api/motor-riders/${riderId}/set-default`);
-      fetchData();
-    } catch (error) {
-      console.error('Error setting default rider:', error);
-      alert('Failed to set default rider');
-    }
+    showConfirm({
+      title: 'Set Default Delivery Rider?',
+      message: 'Set this rider as the default delivery rider?\n\nThis will be used for quick-assign deliveries.',
+      confirmText: 'Yes, set as default!',
+      cancelText: 'Nah, cancel',
+      type: 'info',
+      onConfirm: async () => {
+        try {
+          await axios.put(`${API_URL}/api/motor-riders/${riderId}/set-default`);
+          fetchData();
+          showSuccess('Default rider set successfully! ⭐');
+        } catch (error) {
+          console.error('Error setting default rider:', error);
+          showError('Failed to set default rider');
+        }
+      }
+    });
   };
 
   const handleDeleteRider = async (riderId) => {
-    if (!window.confirm('Are you sure you want to delete this motor rider?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/motor-riders/${riderId}`);
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting motor rider:', error);
-      alert('Failed to delete motor rider');
-    }
+    showConfirm({
+      title: 'Delete Motor Rider?',
+      message: 'Are you sure you want to delete this motor rider?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it!',
+      cancelText: 'Nah, keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/motor-riders/${riderId}`);
+          fetchData();
+          showSuccess('Motor rider deleted successfully! 🗑️');
+        } catch (error) {
+          console.error('Error deleting motor rider:', error);
+          showError('Failed to delete motor rider');
+        }
+      }
+    });
   };
 
   return (
@@ -3889,9 +4020,10 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
         icon: '🏷️',
         color: '#f97316'
       });
+      showSuccess('Category added successfully! 🏷️');
     } catch (error) {
       console.error('Error creating category:', error);
-      alert('Failed to create category');
+      showError('Failed to create category');
     }
   };
 
@@ -3913,21 +4045,31 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
       fetchData();
       setShowEditModal(false);
       setSelectedCategory(null);
+      showSuccess('Category updated successfully! 🎉');
     } catch (error) {
       console.error('Error updating category:', error);
-      alert('Failed to update category');
+      showError('Failed to update category');
     }
   };
 
   const handleDeleteCategory = async (categoryId) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/categories/${categoryId}`);
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting category:', error);
-      alert('Failed to delete category');
-    }
+    showConfirm({
+      title: 'Delete Category?',
+      message: 'Are you sure you want to delete this category?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it!',
+      cancelText: 'Nah, keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/categories/${categoryId}`);
+          fetchData();
+          showSuccess('Category deleted successfully! 🗑️');
+        } catch (error) {
+          console.error('Error deleting category:', error);
+          showError('Failed to delete category');
+        }
+      }
+    });
   };
 
   return (
@@ -4212,7 +4354,7 @@ const SettingsTab = () => {
       setSettings(response.data);
     } catch (error) {
       console.error('Error fetching settings:', error);
-      alert('Failed to fetch settings');
+      showError('Failed to fetch settings');
     } finally {
       setLoading(false);
     }
@@ -4246,15 +4388,23 @@ const SettingsTab = () => {
   };
 
   const handleDeleteAnnouncement = async (announcementId) => {
-    if (!window.confirm('Are you sure you want to delete this announcement?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/settings/announcements/${announcementId}`, getAuthHeaders());
-      fetchSettings();
-      showSuccess('Announcement deleted! It\'s gone forever now 🗑️');
-    } catch (error) {
-      console.error('Error deleting announcement:', error);
-      showError('Couldn\'t delete announcement. Something went wrong!');
-    }
+    showConfirm({
+      title: 'Delete Announcement?',
+      message: 'Are you sure you want to delete this announcement?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it!',
+      cancelText: 'Nah, keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/settings/announcements/${announcementId}`, getAuthHeaders());
+          fetchSettings();
+          showSuccess('Announcement deleted! It\'s gone forever now 🗑️');
+        } catch (error) {
+          console.error('Error deleting announcement:', error);
+          showError('Couldn\'t delete announcement. Something went wrong!');
+        }
+      }
+    });
   };
 
   const handleAddHoliday = async () => {
@@ -4271,15 +4421,23 @@ const SettingsTab = () => {
   };
 
   const handleDeleteHoliday = async (date) => {
-    if (!window.confirm('Are you sure you want to delete this holiday?')) return;
-    try {
-      await axios.delete(`${API_URL}/api/settings/holidays/${date}`, getAuthHeaders());
-      fetchSettings();
-      showSuccess('Holiday deleted! Back to work we go 💼');
-    } catch (error) {
-      console.error('Error deleting holiday:', error);
-      showError('Failed to delete holiday. Something broke!');
-    }
+    showConfirm({
+      title: 'Delete Holiday?',
+      message: 'Are you sure you want to delete this holiday?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it!',
+      cancelText: 'Nah, keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/settings/holidays/${date}`, getAuthHeaders());
+          fetchSettings();
+          showSuccess('Holiday deleted! Back to work we go 💼');
+        } catch (error) {
+          console.error('Error deleting holiday:', error);
+          showError('Failed to delete holiday. Something broke!');
+        }
+      }
+    });
   };
 
   const sections = [
@@ -5104,6 +5262,18 @@ const SettingsTab = () => {
 
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={hideConfirm}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        cancelText={confirmState.cancelText}
+        type={confirmState.type}
+      />
     </div>
   );
 };
