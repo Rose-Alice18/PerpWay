@@ -4498,15 +4498,17 @@ const RevenueTab = ({ deliveries, motorRiders, exportToCSV }) => {
   const [financialData, setFinancialData] = useState(null);
   const [riderStats, setRiderStats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchFinancialData();
-  }, [period]);
-
-  const fetchFinancialData = async () => {
+  const fetchFinancialData = React.useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const token = localStorage.getItem('token');
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       // Fetch overview
       const overviewRes = await axios.get(`${API_URL}/api/financials/overview?period=${period}`, {
@@ -4522,12 +4524,27 @@ const RevenueTab = ({ deliveries, motorRiders, exportToCSV }) => {
       setRiderStats(riderRes.data.riders || []);
     } catch (error) {
       console.error('Error fetching financial data:', error);
+      setError(error.response?.data?.error || error.message || 'Failed to load financial data');
+      // Set default empty data to avoid infinite loading
+      setFinancialData({
+        totalRevenue: 0,
+        paidRevenue: 0,
+        unpaidRevenue: 0,
+        platformRevenue: 0,
+        profitMargin: 0,
+        deliveryStats: { total: 0 }
+      });
+      setRiderStats([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [period]);
 
-  if (loading || !financialData) {
+  useEffect(() => {
+    fetchFinancialData();
+  }, [fetchFinancialData]);
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -4536,6 +4553,28 @@ const RevenueTab = ({ deliveries, motorRiders, exportToCSV }) => {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Error Loading Financial Data</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={fetchFinancialData}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!financialData) {
+    return null;
   }
 
   return (
