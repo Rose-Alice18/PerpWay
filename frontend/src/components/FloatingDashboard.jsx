@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const FloatingDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('');
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,17 +13,49 @@ const FloatingDashboard = () => {
     const role = localStorage.getItem('userRole');
     setIsAuthenticated(authStatus === 'true');
     setUserRole(role);
+
+    // Load saved position from localStorage
+    const savedPosition = localStorage.getItem('floatingDashboardPosition');
+    if (savedPosition) {
+      setPosition(JSON.parse(savedPosition));
+    }
   }, []);
+
+  const handleDragEnd = (event, info) => {
+    const newPosition = { x: info.point.x, y: info.point.y };
+    setPosition(newPosition);
+    // Save position to localStorage
+    localStorage.setItem('floatingDashboardPosition', JSON.stringify(newPosition));
+  };
 
   return (
     <AnimatePresence>
       {isAuthenticated && (
         <motion.div
+          drag
+          dragMomentum={false}
+          dragElastic={0.1}
+          dragConstraints={{
+            top: 0,
+            left: 0,
+            right: window.innerWidth - 200,
+            bottom: window.innerHeight - 100
+          }}
+          onDragEnd={handleDragEnd}
+          style={{
+            x: position.x,
+            y: position.y,
+            position: 'fixed',
+            bottom: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
+            right: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
+            top: position.x === 0 && position.y === 0 ? 'auto' : 0,
+            left: position.x === 0 && position.y === 0 ? 'auto' : 0,
+          }}
           initial={{ scale: 0, opacity: 0, rotate: -180 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
           exit={{ scale: 0, opacity: 0, rotate: 180 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="fixed bottom-6 right-6 z-50"
+          className="z-50 cursor-grab active:cursor-grabbing"
         >
           <motion.button
             onClick={() => navigate(userRole === 'admin' ? '/admin/dashboard' : '/dashboard')}
