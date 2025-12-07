@@ -629,6 +629,11 @@ const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV }) => {
   const [selectedRiderId, setSelectedRiderId] = useState('');
   const [viewMode, setViewMode] = useState('card'); // 'card' or 'table'
 
+  // Bulk operations state
+  const [selectedDeliveries, setSelectedDeliveries] = useState([]);
+  const [showBulkAssignModal, setShowBulkAssignModal] = useState(false);
+  const [bulkRiderId, setBulkRiderId] = useState('');
+
   // Bulk send modal state
   const [showBulkSendModal, setShowBulkSendModal] = useState(false);
   const [availableRidersForBulk, setAvailableRidersForBulk] = useState([]);
@@ -940,8 +945,205 @@ Use the link to mark deliveries as:
     });
   };
 
+  // ============================================
+  // BULK OPERATIONS FUNCTIONS
+  // ============================================
+
+  // Toggle delivery selection
+  const toggleDeliverySelection = (deliveryId) => {
+    setSelectedDeliveries(prev =>
+      prev.includes(deliveryId)
+        ? prev.filter(id => id !== deliveryId)
+        : [...prev, deliveryId]
+    );
+  };
+
+  // Select all filtered deliveries
+  const selectAllDeliveries = () => {
+    setSelectedDeliveries(filteredDeliveries.map(d => d._id));
+  };
+
+  // Deselect all deliveries
+  const deselectAllDeliveries = () => {
+    setSelectedDeliveries([]);
+  };
+
+  // Bulk Authorize
+  const handleBulkAuthorize = async () => {
+    if (selectedDeliveries.length === 0) {
+      alert('Please select deliveries to authorize');
+      return;
+    }
+
+    if (!confirm(`Authorize ${selectedDeliveries.length} deliveries?`)) return;
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/delivery/admin/bulk/authorize`,
+        { deliveryIds: selectedDeliveries, authorizedBy: 'Admin Roseline' },
+        getAuthHeaders()
+      );
+      alert(`✅ ${response.data.message}`);
+      setSelectedDeliveries([]);
+      fetchData();
+    } catch (error) {
+      console.error('Bulk authorize error:', error);
+      alert('❌ Failed to bulk authorize: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  // Bulk Assign
+  const handleBulkAssign = async () => {
+    if (selectedDeliveries.length === 0) {
+      alert('Please select deliveries to assign');
+      return;
+    }
+
+    if (!bulkRiderId) {
+      alert('Please select a rider');
+      return;
+    }
+
+    const rider = motorRiders.find(r => r._id === bulkRiderId);
+    if (!confirm(`Assign ${selectedDeliveries.length} deliveries to ${rider?.name}?`)) return;
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/delivery/admin/bulk/assign`,
+        { deliveryIds: selectedDeliveries, riderId: bulkRiderId },
+        getAuthHeaders()
+      );
+      alert(`✅ ${response.data.message}`);
+      setSelectedDeliveries([]);
+      setBulkRiderId('');
+      setShowBulkAssignModal(false);
+      fetchData();
+    } catch (error) {
+      console.error('Bulk assign error:', error);
+      alert('❌ Failed to bulk assign: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  // Bulk Mark as Delivered
+  const handleBulkMarkDelivered = async () => {
+    if (selectedDeliveries.length === 0) {
+      alert('Please select deliveries to mark as delivered');
+      return;
+    }
+
+    if (!confirm(`Mark ${selectedDeliveries.length} deliveries as DELIVERED?`)) return;
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/delivery/admin/bulk/status`,
+        { deliveryIds: selectedDeliveries, status: 'delivered' },
+        getAuthHeaders()
+      );
+      alert(`✅ ${response.data.message}`);
+      setSelectedDeliveries([]);
+      fetchData();
+    } catch (error) {
+      console.error('Bulk mark delivered error:', error);
+      alert('❌ Failed to bulk mark as delivered: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  // Bulk Cancel
+  const handleBulkCancel = async () => {
+    if (selectedDeliveries.length === 0) {
+      alert('Please select deliveries to cancel');
+      return;
+    }
+
+    if (!confirm(`⚠️ Cancel ${selectedDeliveries.length} deliveries?\n\nThis action cannot be undone.`)) return;
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/delivery/admin/bulk/cancel`,
+        { deliveryIds: selectedDeliveries },
+        getAuthHeaders()
+      );
+      alert(`✅ ${response.data.message}`);
+      setSelectedDeliveries([]);
+      fetchData();
+    } catch (error) {
+      console.error('Bulk cancel error:', error);
+      alert('❌ Failed to bulk cancel: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  // Bulk Export Selected
+  const handleBulkExport = () => {
+    if (selectedDeliveries.length === 0) {
+      alert('Please select deliveries to export');
+      return;
+    }
+
+    const selectedDeliveriesData = deliveries.filter(d => selectedDeliveries.includes(d._id));
+    exportToCSV(selectedDeliveriesData, 'selected-deliveries', [
+      'name', 'contact', 'itemDescription', 'pickupPoint', 'dropoffPoint', 'deliveryType', 'status', 'assignedRiderName'
+    ]);
+    alert(`✅ Exported ${selectedDeliveries.length} deliveries to CSV`);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Bulk Action Toolbar */}
+      {selectedDeliveries.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-4 shadow-2xl sticky top-4 z-20"
+        >
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <span className="bg-white/20 px-4 py-2 rounded-xl font-bold text-lg">
+                {selectedDeliveries.length} Selected
+              </span>
+              <button
+                onClick={deselectAllDeliveries}
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-semibold transition-all"
+              >
+                Clear Selection
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={handleBulkAuthorize}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition-all text-sm"
+              >
+                ✓ Authorize
+              </button>
+              <button
+                onClick={() => setShowBulkAssignModal(true)}
+                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-xl font-semibold transition-all text-sm"
+              >
+                👤 Assign
+              </button>
+              <button
+                onClick={handleBulkMarkDelivered}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-xl font-semibold transition-all text-sm"
+              >
+                ✅ Mark Delivered
+              </button>
+              <button
+                onClick={handleBulkCancel}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-xl font-semibold transition-all text-sm"
+              >
+                ✕ Cancel
+              </button>
+              <button
+                onClick={handleBulkExport}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-xl font-semibold transition-all text-sm"
+              >
+                📥 Export
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
@@ -993,6 +1195,13 @@ Use the link to mark deliveries as:
             >
               <span>📤</span>
               Send Bulk to Rider
+            </button>
+            <button
+              onClick={selectedDeliveries.length === filteredDeliveries.length ? deselectAllDeliveries : selectAllDeliveries}
+              className="px-4 py-2 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-all flex items-center gap-2"
+            >
+              <span>{selectedDeliveries.length === filteredDeliveries.length ? '☐' : '☑'}</span>
+              {selectedDeliveries.length === filteredDeliveries.length ? 'Deselect All' : 'Select All'}
             </button>
             <button
               onClick={() => exportToCSV(filteredDeliveries, 'deliveries', ['name', 'contact', 'itemDescription', 'pickupPoint', 'dropoffPoint', 'status', 'deliveryType'])}
@@ -1107,35 +1316,46 @@ Use the link to mark deliveries as:
               animate={{ opacity: 1, y: 0 }}
               className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                {/* Delivery Info */}
-                <div className="lg:col-span-2">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white">{delivery.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{delivery.contact}</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-xl text-xs font-bold border-2 ${statusColors[delivery.status]?.bg} ${statusColors[delivery.status]?.text} ${statusColors[delivery.status]?.border}`}>
-                      {delivery.status.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-semibold text-gray-700 dark:text-gray-300">📦 Item:</span> <span className="text-gray-900 dark:text-white">{delivery.itemDescription}</span></p>
-                    <p><span className="font-semibold text-gray-700 dark:text-gray-300">📍 Pickup:</span> <span className="text-gray-900 dark:text-white">{delivery.pickupPoint || 'N/A'}</span></p>
-                    <p><span className="font-semibold text-gray-700 dark:text-gray-300">📍 Dropoff:</span> <span className="text-gray-900 dark:text-white">{delivery.dropoffPoint || 'N/A'}</span></p>
-                    <p><span className="font-semibold text-gray-700 dark:text-gray-300">🚚 Type:</span> <span className="capitalize text-gray-900 dark:text-white">{delivery.deliveryType?.replace('-', ' ')}</span></p>
-                    <p><span className="font-semibold text-gray-700 dark:text-gray-300">⏰ Requested:</span> <span className="text-gray-900 dark:text-white">{new Date(delivery.createdAt).toLocaleDateString()} {new Date(delivery.createdAt).toLocaleTimeString()}</span></p>
-                    {delivery.authorizedBy && (
-                      <p><span className="font-semibold text-gray-700 dark:text-gray-300">✅ Authorized by:</span> <span className="text-gray-900 dark:text-white">{delivery.authorizedBy}</span></p>
-                    )}
-                    {delivery.notes && (
-                      <p><span className="font-semibold text-gray-700 dark:text-gray-300">📝 Notes:</span> <span className="text-gray-900 dark:text-white">{delivery.notes}</span></p>
-                    )}
-                  </div>
-                </div>
+              <div className="flex items-start gap-4">
+                {/* Checkbox */}
+                <label className="flex items-center mt-1">
+                  <input
+                    type="checkbox"
+                    checked={selectedDeliveries.includes(delivery._id)}
+                    onChange={() => toggleDeliverySelection(delivery._id)}
+                    className="w-5 h-5 rounded border-2 border-purple-400 text-purple-600 focus:ring-purple-500 focus:ring-2 cursor-pointer"
+                  />
+                </label>
 
-                {/* Rider Info */}
-                <div className="lg:col-span-1">
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4">
+                  {/* Delivery Info */}
+                  <div className="lg:col-span-2">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white">{delivery.name}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{delivery.contact}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-xl text-xs font-bold border-2 ${statusColors[delivery.status]?.bg} ${statusColors[delivery.status]?.text} ${statusColors[delivery.status]?.border}`}>
+                        {delivery.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p><span className="font-semibold text-gray-700 dark:text-gray-300">📦 Item:</span> <span className="text-gray-900 dark:text-white">{delivery.itemDescription}</span></p>
+                      <p><span className="font-semibold text-gray-700 dark:text-gray-300">📍 Pickup:</span> <span className="text-gray-900 dark:text-white">{delivery.pickupPoint || 'N/A'}</span></p>
+                      <p><span className="font-semibold text-gray-700 dark:text-gray-300">📍 Dropoff:</span> <span className="text-gray-900 dark:text-white">{delivery.dropoffPoint || 'N/A'}</span></p>
+                      <p><span className="font-semibold text-gray-700 dark:text-gray-300">🚚 Type:</span> <span className="capitalize text-gray-900 dark:text-white">{delivery.deliveryType?.replace('-', ' ')}</span></p>
+                      <p><span className="font-semibold text-gray-700 dark:text-gray-300">⏰ Requested:</span> <span className="text-gray-900 dark:text-white">{new Date(delivery.createdAt).toLocaleDateString()} {new Date(delivery.createdAt).toLocaleTimeString()}</span></p>
+                      {delivery.authorizedBy && (
+                        <p><span className="font-semibold text-gray-700 dark:text-gray-300">✅ Authorized by:</span> <span className="text-gray-900 dark:text-white">{delivery.authorizedBy}</span></p>
+                      )}
+                      {delivery.notes && (
+                        <p><span className="font-semibold text-gray-700 dark:text-gray-300">📝 Notes:</span> <span className="text-gray-900 dark:text-white">{delivery.notes}</span></p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Rider Info */}
+                  <div className="lg:col-span-1">
                   {delivery.assignedRider ? (
                     <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-700">
                       <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-1">
@@ -1157,10 +1377,10 @@ Use the link to mark deliveries as:
                       <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">No rider assigned</p>
                     </div>
                   )}
-                </div>
+                  </div>
 
-                {/* Actions */}
-                <div className="lg:col-span-1 flex flex-col gap-2">
+                  {/* Actions */}
+                  <div className="lg:col-span-1 flex flex-col gap-2">
                   {delivery.status === 'pending' && (
                     <button
                       onClick={() => handleAuthorize(delivery._id)}
@@ -1231,6 +1451,7 @@ Use the link to mark deliveries as:
                       ❌ Cancel
                     </button>
                   )}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1241,6 +1462,14 @@ Use the link to mark deliveries as:
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700/50 border-b-2 border-gray-200 dark:border-gray-600">
               <tr>
+                <th className="px-4 py-3 text-center w-12">
+                  <input
+                    type="checkbox"
+                    checked={selectedDeliveries.length === filteredDeliveries.length && filteredDeliveries.length > 0}
+                    onChange={() => selectedDeliveries.length === filteredDeliveries.length ? deselectAllDeliveries() : selectAllDeliveries()}
+                    className="w-5 h-5 rounded border-2 border-purple-400 text-purple-600 focus:ring-purple-500 focus:ring-2 cursor-pointer"
+                  />
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Customer</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Item</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Pickup</th>
@@ -1255,6 +1484,14 @@ Use the link to mark deliveries as:
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {filteredDeliveries.map((delivery) => (
                 <tr key={delivery._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                  <td className="px-4 py-4 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedDeliveries.includes(delivery._id)}
+                      onChange={() => toggleDeliverySelection(delivery._id)}
+                      className="w-5 h-5 rounded border-2 border-purple-400 text-purple-600 focus:ring-purple-500 focus:ring-2 cursor-pointer"
+                    />
+                  </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-white">{delivery.name}</p>
@@ -1425,6 +1662,80 @@ Use the link to mark deliveries as:
                   setShowAssignModal(false);
                   setSelectedDelivery(null);
                   setSelectedRiderId('');
+                }}
+                className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Bulk Assign Modal */}
+      {showBulkAssignModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowBulkAssignModal(false)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4"
+          >
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">🏍️</span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Bulk Assign to Rider
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Assign {selectedDeliveries.length} {selectedDeliveries.length === 1 ? 'delivery' : 'deliveries'} to a rider
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Select Rider
+              </label>
+              <select
+                value={bulkRiderId}
+                onChange={(e) => setBulkRiderId(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-medium"
+              >
+                <option value="">-- Choose a motor rider --</option>
+                {motorRiders
+                  .filter(rider => rider.status === 'active')
+                  .map((rider) => (
+                    <option key={rider._id} value={rider._id}>
+                      {rider.name} - {rider.phone} {rider.isDefaultDeliveryRider ? '⭐ (Default)' : ''} - {rider.motorcycleType || 'N/A'}
+                    </option>
+                  ))}
+              </select>
+
+              {motorRiders.filter(r => r.status === 'active').length === 0 && (
+                <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">
+                  ⚠️ No active riders available. All riders are currently busy or inactive.
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  handleBulkAssign();
+                  setShowBulkAssignModal(false);
+                  setBulkRiderId('');
+                }}
+                disabled={!bulkRiderId || motorRiders.length === 0}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
+              >
+                ✅ Assign to Rider
+              </button>
+              <button
+                onClick={() => {
+                  setShowBulkAssignModal(false);
+                  setBulkRiderId('');
                 }}
                 className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
               >

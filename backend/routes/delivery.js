@@ -413,4 +413,205 @@ router.post('/rider/:riderCode/update', async (req, res) => {
   }
 });
 
+// ============================================
+// BULK OPERATIONS - Admin Only
+// ============================================
+
+// Bulk Authorize Deliveries
+router.post('/admin/bulk/authorize', requireAdmin, async (req, res) => {
+  try {
+    const { deliveryIds, authorizedBy } = req.body;
+
+    if (!deliveryIds || !Array.isArray(deliveryIds) || deliveryIds.length === 0) {
+      return res.status(400).json({ error: 'deliveryIds array is required' });
+    }
+
+    const results = await Promise.all(
+      deliveryIds.map(async (id) => {
+        try {
+          const delivery = await DeliveryRequest.findById(id);
+          if (!delivery) {
+            return { id, success: false, error: 'Delivery not found' };
+          }
+
+          if (delivery.status !== 'pending') {
+            return { id, success: false, error: `Already ${delivery.status}` };
+          }
+
+          delivery.status = 'authorized';
+          delivery.authorizedAt = new Date();
+          delivery.authorizedBy = authorizedBy || 'Admin';
+          await delivery.save();
+
+          return { id, success: true };
+        } catch (error) {
+          return { id, success: false, error: error.message };
+        }
+      })
+    );
+
+    const successCount = results.filter(r => r.success).length;
+    const failCount = results.length - successCount;
+
+    res.json({
+      success: true,
+      message: `Authorized ${successCount} deliveries${failCount > 0 ? `, ${failCount} failed` : ''}`,
+      results
+    });
+  } catch (error) {
+    console.error('Bulk authorize error:', error);
+    res.status(500).json({ error: 'Failed to bulk authorize deliveries' });
+  }
+});
+
+// Bulk Assign to Rider
+router.post('/admin/bulk/assign', requireAdmin, async (req, res) => {
+  try {
+    const { deliveryIds, riderId } = req.body;
+
+    if (!deliveryIds || !Array.isArray(deliveryIds) || deliveryIds.length === 0) {
+      return res.status(400).json({ error: 'deliveryIds array is required' });
+    }
+
+    if (!riderId) {
+      return res.status(400).json({ error: 'riderId is required' });
+    }
+
+    // Get rider details
+    const rider = await MotorRider.findById(riderId);
+    if (!rider) {
+      return res.status(404).json({ error: 'Rider not found' });
+    }
+
+    const results = await Promise.all(
+      deliveryIds.map(async (id) => {
+        try {
+          const delivery = await DeliveryRequest.findById(id);
+          if (!delivery) {
+            return { id, success: false, error: 'Delivery not found' };
+          }
+
+          if (!['authorized', 'pending'].includes(delivery.status)) {
+            return { id, success: false, error: `Cannot assign - status is ${delivery.status}` };
+          }
+
+          delivery.status = 'assigned';
+          delivery.assignedRider = riderId;
+          delivery.assignedRiderName = rider.name;
+          delivery.assignedAt = new Date();
+          await delivery.save();
+
+          return { id, success: true };
+        } catch (error) {
+          return { id, success: false, error: error.message };
+        }
+      })
+    );
+
+    const successCount = results.filter(r => r.success).length;
+    const failCount = results.length - successCount;
+
+    res.json({
+      success: true,
+      message: `Assigned ${successCount} deliveries to ${rider.name}${failCount > 0 ? `, ${failCount} failed` : ''}`,
+      results,
+      rider: { id: rider._id, name: rider.name, phone: rider.phone, whatsapp: rider.whatsapp }
+    });
+  } catch (error) {
+    console.error('Bulk assign error:', error);
+    res.status(500).json({ error: 'Failed to bulk assign deliveries' });
+  }
+});
+
+// Bulk Update Status
+router.post('/admin/bulk/status', requireAdmin, async (req, res) => {
+  try {
+    const { deliveryIds, status } = req.body;
+
+    if (!deliveryIds || !Array.isArray(deliveryIds) || deliveryIds.length === 0) {
+      return res.status(400).json({ error: 'deliveryIds array is required' });
+    }
+
+    if (!status) {
+      return res.status(400).json({ error: 'status is required' });
+    }
+
+    const validStatuses = ['pending', 'authorized', 'assigned', 'in-progress', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const results = await Promise.all(
+      deliveryIds.map(async (id) => {
+        try {
+          const delivery = await DeliveryRequest.findById(id);
+          if (!delivery) {
+            return { id, success: false, error: 'Delivery not found' };
+          }
+
+          delivery.status = status;
+          await delivery.save();
+
+          return { id, success: true };
+        } catch (error) {
+          return { id, success: false, error: error.message };
+        }
+      })
+    );
+
+    const successCount = results.filter(r => r.success).length;
+    const failCount = results.length - successCount;
+
+    res.json({
+      success: true,
+      message: `Updated ${successCount} deliveries to ${status}${failCount > 0 ? `, ${failCount} failed` : ''}`,
+      results
+    });
+  } catch (error) {
+    console.error('Bulk status update error:', error);
+    res.status(500).json({ error: 'Failed to bulk update status' });
+  }
+});
+
+// Bulk Delete/Cancel Deliveries
+router.post('/admin/bulk/cancel', requireAdmin, async (req, res) => {
+  try {
+    const { deliveryIds } = req.body;
+
+    if (!deliveryIds || !Array.isArray(deliveryIds) || deliveryIds.length === 0) {
+      return res.status(400).json({ error: 'deliveryIds array is required' });
+    }
+
+    const results = await Promise.all(
+      deliveryIds.map(async (id) => {
+        try {
+          const delivery = await DeliveryRequest.findById(id);
+          if (!delivery) {
+            return { id, success: false, error: 'Delivery not found' };
+          }
+
+          delivery.status = 'cancelled';
+          await delivery.save();
+
+          return { id, success: true };
+        } catch (error) {
+          return { id, success: false, error: error.message };
+        }
+      })
+    );
+
+    const successCount = results.filter(r => r.success).length;
+    const failCount = results.length - successCount;
+
+    res.json({
+      success: true,
+      message: `Cancelled ${successCount} deliveries${failCount > 0 ? `, ${failCount} failed` : ''}`,
+      results
+    });
+  } catch (error) {
+    console.error('Bulk cancel error:', error);
+    res.status(500).json({ error: 'Failed to bulk cancel deliveries' });
+  }
+});
+
 module.exports = router;

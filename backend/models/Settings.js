@@ -50,13 +50,16 @@ const settingsSchema = new mongoose.Schema({
   businessHours: {
     enabled: { type: Boolean, default: true },
     schedule: {
-      monday: { open: '08:00', close: '18:00', closed: false },
-      tuesday: { open: '08:00', close: '18:00', closed: false },
-      wednesday: { open: '08:00', close: '18:00', closed: false },
-      thursday: { open: '08:00', close: '18:00', closed: false },
-      friday: { open: '08:00', close: '18:00', closed: false },
-      saturday: { open: '09:00', close: '15:00', closed: false },
-      sunday: { open: '00:00', close: '00:00', closed: true }
+      type: mongoose.Schema.Types.Mixed,
+      default: {
+        monday: { open: '08:00', close: '18:00', closed: false },
+        tuesday: { open: '08:00', close: '18:00', closed: false },
+        wednesday: { open: '08:00', close: '18:00', closed: false },
+        thursday: { open: '08:00', close: '18:00', closed: false },
+        friday: { open: '08:00', close: '18:00', closed: false },
+        saturday: { open: '09:00', close: '15:00', closed: false },
+        sunday: { open: '00:00', close: '00:00', closed: true }
+      }
     },
     holidays: [{
       date: String, // YYYY-MM-DD format
