@@ -13,6 +13,10 @@ const UserDashboard = () => {
   const [filter, setFilter] = useState('all');
   const [userInfo, setUserInfo] = useState({});
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedInfo, setEditedInfo] = useState({});
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -62,6 +66,60 @@ const UserDashboard = () => {
     localStorage.removeItem('userName');
     localStorage.removeItem('authTime');
     navigate('/');
+  };
+
+  const handleEditProfile = () => {
+    setEditedInfo({
+      name: userInfo.name,
+      email: userInfo.email,
+      phone: userInfo.phone || '',
+      address: userInfo.address || '',
+    });
+    setIsEditMode(true);
+    setSuccessMessage('');
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setEditedInfo({});
+    setSuccessMessage('');
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaveLoading(true);
+      setSuccessMessage('');
+
+      const response = await axios.put(`${API_URL}/api/users/profile`, {
+        email: userInfo.email,
+        name: editedInfo.name,
+        phone: editedInfo.phone,
+        address: editedInfo.address,
+      });
+
+      if (response.data.success) {
+        setUserInfo({
+          ...userInfo,
+          name: editedInfo.name,
+          phone: editedInfo.phone,
+          address: editedInfo.address,
+        });
+        localStorage.setItem('userName', editedInfo.name);
+        setIsEditMode(false);
+        setSuccessMessage('Profile updated successfully! 🎉');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setSuccessMessage('Failed to update profile. Please try again.');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditedInfo({ ...editedInfo, [field]: value });
   };
 
   const getStatusColor = (status) => {
@@ -736,25 +794,123 @@ const UserDashboard = () => {
                 <p className="text-purple-100 relative z-10">{userInfo.email}</p>
               </motion.div>
 
+              {/* Success Message */}
+              <AnimatePresence>
+                {successMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                    className={`rounded-2xl p-4 shadow-lg ${
+                      successMessage.includes('success')
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                        : 'bg-gradient-to-r from-red-500 to-pink-500'
+                    } text-white font-bold text-center`}
+                  >
+                    {successMessage}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Profile Details */}
               <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
-                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="text-2xl">👤</span> Personal Info
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <span className="text-2xl">👤</span> Personal Info
+                  </h3>
+                  {!isEditMode && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleEditProfile}
+                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                    >
+                      <span>✏️</span> Edit
+                    </motion.button>
+                  )}
+                </div>
                 <div className="space-y-4">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
                     <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Full Name</label>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.name}</p>
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={editedInfo.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    ) : (
+                      <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.name}</p>
+                    )}
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
                     <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Email Address</label>
                     <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.email}</p>
+                    {isEditMode && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Email cannot be changed</p>
+                    )}
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Phone Number</label>
+                    {isEditMode ? (
+                      <input
+                        type="tel"
+                        value={editedInfo.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="Enter phone number"
+                        className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    ) : (
+                      <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.phone || 'Not set'}</p>
+                    )}
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Address</label>
+                    {isEditMode ? (
+                      <textarea
+                        value={editedInfo.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        placeholder="Enter your address"
+                        rows="2"
+                        className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    ) : (
+                      <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.address || 'Not set'}</p>
+                    )}
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
                     <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Account Type</label>
                     <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">Customer</p>
                   </div>
                 </div>
+
+                {/* Save/Cancel Buttons */}
+                {isEditMode && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-3 mt-6"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSaveProfile}
+                      disabled={saveLoading}
+                      className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {saveLoading ? '💾 Saving...' : '✅ Save Changes'}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleCancelEdit}
+                      disabled={saveLoading}
+                      className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ❌ Cancel
+                    </motion.button>
+                  </motion.div>
+                )}
               </div>
 
               {/* Account Stats */}
