@@ -208,6 +208,7 @@ const AdminDashboard = () => {
     { id: 'home', name: 'Home', icon: '🏠', color: 'text-gray-600', isLink: true, path: '/' },
     { id: 'overview', name: 'Overview', icon: '📊', color: 'text-blue-600' },
     { id: 'deliveries', name: 'Deliveries', icon: '📦', color: 'text-indigo-600' },
+    { id: 'revenue', name: 'Revenue', icon: '💰', color: 'text-emerald-600' },
     { id: 'drivers', name: 'Drivers', icon: '🚗', color: 'text-green-600' },
     { id: 'rides', name: 'Rides', icon: '🚙', color: 'text-purple-600' },
     { id: 'vendors', name: 'Vendors', icon: '🛍️', color: 'text-orange-600' },
@@ -352,6 +353,7 @@ const AdminDashboard = () => {
             >
               {activeTab === 'overview' && <OverviewTab stats={stats} deliveries={deliveries} drivers={drivers} rides={rides} vendors={vendors} />}
               {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
+              {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} />}
               {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} />}
               {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} />}
@@ -4483,6 +4485,232 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
           </motion.div>
         </div>
       )}
+    </div>
+  );
+};
+
+// ============================================
+// REVENUE TAB - Financial Tracking & Analytics
+// ============================================
+const RevenueTab = ({ deliveries, motorRiders, exportToCSV }) => {
+  const [period, setPeriod] = useState('month');
+  const [viewMode, setViewMode] = useState('table');
+  const [financialData, setFinancialData] = useState(null);
+  const [riderStats, setRiderStats] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFinancialData();
+  }, [period]);
+
+  const fetchFinancialData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+
+      // Fetch overview
+      const overviewRes = await axios.get(`${API_URL}/api/financials/overview?period=${period}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Fetch rider stats
+      const riderRes = await axios.get(`${API_URL}/api/financials/riders?period=${period}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setFinancialData(overviewRes.data);
+      setRiderStats(riderRes.data.riders || []);
+    } catch (error) {
+      console.error('Error fetching financial data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || !financialData) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading financial data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Period Filter */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Revenue & Financial Tracking</h2>
+            <p className="text-gray-600 dark:text-gray-400">Monitor earnings, commissions, and payment status</p>
+          </div>
+          <div className="flex gap-3">
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+              <option value="all">All Time</option>
+            </select>
+            <button
+              onClick={() => exportToCSV(riderStats, 'rider-financials', ['riderName', 'totalDeliveries', 'totalRevenue', 'totalCommission'])}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all"
+            >
+              📥 Export
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Revenue Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-emerald-100">Total Revenue</span>
+            <span className="text-3xl">💰</span>
+          </div>
+          <div className="text-3xl font-bold">GH₵{financialData.totalRevenue.toFixed(2)}</div>
+          <div className="text-emerald-100 text-sm mt-2">
+            {financialData.deliveryStats.total} deliveries
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-green-100">Paid Revenue</span>
+            <span className="text-3xl">✅</span>
+          </div>
+          <div className="text-3xl font-bold">GH₵{financialData.paidRevenue.toFixed(2)}</div>
+          <div className="text-green-100 text-sm mt-2">
+            {((financialData.paidRevenue / financialData.totalRevenue) * 100).toFixed(1)}% collected
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-orange-100">Unpaid Revenue</span>
+            <span className="text-3xl">⏳</span>
+          </div>
+          <div className="text-3xl font-bold">GH₵{financialData.unpaidRevenue.toFixed(2)}</div>
+          <div className="text-orange-100 text-sm mt-2">
+            Pending collection
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-blue-100">Platform Share</span>
+            <span className="text-3xl">🏢</span>
+          </div>
+          <div className="text-3xl font-bold">GH₵{financialData.platformRevenue.toFixed(2)}</div>
+          <div className="text-blue-100 text-sm mt-2">
+            {financialData.profitMargin}% margin
+          </div>
+        </div>
+      </div>
+
+      {/* Rider Earnings Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Rider Earnings</h3>
+            <div className="flex bg-gray-200 dark:bg-gray-700 rounded-xl p-1">
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  viewMode === 'table'
+                    ? 'bg-white dark:bg-gray-600 text-emerald-600 shadow-md'
+                    : 'text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                📊 Table
+              </button>
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  viewMode === 'cards'
+                    ? 'bg-white dark:bg-gray-600 text-emerald-600 shadow-md'
+                    : 'text-gray-600 dark:text-gray-300'
+                }`}
+              >
+                📇 Cards
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {viewMode === 'table' ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Rider</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Deliveries</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Revenue</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Commission</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Paid</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Unpaid</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {riderStats.map((rider) => (
+                  <tr key={rider.riderId} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">{rider.riderName}</td>
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {rider.totalDeliveries} ({rider.completionRate}%)
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-emerald-600 dark:text-emerald-400">
+                      GH₵{rider.totalRevenue.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-blue-600 dark:text-blue-400">
+                      GH₵{rider.totalCommission.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 text-green-600 dark:text-green-400">
+                      GH₵{rider.paidRevenue.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 text-orange-600 dark:text-orange-400">
+                      GH₵{rider.unpaidRevenue.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+            {riderStats.map((rider) => (
+              <div key={rider.riderId} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-4">{rider.riderName}</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Deliveries:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{rider.totalDeliveries}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Revenue:</span>
+                    <span className="font-semibold text-emerald-600">GH₵{rider.totalRevenue.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Commission:</span>
+                    <span className="font-semibold text-blue-600">GH₵{rider.totalCommission.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-gray-300 dark:border-gray-600 pt-2">
+                    <span className="text-gray-600 dark:text-gray-400">Completion:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{rider.completionRate}%</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

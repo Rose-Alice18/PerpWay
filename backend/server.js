@@ -65,6 +65,7 @@ const paymentRoutes = require('./routes/payments');
 const motorRiderRoutes = require('./routes/motorRiders');
 const categoryRoutes = require('./routes/categories');
 const settingsRoutes = require('./routes/settings');
+const financialRoutes = require('./routes/financials');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
@@ -75,6 +76,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/motor-riders', motorRiderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/financials', financialRoutes);
 
 // API health check and welcome route
 app.get('/', (req, res) => {

@@ -51,9 +51,38 @@ const deliveryRequestSchema = new mongoose.Schema({
   assignedAt: {
     type: Date,
   },
+  // Financial fields
+  price: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['unpaid', 'paid', 'refunded'],
+    default: 'unpaid',
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['cash', 'mobile-money', 'card', 'other'],
+  },
+  paidAt: {
+    type: Date,
+  },
+  riderCommission: {
+    type: Number,
+    default: 0, // Amount rider gets (e.g., 70% of price)
+  },
+  platformRevenue: {
+    type: Number,
+    default: 0, // Amount platform keeps (e.g., 30% of price)
+  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  deliveredAt: {
+    type: Date,
   },
 });
 

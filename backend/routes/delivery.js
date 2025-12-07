@@ -22,6 +22,24 @@ router.post('/request', async (req, res) => {
   try {
     const { name, contact, itemDescription, pickupPoint, dropoffPoint, deliveryType, notes } = req.body;
 
+    // Fetch pricing from settings
+    const Settings = require('../models/Settings');
+    const settings = await Settings.getSettings();
+
+    // Get price based on delivery type
+    let price = 0;
+    if (deliveryType === 'instant') {
+      price = settings.pricing.instant || 10;
+    } else if (deliveryType === 'next-day') {
+      price = settings.pricing.nextDay || 7;
+    } else if (deliveryType === 'weekly-station') {
+      price = settings.pricing.weeklyStation || 5;
+    }
+
+    // Calculate commission (70% to rider, 30% to platform)
+    const riderCommission = price * 0.7;
+    const platformRevenue = price * 0.3;
+
     // Save to database
     const deliveryRequest = new DeliveryRequest({
       name,
@@ -31,6 +49,9 @@ router.post('/request', async (req, res) => {
       dropoffPoint,
       deliveryType,
       notes,
+      price,
+      riderCommission,
+      platformRevenue,
     });
 
     await deliveryRequest.save();
