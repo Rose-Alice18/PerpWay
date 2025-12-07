@@ -12,6 +12,10 @@ const FloatingDashboard = () => {
   useEffect(() => {
     const authStatus = localStorage.getItem('userAuthenticated');
     const role = localStorage.getItem('userRole');
+
+    console.log('FloatingDashboard - Auth Status:', authStatus);
+    console.log('FloatingDashboard - User Role:', role);
+
     setIsAuthenticated(authStatus === 'true');
     setUserRole(role);
 
@@ -43,38 +47,44 @@ const FloatingDashboard = () => {
     }
   };
 
+  console.log('FloatingDashboard rendering - isAuthenticated:', isAuthenticated);
+
+  // Always show for testing
+  if (!isAuthenticated) {
+    return null; // Return null for now, will show when authenticated
+  }
+
   return (
     <AnimatePresence>
-      {isAuthenticated && (
-        <motion.div
-          drag
-          dragMomentum={false}
-          dragElastic={0.1}
-          dragConstraints={{
-            top: 0,
-            left: 0,
-            right: window.innerWidth - 200,
-            bottom: window.innerHeight - 100
-          }}
-          onDragEnd={handleDragEnd}
-          style={{
-            x: position.x,
-            y: position.y,
-            position: 'fixed',
-            bottom: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
-            right: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
-            top: position.x === 0 && position.y === 0 ? 'auto' : 0,
-            left: position.x === 0 && position.y === 0 ? 'auto' : 0,
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            touchAction: 'none',
-          }}
-          initial={{ scale: 0, opacity: 0, rotate: -180 }}
-          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-          exit={{ scale: 0, opacity: 0, rotate: 180 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="z-[9999] select-none"
-        >
+      <motion.div
+        drag
+        dragMomentum={false}
+        dragElastic={0.1}
+        dragConstraints={{
+          top: 0,
+          left: 0,
+          right: window.innerWidth - 200,
+          bottom: window.innerHeight - 100
+        }}
+        onDragEnd={handleDragEnd}
+        style={{
+          x: position.x,
+          y: position.y,
+          position: 'fixed',
+          bottom: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
+          right: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
+          top: position.x === 0 && position.y === 0 ? 'auto' : 0,
+          left: position.x === 0 && position.y === 0 ? 'auto' : 0,
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          touchAction: 'none',
+        }}
+        initial={{ scale: 0, opacity: 0, rotate: -180 }}
+        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+        exit={{ scale: 0, opacity: 0, rotate: 180 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className="z-[9999] select-none"
+      >
           <div className="relative group">
             {/* Drag Handle - visible on hover */}
             <motion.div
@@ -266,7 +276,6 @@ const FloatingDashboard = () => {
             />
           </motion.div>
         </motion.div>
-      )}
     </AnimatePresence>
   );
 };
