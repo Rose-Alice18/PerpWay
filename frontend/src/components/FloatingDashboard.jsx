@@ -6,6 +6,7 @@ const FloatingDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('');
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [lastTap, setLastTap] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +27,20 @@ const FloatingDashboard = () => {
     setPosition(newPosition);
     // Save position to localStorage
     localStorage.setItem('floatingDashboardPosition', JSON.stringify(newPosition));
+  };
+
+  const handleClick = () => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (now - lastTap < DOUBLE_TAP_DELAY) {
+      // Double tap detected - navigate to dashboard
+      navigate(userRole === 'admin' ? '/admin/dashboard' : '/dashboard');
+      setLastTap(0);
+    } else {
+      // Single tap - just record the time
+      setLastTap(now);
+    }
   };
 
   return (
@@ -50,28 +65,30 @@ const FloatingDashboard = () => {
             right: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
             top: position.x === 0 && position.y === 0 ? 'auto' : 0,
             left: position.x === 0 && position.y === 0 ? 'auto' : 0,
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            touchAction: 'none',
           }}
           initial={{ scale: 0, opacity: 0, rotate: -180 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
           exit={{ scale: 0, opacity: 0, rotate: 180 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="z-50"
+          className="z-50 select-none"
         >
           <div className="relative group">
             {/* Drag Handle - visible on hover */}
             <motion.div
               whileHover={{ opacity: 1 }}
-              className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-3 py-1 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
+              className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-3 py-1 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20 whitespace-nowrap"
             >
-              ⬍ Drag me ⬍
+              ⬍ Drag me | Double-tap to open ⬍
             </motion.div>
 
-            <motion.button
-              onClick={() => navigate(userRole === 'admin' ? '/admin/dashboard' : '/dashboard')}
-              onPointerDown={(e) => e.stopPropagation()}
+            <motion.div
+              onClick={handleClick}
               whileHover={{ scale: 1.15, rotate: [0, -5, 5, 0] }}
               whileTap={{ scale: 0.85 }}
-              className="relative"
+              className="relative cursor-pointer"
             >
             {/* Pulsing outer glow - breathing effect */}
             <motion.div
@@ -225,7 +242,7 @@ const FloatingDashboard = () => {
                 Dashboard
               </motion.p>
             </motion.div>
-          </motion.button>
+          </motion.div>
           </div>
 
           {/* Enhanced tooltip with animation */}
