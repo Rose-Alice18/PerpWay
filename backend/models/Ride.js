@@ -10,6 +10,11 @@ const rideSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  userEmail: {
+    type: String,
+    trim: true,
+    lowercase: true,
+  },
   pickupLocation: {
     type: String,
     required: true,

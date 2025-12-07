@@ -13,10 +13,41 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET user's ride history
+router.get('/user/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Fetch all rides for this user (rides they created or joined)
+    const createdRides = await Ride.find({ userEmail: email.toLowerCase() })
+      .sort({ createdAt: -1 }); // Most recent first
+
+    // Also find rides where user joined
+    const joinedRides = await Ride.find({
+      'joinedUsers.email': email.toLowerCase()
+    }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      createdRides,
+      joinedRides,
+      totalCreated: createdRides.length,
+      totalJoined: joinedRides.length
+    });
+  } catch (error) {
+    console.error('Error fetching user rides:', error);
+    res.status(500).json({ error: 'Failed to fetch ride history' });
+  }
+});
+
 // Create new ride
 router.post('/create', async (req, res) => {
   try {
-    const { name, contact, pickupLocation, destination, departureTime, departureDate, seatsNeeded, notes } = req.body;
+    const { name, contact, pickupLocation, destination, departureTime, departureDate, seatsNeeded, notes, userEmail } = req.body;
 
     // Parse seatsNeeded with validation and default to 1
     const seatsRequested = parseInt(seatsNeeded) || 1;
@@ -32,6 +63,7 @@ router.post('/create', async (req, res) => {
     const newRide = new Ride({
       name,
       contact,
+      userEmail: userEmail ? userEmail.toLowerCase() : null,
       pickupLocation,
       destination,
       departureTime,

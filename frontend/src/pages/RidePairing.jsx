@@ -65,8 +65,14 @@ const RidePairing = () => {
     e.preventDefault();
 
     try {
+      // Get logged-in user email
+      const userEmail = localStorage.getItem('userEmail');
+
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      await axios.post(`${apiUrl}/api/rides/create`, formData);
+      await axios.post(`${apiUrl}/api/rides/create`, {
+        ...formData,
+        userEmail: userEmail || null,
+      });
 
       // Refresh rides list
       fetchRides();
