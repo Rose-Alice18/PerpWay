@@ -41,11 +41,13 @@ const Navbar = () => {
       const role = localStorage.getItem('userRole');
 
       setIsAuthenticated(authenticated === 'true');
-      // Show "Admin Roseline" for admin, otherwise show first name
+      // Show "Admin" for admin, otherwise show first name only
       if (role === 'admin') {
-        setUserName('Admin Roseline');
+        setUserName('Admin');
       } else {
-        setUserName(name || 'User');
+        // Extract first name only (before space)
+        const firstName = name ? name.split(' ')[0] : 'User';
+        setUserName(firstName);
       }
       setUserRole(role || 'user');
     };
@@ -350,23 +352,25 @@ const Navbar = () => {
             {/* User Menu or Sign In Button */}
             {isAuthenticated ? (
               <div className="relative ml-4">
-                <button
+                <motion.button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full bg-gradient-to-r from-ashesi-primary to-ghana-red text-white font-medium hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-r from-ashesi-primary to-ghana-red text-white font-medium hover:shadow-lg transition-all duration-200"
                 >
-                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold backdrop-blur-sm">
-                    {userRole === 'admin' ? 'R' : userName.charAt(0).toUpperCase()}
+                  <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold backdrop-blur-sm">
+                    {userRole === 'admin' ? '👑' : userName.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-sm font-semibold">{userName}</span>
+                  <span className="text-sm font-semibold max-w-[80px] truncate">{userName}</span>
                   <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`}
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
+                </motion.button>
 
                 {showUserMenu && (
                   <motion.div
@@ -381,19 +385,17 @@ const Navbar = () => {
                       <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{userRole} Account</p>
                     </div>
 
-                    {/* Admin Dashboard Link */}
-                    {userRole === 'admin' && (
-                      <Link
-                        to="/admin/dashboard"
-                        onClick={() => setShowUserMenu(false)}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-ashesi-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors border-b border-gray-200 dark:border-gray-700"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                          <span>📊</span>
-                        </div>
-                        <span className="font-medium">Dashboard</span>
-                      </Link>
-                    )}
+                    {/* Dashboard Link - Admin or User */}
+                    <Link
+                      to={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
+                      onClick={() => setShowUserMenu(false)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-ashesi-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors border-b border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        <span>📊</span>
+                      </div>
+                      <span className="font-medium">Dashboard</span>
+                    </Link>
 
                     <button
                       onClick={handleLogout}
@@ -536,19 +538,18 @@ const Navbar = () => {
               <>
                 <div className="border-t border-gray-200 dark:border-gray-700 my-2 pt-2">
                   <div className="px-4 py-2 text-gray-600 dark:text-gray-300 text-sm font-medium">
-                    <span className="mr-2">{userRole === 'admin' ? '👨‍💼' : '👤'}</span>
+                    <span className="mr-2">{userRole === 'admin' ? '👑' : '👤'}</span>
                     {userName}
                   </div>
-                  {userRole === 'admin' && (
-                    <Link
-                      to="/admin/dashboard"
-                      onClick={() => setIsOpen(false)}
-                      className="w-full text-left px-4 py-3 rounded-lg font-medium text-ashesi-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all my-1 block"
-                    >
-                      <span className="mr-2">📊</span>
-                      Dashboard
-                    </Link>
-                  )}
+                  {/* Dashboard Link for all authenticated users */}
+                  <Link
+                    to={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
+                    onClick={() => setIsOpen(false)}
+                    className="w-full text-left px-4 py-3 rounded-lg font-medium text-ashesi-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all my-1 block"
+                  >
+                    <span className="mr-2">📊</span>
+                    Dashboard
+                  </Link>
                   <button
                     onClick={() => {
                       handleLogout();
