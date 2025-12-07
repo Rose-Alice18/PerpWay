@@ -147,11 +147,16 @@ const AdminDashboard = () => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setLoading(false);
       if (error.response?.status === 401 || error.response?.status === 403) {
-        showError('Session expired. Please login again.');
+        try {
+          showError('Session expired. Please login again.');
+        } catch (toastError) {
+          console.error('Toast error:', toastError);
+          alert('Session expired. Please login again.');
+        }
         setTimeout(() => navigate('/signin'), 2000);
       }
-      setLoading(false);
     }
   };
 
