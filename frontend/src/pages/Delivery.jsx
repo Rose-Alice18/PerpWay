@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -17,6 +17,33 @@ const Delivery = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
   const [errors, setErrors] = useState({});
+  const [pricing, setPricing] = useState({
+    instant: 10,
+    nextDay: 7,
+    weeklyStation: 5,
+  });
+
+  // Fetch pricing from Settings API
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+        const response = await axios.get(`${apiUrl}/api/settings`);
+        if (response.data && response.data.pricing) {
+          setPricing({
+            instant: response.data.pricing.instant || 10,
+            nextDay: response.data.pricing.nextDay || 7,
+            weeklyStation: response.data.pricing.weeklyStation || 5,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        // Keep default pricing if fetch fails
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   const deliveryTypes = [
     {
@@ -24,21 +51,21 @@ const Delivery = () => {
       name: 'Instant Delivery',
       icon: '⚡',
       description: 'Same day delivery (2-4 hours)',
-      price: 'GHS 15-25',
+      price: `GH₵${pricing.instant}`,
     },
     {
       id: 'next-day',
       name: 'Next-Day Delivery',
       icon: '📅',
       description: 'Delivered tomorrow',
-      price: 'GHS 10-15',
+      price: `GH₵${pricing.nextDay}`,
     },
     {
       id: 'weekly-station',
       name: 'Weekly Station Pickup',
       icon: '📦',
       description: 'Pickup from campus station weekly',
-      price: 'GHS 5-8',
+      price: `GH₵${pricing.weeklyStation}`,
     },
   ];
 

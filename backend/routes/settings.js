@@ -45,6 +45,7 @@ router.get('/', async (req, res) => {
 
     // For public/non-admin: return only necessary info
     res.json({
+      pricing: settings.pricing, // Make pricing public so delivery forms can use it
       businessHours: settings.businessHours,
       announcements: settings.announcements.filter(a => a.active &&
         (!a.endDate || new Date(a.endDate) >= new Date())),
