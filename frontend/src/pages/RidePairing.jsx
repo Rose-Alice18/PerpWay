@@ -435,17 +435,17 @@ const RidePairing = () => {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+              className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto transition-colors duration-300"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="font-display text-3xl font-bold mb-6 text-center">
+              <h2 className="font-display text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
                 Post a Ride 🚗
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                       Your Name *
                     </label>
                     <input
@@ -459,7 +459,7 @@ const RidePairing = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                       Contact Number *
                     </label>
                     <input
@@ -476,7 +476,7 @@ const RidePairing = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                       Pickup Location *
                     </label>
                     <input
@@ -490,7 +490,7 @@ const RidePairing = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                       Destination *
                     </label>
                     <input
@@ -507,7 +507,7 @@ const RidePairing = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                       Departure Date *
                     </label>
                     <input
@@ -519,12 +519,12 @@ const RidePairing = () => {
                       className="input-field"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Cannot select past dates
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                       Departure Time *
                     </label>
                     <input
@@ -536,14 +536,14 @@ const RidePairing = () => {
                       className="input-field"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {formData.departureDate === getTodayDate() && 'Cannot select past times for today'}
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     How Many Seats Do You Need? * (1-4 seats)
                   </label>
                   <input
@@ -556,19 +556,19 @@ const RidePairing = () => {
                     className="input-field"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     💡 <strong>Important:</strong> A taxi has 5 total seats (1 driver + 4 passengers).
                     <br />
                     <strong>YOU are a passenger!</strong> Select how many of the 4 passenger seats YOU need.
                     <br />
                     📊 <strong>You need: {formData.seatsNeeded || 1} {formData.seatsNeeded === 1 ? 'seat' : 'seats'}</strong> → <strong>Others can join: {4 - (formData.seatsNeeded || 1)} {4 - (formData.seatsNeeded || 1) === 1 ? 'seat' : 'seats'}</strong>
                     <br />
-                    <span className="text-red-600">⚠️ Total passengers will be: {formData.seatsNeeded || 1} (you) + {4 - (formData.seatsNeeded || 1)} (others) = 4 max</span>
+                    <span className="text-red-600 dark:text-red-400">⚠️ Total passengers will be: {formData.seatsNeeded || 1} (you) + {4 - (formData.seatsNeeded || 1)} (others) = 4 max</span>
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Additional Notes (Optional)
                   </label>
                   <textarea
@@ -584,7 +584,7 @@ const RidePairing = () => {
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                   >
                     Cancel
                   </button>
