@@ -639,7 +639,7 @@ const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV }) => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [selectedRiderId, setSelectedRiderId] = useState('');
-  const [viewMode, setViewMode] = useState('card'); // 'card' or 'table'
+  const [viewMode, setViewMode] = useState('table'); // 'card' or 'table'
 
   // Bulk operations state
   const [selectedDeliveries, setSelectedDeliveries] = useState([]);
@@ -1900,7 +1900,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
-  const [viewMode, setViewMode] = useState('card'); // 'card' or 'table'
+  const [viewMode, setViewMode] = useState('table'); // 'card' or 'table'
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
@@ -2425,7 +2425,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
 const RidesTab = ({ rides, fetchData, exportToCSV }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('card');
+  const [viewMode, setViewMode] = useState('table');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRide, setSelectedRide] = useState(null);
 
@@ -2851,7 +2851,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
 // ============================================
 const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('card');
+  const [viewMode, setViewMode] = useState('table');
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
@@ -3339,6 +3339,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
 // ============================================
 const UsersTab = ({ users, fetchData, exportToCSV }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
   const filteredUsers = users.filter(user => {
     return !searchTerm ||
@@ -3360,12 +3361,37 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Users Management</h2>
             <p className="text-gray-600 dark:text-gray-400">Showing {allUsers.length} total users</p>
           </div>
-          <button
-            onClick={() => exportToCSV(allUsers, 'users', ['name', 'email', 'role', 'date'])}
-            className="px-4 py-2 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
-          >
-            <span>📥</span> Export CSV
-          </button>
+          <div className="flex flex-wrap gap-3">
+            {/* View Toggle */}
+            <div className="flex bg-gray-200 dark:bg-gray-700 rounded-xl p-1">
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                  viewMode === 'table'
+                    ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-ashesi-primary'
+                }`}
+              >
+                <span>📊</span> Table
+              </button>
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                  viewMode === 'cards'
+                    ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-ashesi-primary'
+                }`}
+              >
+                <span>📇</span> Cards
+              </button>
+            </div>
+            <button
+              onClick={() => exportToCSV(allUsers, 'users', ['name', 'email', 'role', 'date'])}
+              className="px-4 py-2 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+            >
+              <span>📥</span> Export CSV
+            </button>
+          </div>
         </div>
 
         {/* Search Filter */}
@@ -3381,65 +3407,117 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700 border-b-2 border-gray-200 dark:border-gray-600">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">User</th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Email</th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Role</th>
-                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Registered</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {allUsers.length === 0 ? (
+      {/* Table View */}
+      {viewMode === 'table' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700 border-b-2 border-gray-200 dark:border-gray-600">
                 <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                    No users found
-                  </td>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">User</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Email</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Role</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Registered</th>
                 </tr>
-              ) : (
-                allUsers.map((user, index) => (
-                  <motion.tr
-                    key={user._id || index}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                          user.role === 'admin'
-                            ? 'bg-gradient-to-br from-ashesi-primary to-ghana-red'
-                            : 'bg-gradient-to-br from-blue-500 to-purple-500'
-                        }`}>
-                          {user.name?.charAt(0).toUpperCase() || '?'}
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {allUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                      No users found
+                    </td>
+                  </tr>
+                ) : (
+                  allUsers.map((user, index) => (
+                    <motion.tr
+                      key={user._id || index}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
+                            user.role === 'admin'
+                              ? 'bg-gradient-to-br from-ashesi-primary to-ghana-red'
+                              : 'bg-gradient-to-br from-blue-500 to-purple-500'
+                          }`}>
+                            {user.name?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <span className="font-semibold text-gray-900 dark:text-white">{user.name}</span>
                         </div>
-                        <span className="font-semibold text-gray-900 dark:text-white">{user.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{user.email}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                        user.role === 'admin'
-                          ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
-                          : 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400'
-                      }`}>
-                        {user.role === 'admin' ? 'ADMIN' : 'USER'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                      {user.date === 'System' ? 'System User' : new Date(user.date).toLocaleDateString()}
-                    </td>
-                  </motion.tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{user.email}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
+                          user.role === 'admin'
+                            ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
+                            : 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400'
+                        }`}>
+                          {user.role === 'admin' ? 'ADMIN' : 'USER'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                        {user.date === 'System' ? 'System User' : new Date(user.date).toLocaleDateString()}
+                      </td>
+                    </motion.tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Cards View */}
+      {viewMode === 'cards' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {allUsers.length === 0 ? (
+            <div className="col-span-full bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+              <p className="text-gray-500 dark:text-gray-400 text-lg">No users found</p>
+            </div>
+          ) : (
+            allUsers.map((user, index) => (
+              <motion.div
+                key={user._id || index}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-white text-2xl ${
+                    user.role === 'admin'
+                      ? 'bg-gradient-to-br from-ashesi-primary to-ghana-red'
+                      : 'bg-gradient-to-br from-blue-500 to-purple-500'
+                  }`}>
+                    {user.name?.charAt(0).toUpperCase() || '?'}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">{user.name}</h3>
+                    <span className={`inline-block px-2 py-1 rounded-lg text-xs font-bold mt-1 ${
+                      user.role === 'admin'
+                        ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'
+                        : 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400'
+                    }`}>
+                      {user.role === 'admin' ? 'ADMIN' : 'USER'}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                    <span>📧</span>
+                    <span className="truncate">{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                    <span>📅</span>
+                    <span>{user.date === 'System' ? 'System User' : new Date(user.date).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -3449,7 +3527,7 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
 // ============================================
 const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('card');
+  const [viewMode, setViewMode] = useState('table');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRider, setSelectedRider] = useState(null);
@@ -3988,6 +4066,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
   const [newCategoryForm, setNewCategoryForm] = useState({
     name: '',
     description: '',
@@ -4087,6 +4166,29 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
             <p className="text-gray-600 dark:text-gray-400">Showing {filteredCategories.length} / {categories.length} categories</p>
           </div>
           <div className="flex flex-wrap gap-3">
+            {/* View Toggle */}
+            <div className="flex bg-gray-200 dark:bg-gray-700 rounded-xl p-1">
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                  viewMode === 'table'
+                    ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-ashesi-primary'
+                }`}
+              >
+                <span>📊</span> Table
+              </button>
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                  viewMode === 'cards'
+                    ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-ashesi-primary'
+                }`}
+              >
+                <span>📇</span> Cards
+              </button>
+            </div>
             <button
               onClick={() => setShowAddModal(true)}
               className="px-4 py-2 bg-gradient-to-r from-ashesi-primary to-ghana-red text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
@@ -4114,55 +4216,128 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
         </div>
       </div>
 
-      {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categoriesWithCounts.length === 0 ? (
-          <div className="col-span-full bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-lg">No categories found</p>
-          </div>
-        ) : (
-          categoriesWithCounts.map((category) => (
-            <motion.div
-              key={category._id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div
-                  className="rounded-xl p-3"
-                  style={{ backgroundColor: `${category.color}20` }}
-                >
-                  <span className="text-2xl">{category.icon}</span>
-                </div>
-                <div className="px-3 py-1 bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-400 rounded-xl text-xs font-bold">
-                  {category.vendorCount} vendors
-                </div>
-              </div>
+      {/* Table View */}
+      {viewMode === 'table' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {categoriesWithCounts.length === 0 ? (
+            <div className="p-12 text-center">
+              <p className="text-gray-500 dark:text-gray-400 text-lg">No categories found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Icon</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Vendors</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {categoriesWithCounts.map((category) => (
+                    <motion.tr
+                      key={category._id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div
+                          className="w-10 h-10 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: `${category.color}20` }}
+                        >
+                          <span className="text-xl">{category.icon}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="font-bold text-gray-900 dark:text-white">{category.name}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-600 dark:text-gray-400 max-w-md">{category.description || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-3 py-1 bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-400 rounded-xl text-xs font-bold">
+                          {category.vendorCount}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEditClick(category)}
+                            className="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-xs"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCategory(category._id)}
+                            className="px-3 py-1.5 bg-ghana-red text-white rounded-lg font-semibold hover:bg-ghana-red/90 transition-all text-xs"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
-              <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{category.name}</h3>
-              {category.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{category.description}</p>
-              )}
+      {/* Cards View */}
+      {viewMode === 'cards' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categoriesWithCounts.length === 0 ? (
+            <div className="col-span-full bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+              <p className="text-gray-500 dark:text-gray-400 text-lg">No categories found</p>
+            </div>
+          ) : (
+            categoriesWithCounts.map((category) => (
+              <motion.div
+                key={category._id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div
+                    className="rounded-xl p-3"
+                    style={{ backgroundColor: `${category.color}20` }}
+                  >
+                    <span className="text-2xl">{category.icon}</span>
+                  </div>
+                  <div className="px-3 py-1 bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-400 rounded-xl text-xs font-bold">
+                    {category.vendorCount} vendors
+                  </div>
+                </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEditClick(category)}
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all text-sm"
-                >
-                  ✏️ Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteCategory(category._id)}
-                  className="flex-1 px-3 py-2 bg-ghana-red text-white rounded-xl font-semibold hover:bg-ghana-red/90 transition-all text-sm"
-                >
-                  🗑️ Delete
-                </button>
-              </div>
-            </motion.div>
-          ))
-        )}
-      </div>
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{category.name}</h3>
+                {category.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{category.description}</p>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditClick(category)}
+                    className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all text-sm"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCategory(category._id)}
+                    className="flex-1 px-3 py-2 bg-ghana-red text-white rounded-xl font-semibold hover:bg-ghana-red/90 transition-all text-sm"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Add Modal */}
       {showAddModal && (
