@@ -152,6 +152,7 @@ const AdminDashboard = () => {
   };
 
   const menuItems = [
+    { id: 'home', name: 'Home', icon: '🏠', color: 'text-gray-600', isLink: true, path: '/' },
     { id: 'overview', name: 'Overview', icon: '📊', color: 'text-blue-600' },
     { id: 'deliveries', name: 'Deliveries', icon: '📦', color: 'text-indigo-600' },
     { id: 'drivers', name: 'Drivers', icon: '🚗', color: 'text-green-600' },
@@ -186,21 +187,17 @@ const AdminDashboard = () => {
       )}
 
       {/* Sidebar - Expandable design */}
-      <aside className={`bg-[#1e293b] dark:bg-[#0f172a] flex flex-col py-4 fixed md:static h-full z-50 transition-all duration-300 ${
+      <aside className={`bg-[#1e293b] dark:bg-[#0f172a] flex flex-col py-4 fixed h-full z-50 transition-all duration-300 ${
         sidebarOpen ? 'w-56' : 'w-16'
-      } md:w-20`}>
-        {/* Logo/Home */}
+      }`}>
+        {/* Logo/Brand */}
         <div className="px-2 mb-4">
-          <button
-            onClick={() => navigate('/')}
-            className={`w-full rounded-2xl bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold shadow-lg hover:scale-105 transition-all ${
+          <div className={`w-full rounded-2xl bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white font-bold shadow-lg transition-all ${
               sidebarOpen ? 'h-12 gap-2 px-3' : 'h-12 md:h-14'
-            }`}
-            title="Home"
-          >
+            }`}>
             <span className={sidebarOpen ? 'text-lg' : 'text-xl'}>P</span>
             {sidebarOpen && <span className="text-sm font-semibold">Perpway</span>}
-          </button>
+          </div>
         </div>
 
         {/* Menu Items */}
@@ -209,7 +206,11 @@ const AdminDashboard = () => {
             <motion.button
               key={item.id}
               onClick={() => {
-                setActiveTab(item.id);
+                if (item.isLink) {
+                  navigate(item.path);
+                } else {
+                  setActiveTab(item.id);
+                }
                 if (window.innerWidth < 768) {
                   setSidebarOpen(false); // Close sidebar on mobile after selection
                 }
@@ -219,13 +220,13 @@ const AdminDashboard = () => {
               className={`w-full rounded-xl flex items-center transition-all duration-200 relative ${
                 sidebarOpen ? 'h-12 gap-3 px-3' : 'h-12 md:h-14 justify-center'
               } ${
-                activeTab === item.id
+                activeTab === item.id && !item.isLink
                   ? 'bg-ashesi-primary shadow-lg shadow-ashesi-primary/50 text-white'
                   : 'bg-gray-700/50 dark:bg-gray-800/50 hover:bg-gray-600/50 dark:hover:bg-gray-700/50 text-gray-300'
               }`}
               title={item.name}
             >
-              {activeTab === item.id && !sidebarOpen && (
+              {activeTab === item.id && !sidebarOpen && !item.isLink && (
                 <motion.div
                   layoutId="activeIndicator"
                   className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
@@ -255,15 +256,15 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
-        sidebarOpen ? 'md:ml-0' : 'ml-16 md:ml-0'
+        sidebarOpen ? 'ml-56' : 'ml-16'
       }`}>
         {/* Top Bar */}
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-4 md:px-6 py-3">
           <div className="flex items-center justify-between gap-3">
-            {/* Hamburger Menu (Mobile) */}
+            {/* Hamburger Menu (All devices) */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
