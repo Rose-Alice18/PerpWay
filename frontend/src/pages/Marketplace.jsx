@@ -6,7 +6,7 @@ const Marketplace = () => {
   const businesses = [
     {
       id: 1,
-      name: 'Lettered Petal',
+      name: 'Lettered Petals',
       tagline: 'Reviving Vintage Handwritten Letters',
       description: 'An artist atelier dedicated to preserving the art of handwritten correspondence and vintage letters.',
       icon: '✉️',
@@ -27,7 +27,7 @@ const Marketplace = () => {
         >
           <h1 className="text-5xl md:text-6xl font-display font-bold mb-4">
             <span className="bg-gradient-to-r from-ashesi-primary to-ghana-red bg-clip-text text-transparent">
-              Perpway Marketplace
+            Marketplace
             </span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
