@@ -122,14 +122,33 @@ const Navbar = () => {
             </motion.div>
             <div className="flex flex-col justify-center">
               <motion.span
-                className="font-display text-2xl md:text-3xl font-bold text-white leading-tight whitespace-nowrap"
-                whileHover={{ scale: 1.02 }}
+                className="font-display text-2xl md:text-3xl font-bold bg-gradient-to-r from-ghana-red via-ghana-yellow to-ghana-green bg-clip-text text-transparent leading-tight whitespace-nowrap"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                style={{
+                  backgroundSize: "200% auto"
+                }}
               >
                 Perpway
               </motion.span>
               <motion.span
-                className="text-[6px] md:text-[8px] font-bold text-white/90 -mt-0.5 tracking-wide uppercase whitespace-nowrap"
+                className="text-[6px] md:text-[8px] font-bold bg-gradient-to-r from-ghana-red/80 via-ghana-yellow/80 to-ghana-green/80 bg-clip-text text-transparent -mt-0.5 tracking-wide uppercase whitespace-nowrap"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
                 style={{
+                  backgroundSize: "200% auto",
                   maxWidth: "100%",
                   display: "inline-block"
                 }}

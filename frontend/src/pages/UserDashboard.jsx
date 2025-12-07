@@ -127,29 +127,29 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <div className="bg-gradient-to-r from-ghana-red via-ghana-yellow to-ghana-green text-white py-6 px-4 shadow-lg">
+      <div className="bg-white dark:bg-gray-800 border-b-4 border-ashesi-primary dark:border-ashesi-primary/50 py-6 px-4 shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center">
             <div>
               <motion.h1
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-2xl md:text-3xl font-bold mb-1"
+                className="text-2xl md:text-3xl font-bold mb-1 text-gray-900 dark:text-white"
               >
                 👋 Welcome back, {userInfo.name}!
               </motion.h1>
-              <p className="text-white/90 text-sm">{userInfo.email}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">{userInfo.email}</p>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => navigate('/')}
-                className="px-3 md:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors backdrop-blur-sm text-sm md:text-base"
+                className="px-3 md:px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl transition-colors text-sm md:text-base font-medium"
               >
                 🏠 Home
               </button>
               <button
                 onClick={handleLogout}
-                className="px-3 md:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors backdrop-blur-sm text-sm md:text-base"
+                className="px-3 md:px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-xl transition-colors text-sm md:text-base font-medium"
               >
                 🚪 Logout
               </button>
