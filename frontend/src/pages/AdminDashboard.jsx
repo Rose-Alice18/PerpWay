@@ -202,6 +202,7 @@ const AdminDashboard = () => {
     { id: 'motor-riders', name: 'Motor Riders', icon: '🏍️', color: 'text-red-600' },
     { id: 'categories', name: 'Categories', icon: '🏷️', color: 'text-teal-600' },
     { id: 'users', name: 'Users', icon: '👥', color: 'text-pink-600' },
+    { id: 'settings', name: 'Settings', icon: '⚙️', color: 'text-gray-600' },
   ];
 
   const stats = getOverviewStats();
@@ -345,6 +346,7 @@ const AdminDashboard = () => {
               {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchCategories} exportToCSV={exportToCSV} />}
               {activeTab === 'users' && <UsersTab users={users} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
+              {activeTab === 'settings' && <SettingsTab />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -3842,6 +3844,946 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
                 </button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================
+// SETTINGS TAB - Configuration Management
+// ============================================
+const SettingsTab = () => {
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeSection, setActiveSection] = useState('pricing');
+  const [showAddAnnouncementModal, setShowAddAnnouncementModal] = useState(false);
+  const [showAddHolidayModal, setShowAddHolidayModal] = useState(false);
+
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: '',
+    message: '',
+    type: 'info',
+    active: true,
+    targetAudience: 'all',
+    endDate: ''
+  });
+
+  const [holidayForm, setHolidayForm] = useState({
+    date: '',
+    name: '',
+    description: ''
+  });
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('authToken');
+    return {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    };
+  };
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/api/settings`, getAuthHeaders());
+      setSettings(response.data);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      alert('Failed to fetch settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSettings = async (updatedFields) => {
+    try {
+      setSaving(true);
+      const response = await axios.put(`${API_URL}/api/settings`, updatedFields, getAuthHeaders());
+      setSettings(response.data.settings);
+      alert('✅ Settings updated successfully!');
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      alert('❌ Failed to update settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddAnnouncement = async () => {
+    try {
+      await axios.post(`${API_URL}/api/settings/announcements`, announcementForm, getAuthHeaders());
+      setShowAddAnnouncementModal(false);
+      setAnnouncementForm({ title: '', message: '', type: 'info', active: true, targetAudience: 'all', endDate: '' });
+      fetchSettings();
+      alert('✅ Announcement created successfully!');
+    } catch (error) {
+      console.error('Error creating announcement:', error);
+      alert('❌ Failed to create announcement');
+    }
+  };
+
+  const handleDeleteAnnouncement = async (announcementId) => {
+    if (!window.confirm('Are you sure you want to delete this announcement?')) return;
+    try {
+      await axios.delete(`${API_URL}/api/settings/announcements/${announcementId}`, getAuthHeaders());
+      fetchSettings();
+      alert('✅ Announcement deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting announcement:', error);
+      alert('❌ Failed to delete announcement');
+    }
+  };
+
+  const handleAddHoliday = async () => {
+    try {
+      await axios.post(`${API_URL}/api/settings/holidays`, holidayForm, getAuthHeaders());
+      setShowAddHolidayModal(false);
+      setHolidayForm({ date: '', name: '', description: '' });
+      fetchSettings();
+      alert('✅ Holiday added successfully!');
+    } catch (error) {
+      console.error('Error adding holiday:', error);
+      alert('❌ Failed to add holiday');
+    }
+  };
+
+  const handleDeleteHoliday = async (date) => {
+    if (!window.confirm('Are you sure you want to delete this holiday?')) return;
+    try {
+      await axios.delete(`${API_URL}/api/settings/holidays/${date}`, getAuthHeaders());
+      fetchSettings();
+      alert('✅ Holiday deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting holiday:', error);
+      alert('❌ Failed to delete holiday');
+    }
+  };
+
+  const sections = [
+    { id: 'pricing', name: 'Pricing', icon: '💰' },
+    { id: 'auto-assignment', name: 'Auto-Assignment', icon: '🤖' },
+    { id: 'notifications', name: 'Notifications', icon: '📬' },
+    { id: 'business-hours', name: 'Business Hours', icon: '🕐' },
+    { id: 'announcements', name: 'Announcements', icon: '📢' },
+    { id: 'sla', name: 'SLA Thresholds', icon: '⏱️' },
+    { id: 'general', name: 'General', icon: '⚙️' }
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⚙️</div>
+          <p className="text-gray-600 dark:text-gray-400">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-4xl mb-4">❌</div>
+          <p className="text-gray-600 dark:text-gray-400">Failed to load settings</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Settings & Configuration</h2>
+        <p className="text-gray-600 dark:text-gray-400">Manage platform settings, pricing, automation rules, and more</p>
+      </div>
+
+      {/* Section Navigation */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap gap-2">
+          {sections.map(section => (
+            <button
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
+              className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                activeSection === section.id
+                  ? 'bg-ashesi-primary text-white shadow-lg'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              <span>{section.icon}</span>
+              <span className="hidden sm:inline">{section.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Pricing Section */}
+      {activeSection === 'pricing' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>💰</span> Delivery Pricing Configuration
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Set default pricing for different delivery types</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Instant Delivery (GH₵)
+              </label>
+              <input
+                type="number"
+                value={settings.pricing?.instant || 0}
+                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, instant: parseFloat(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Delivered within 1-2 hours</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Next-Day Delivery (GH₵)
+              </label>
+              <input
+                type="number"
+                value={settings.pricing?.nextDay || 0}
+                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, nextDay: parseFloat(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Delivered within 24 hours</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Weekly Station (GH₵)
+              </label>
+              <input
+                type="number"
+                value={settings.pricing?.weeklyStation || 0}
+                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, weeklyStation: parseFloat(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Weekly collection points</p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => updateSettings({ pricing: settings.pricing })}
+            disabled={saving}
+            className="mt-6 px-6 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Pricing'}
+          </button>
+        </div>
+      )}
+
+      {/* Auto-Assignment Section */}
+      {activeSection === 'auto-assignment' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>🤖</span> Auto-Assignment Rules
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Configure automatic delivery assignment behavior</p>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">Enable Auto-Assignment</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Automatically assign deliveries to riders</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.autoAssignment?.enabled || false}
+                  onChange={(e) => setSettings({ ...settings, autoAssignment: { ...settings.autoAssignment, enabled: e.target.checked } })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-ashesi-primary"></div>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">Assign to Default Rider</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Use default rider when auto-assigning</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.autoAssignment?.assignToDefaultRider || false}
+                  onChange={(e) => setSettings({ ...settings, autoAssignment: { ...settings.autoAssignment, assignToDefaultRider: e.target.checked } })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-ashesi-primary"></div>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">Balance Workload</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Assign to the least busy rider</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.autoAssignment?.balanceWorkload || false}
+                  onChange={(e) => setSettings({ ...settings, autoAssignment: { ...settings.autoAssignment, balanceWorkload: e.target.checked } })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-ashesi-primary"></div>
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Max Deliveries Per Rider
+              </label>
+              <input
+                type="number"
+                value={settings.autoAssignment?.maxDeliveriesPerRider || 10}
+                onChange={(e) => setSettings({ ...settings, autoAssignment: { ...settings.autoAssignment, maxDeliveriesPerRider: parseInt(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Maximum concurrent deliveries per rider</p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => updateSettings({ autoAssignment: settings.autoAssignment })}
+            disabled={saving}
+            className="mt-6 px-6 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Auto-Assignment Rules'}
+          </button>
+        </div>
+      )}
+
+      {/* Notification Templates Section */}
+      {activeSection === 'notifications' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>📬</span> Notification Templates
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Customize message templates for different events</p>
+
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Delivery Assigned Template
+              </label>
+              <textarea
+                value={settings.notificationTemplates?.deliveryAssigned || ''}
+                onChange={(e) => setSettings({ ...settings, notificationTemplates: { ...settings.notificationTemplates, deliveryAssigned: e.target.value } })}
+                rows="6"
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+                placeholder="Use placeholders: {riderName}, {customerName}, {customerContact}, {itemDescription}, {pickupPoint}, {dropoffPoint}, {deliveryType}"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Available variables: {'{riderName}'}, {'{customerName}'}, {'{customerContact}'}, {'{itemDescription}'}, {'{pickupPoint}'}, {'{dropoffPoint}'}, {'{deliveryType}'}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Delivery Completed Template
+              </label>
+              <textarea
+                value={settings.notificationTemplates?.deliveryCompleted || ''}
+                onChange={(e) => setSettings({ ...settings, notificationTemplates: { ...settings.notificationTemplates, deliveryCompleted: e.target.value } })}
+                rows="4"
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Delivery Reminder Template
+              </label>
+              <textarea
+                value={settings.notificationTemplates?.deliveryReminder || ''}
+                onChange={(e) => setSettings({ ...settings, notificationTemplates: { ...settings.notificationTemplates, deliveryReminder: e.target.value } })}
+                rows="4"
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={() => updateSettings({ notificationTemplates: settings.notificationTemplates })}
+            disabled={saving}
+            className="mt-6 px-6 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Templates'}
+          </button>
+        </div>
+      )}
+
+      {/* Business Hours Section */}
+      {activeSection === 'business-hours' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>🕐</span> Business Hours & Holidays
+          </h3>
+
+          <div className="space-y-6">
+            {/* Business Hours Toggle */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">Enable Business Hours</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Restrict operations to business hours</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.businessHours?.enabled || false}
+                  onChange={(e) => setSettings({ ...settings, businessHours: { ...settings.businessHours, enabled: e.target.checked } })}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-ashesi-primary"></div>
+              </label>
+            </div>
+
+            {/* Weekly Schedule */}
+            <div>
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Weekly Schedule</h4>
+              <div className="space-y-2">
+                {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
+                  <div key={day} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="w-24">
+                      <p className="font-semibold text-gray-900 dark:text-white capitalize">{day}</p>
+                    </div>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!settings.businessHours?.schedule?.[day]?.closed}
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          businessHours: {
+                            ...settings.businessHours,
+                            schedule: {
+                              ...settings.businessHours?.schedule,
+                              [day]: { ...settings.businessHours?.schedule?.[day], closed: !e.target.checked }
+                            }
+                          }
+                        })}
+                        className="rounded text-ashesi-primary focus:ring-ashesi-primary"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Open</span>
+                    </label>
+                    {!settings.businessHours?.schedule?.[day]?.closed && (
+                      <>
+                        <input
+                          type="time"
+                          value={settings.businessHours?.schedule?.[day]?.open || '08:00'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            businessHours: {
+                              ...settings.businessHours,
+                              schedule: {
+                                ...settings.businessHours?.schedule,
+                                [day]: { ...settings.businessHours?.schedule?.[day], open: e.target.value }
+                              }
+                            }
+                          })}
+                          className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                        />
+                        <span className="text-gray-600 dark:text-gray-400">to</span>
+                        <input
+                          type="time"
+                          value={settings.businessHours?.schedule?.[day]?.close || '18:00'}
+                          onChange={(e) => setSettings({
+                            ...settings,
+                            businessHours: {
+                              ...settings.businessHours,
+                              schedule: {
+                                ...settings.businessHours?.schedule,
+                                [day]: { ...settings.businessHours?.schedule?.[day], close: e.target.value }
+                              }
+                            }
+                          })}
+                          className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                        />
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Holidays */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-gray-900 dark:text-white">Holidays</h4>
+                <button
+                  onClick={() => setShowAddHolidayModal(true)}
+                  className="px-4 py-2 bg-ashesi-primary text-white rounded-lg font-semibold hover:bg-ashesi-primary/90 transition-all text-sm"
+                >
+                  + Add Holiday
+                </button>
+              </div>
+              <div className="space-y-2">
+                {settings.businessHours?.holidays?.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm italic p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    No holidays configured
+                  </p>
+                ) : (
+                  settings.businessHours?.holidays?.map((holiday, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">{holiday.name}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{holiday.date} {holiday.description && `- ${holiday.description}`}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteHoliday(holiday.date)}
+                        className="px-3 py-1.5 bg-ghana-red text-white rounded-lg font-semibold hover:bg-ghana-red/90 transition-all text-xs"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => updateSettings({ businessHours: settings.businessHours })}
+            disabled={saving}
+            className="mt-6 px-6 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Business Hours'}
+          </button>
+        </div>
+      )}
+
+      {/* Announcements Section */}
+      {activeSection === 'announcements' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span>📢</span> Platform Announcements
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Display important messages to users</p>
+            </div>
+            <button
+              onClick={() => setShowAddAnnouncementModal(true)}
+              className="px-4 py-2 bg-ashesi-primary text-white rounded-xl font-semibold hover:bg-ashesi-primary/90 transition-all"
+            >
+              + Create Announcement
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {settings.announcements?.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400 text-center p-8 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                No announcements created yet
+              </p>
+            ) : (
+              settings.announcements?.map((announcement) => (
+                <div
+                  key={announcement._id}
+                  className={`p-4 rounded-xl border-2 ${
+                    announcement.type === 'info' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' :
+                    announcement.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700' :
+                    announcement.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' :
+                    'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-bold text-gray-900 dark:text-white">{announcement.title}</h4>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          announcement.active
+                            ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
+                            : 'bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-400'
+                        }`}>
+                          {announcement.active ? 'Active' : 'Inactive'}
+                        </span>
+                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-900/20 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-300">
+                          {announcement.targetAudience}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 dark:text-gray-300 text-sm mb-2">{announcement.message}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {announcement.endDate ? `Expires: ${new Date(announcement.endDate).toLocaleDateString()}` : 'No expiration'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteAnnouncement(announcement._id)}
+                      className="ml-4 px-3 py-1.5 bg-ghana-red text-white rounded-lg font-semibold hover:bg-ghana-red/90 transition-all text-xs"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* SLA Thresholds Section */}
+      {activeSection === 'sla' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>⏱️</span> SLA (Service Level Agreement) Thresholds
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Set maximum time limits for delivery status transitions</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Pending → Authorized (minutes)
+              </label>
+              <input
+                type="number"
+                value={settings.sla?.pendingToAuthorized || 60}
+                onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, pendingToAuthorized: parseInt(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Authorized → Assigned (minutes)
+              </label>
+              <input
+                type="number"
+                value={settings.sla?.authorizedToAssigned || 30}
+                onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, authorizedToAssigned: parseInt(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Assigned → In Progress (minutes)
+              </label>
+              <input
+                type="number"
+                value={settings.sla?.assignedToInProgress || 30}
+                onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, assignedToInProgress: parseInt(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                In Progress → Delivered (minutes)
+              </label>
+              <input
+                type="number"
+                value={settings.sla?.inProgressToDelivered || 120}
+                onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, inProgressToDelivered: parseInt(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Instant Delivery Max (minutes)
+              </label>
+              <input
+                type="number"
+                value={settings.sla?.instantDeliveryMax || 60}
+                onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, instantDeliveryMax: parseInt(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Next-Day Delivery Max (minutes)
+              </label>
+              <input
+                type="number"
+                value={settings.sla?.nextDayDeliveryMax || 1440}
+                onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, nextDayDeliveryMax: parseInt(e.target.value) } })}
+                className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{Math.floor((settings.sla?.nextDayDeliveryMax || 1440) / 60)} hours</p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => updateSettings({ sla: settings.sla })}
+            disabled={saving}
+            className="mt-6 px-6 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save SLA Thresholds'}
+          </button>
+        </div>
+      )}
+
+      {/* General Settings Section */}
+      {activeSection === 'general' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>⚙️</span> General Settings
+          </h3>
+
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Platform Name
+                </label>
+                <input
+                  type="text"
+                  value={settings.general?.platformName || 'Perpway'}
+                  onChange={(e) => setSettings({ ...settings, general: { ...settings.general, platformName: e.target.value } })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Currency
+                </label>
+                <input
+                  type="text"
+                  value={settings.general?.currency || 'GH₵'}
+                  onChange={(e) => setSettings({ ...settings, general: { ...settings.general, currency: e.target.value } })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Support Email
+                </label>
+                <input
+                  type="email"
+                  value={settings.general?.supportEmail || ''}
+                  onChange={(e) => setSettings({ ...settings, general: { ...settings.general, supportEmail: e.target.value } })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Support Phone
+                </label>
+                <input
+                  type="tel"
+                  value={settings.general?.supportPhone || ''}
+                  onChange={(e) => setSettings({ ...settings, general: { ...settings.general, supportPhone: e.target.value } })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Maintenance Mode */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border-2 border-red-200 dark:border-red-700">
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-white">Maintenance Mode</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Temporarily disable the platform for maintenance</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.general?.maintenanceMode || false}
+                    onChange={(e) => setSettings({ ...settings, general: { ...settings.general, maintenanceMode: e.target.checked } })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-ghana-red"></div>
+                </label>
+              </div>
+
+              {settings.general?.maintenanceMode && (
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Maintenance Message
+                  </label>
+                  <textarea
+                    value={settings.general?.maintenanceMessage || ''}
+                    onChange={(e) => setSettings({ ...settings, general: { ...settings.general, maintenanceMessage: e.target.value } })}
+                    rows="3"
+                    className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="Message to display to users during maintenance"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={() => updateSettings({ general: settings.general })}
+            disabled={saving}
+            className="mt-6 px-6 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save General Settings'}
+          </button>
+        </div>
+      )}
+
+      {/* Add Announcement Modal */}
+      {showAddAnnouncementModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Create Announcement</h3>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Title</label>
+                <input
+                  type="text"
+                  value={announcementForm.title}
+                  onChange={(e) => setAnnouncementForm({ ...announcementForm, title: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Announcement title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message</label>
+                <textarea
+                  value={announcementForm.message}
+                  onChange={(e) => setAnnouncementForm({ ...announcementForm, message: e.target.value })}
+                  rows="4"
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Announcement message"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Type</label>
+                <select
+                  value={announcementForm.type}
+                  onChange={(e) => setAnnouncementForm({ ...announcementForm, type: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="info">Info</option>
+                  <option value="warning">Warning</option>
+                  <option value="success">Success</option>
+                  <option value="error">Error</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Target Audience</label>
+                <select
+                  value={announcementForm.targetAudience}
+                  onChange={(e) => setAnnouncementForm({ ...announcementForm, targetAudience: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="all">All Users</option>
+                  <option value="users">Users Only</option>
+                  <option value="riders">Riders Only</option>
+                  <option value="drivers">Drivers Only</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">End Date (Optional)</label>
+                <input
+                  type="date"
+                  value={announcementForm.endDate}
+                  onChange={(e) => setAnnouncementForm({ ...announcementForm, endDate: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleAddAnnouncement}
+                className="flex-1 px-4 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all"
+              >
+                Create
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddAnnouncementModal(false);
+                  setAnnouncementForm({ title: '', message: '', type: 'info', active: true, targetAudience: 'all', endDate: '' });
+                }}
+                className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Add Holiday Modal */}
+      {showAddHolidayModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Add Holiday</h3>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Date</label>
+                <input
+                  type="date"
+                  value={holidayForm.date}
+                  onChange={(e) => setHolidayForm({ ...holidayForm, date: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Holiday Name</label>
+                <input
+                  type="text"
+                  value={holidayForm.name}
+                  onChange={(e) => setHolidayForm({ ...holidayForm, name: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., Independence Day"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description (Optional)</label>
+                <input
+                  type="text"
+                  value={holidayForm.description}
+                  onChange={(e) => setHolidayForm({ ...holidayForm, description: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Additional details"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleAddHoliday}
+                className="flex-1 px-4 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all"
+              >
+                Add Holiday
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddHolidayModal(false);
+                  setHolidayForm({ date: '', name: '', description: '' });
+                }}
+                className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
