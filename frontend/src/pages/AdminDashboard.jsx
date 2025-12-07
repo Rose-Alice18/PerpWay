@@ -64,33 +64,74 @@ const AdminDashboard = () => {
     'Ama Serwaa'
   ];
 
+  // Individual fetch functions for optimized updates
+  const fetchDrivers = async () => {
+    try {
+      const driversRes = await axios.get(`${API_URL}/api/drivers`);
+      setDrivers(driversRes.data);
+    } catch (error) {
+      console.error('Error fetching drivers:', error);
+    }
+  };
+
+  const fetchDeliveries = async () => {
+    try {
+      const deliveriesRes = await axios.get(`${API_URL}/api/delivery/admin/all`, getAuthHeaders());
+      setDeliveries(deliveriesRes.data);
+    } catch (error) {
+      console.error('Error fetching deliveries:', error);
+    }
+  };
+
+  const fetchRides = async () => {
+    try {
+      const ridesRes = await axios.get(`${API_URL}/api/rides`);
+      setRides(ridesRes.data);
+    } catch (error) {
+      console.error('Error fetching rides:', error);
+    }
+  };
+
+  const fetchVendors = async () => {
+    try {
+      const vendorsRes = await axios.get(`${API_URL}/api/vendors`);
+      setVendors(vendorsRes.data);
+    } catch (error) {
+      console.error('Error fetching vendors:', error);
+    }
+  };
+
+  const fetchMotorRiders = async () => {
+    try {
+      const motorRidersRes = await axios.get(`${API_URL}/api/motor-riders`);
+      setMotorRiders(motorRidersRes.data);
+    } catch (error) {
+      console.error('Error fetching motor riders:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const categoriesRes = await axios.get(`${API_URL}/api/categories`);
+      setCategories(categoriesRes.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
 
-      // Fetch deliveries (requires auth)
-      const deliveriesRes = await axios.get(`${API_URL}/api/delivery/admin/all`, getAuthHeaders());
-      setDeliveries(deliveriesRes.data);
-
-      // Fetch drivers
-      const driversRes = await axios.get(`${API_URL}/api/drivers`);
-      setDrivers(driversRes.data);
-
-      // Fetch rides
-      const ridesRes = await axios.get(`${API_URL}/api/rides`);
-      setRides(ridesRes.data);
-
-      // Fetch vendors
-      const vendorsRes = await axios.get(`${API_URL}/api/vendors`);
-      setVendors(vendorsRes.data);
-
-      // Fetch motor riders
-      const motorRidersRes = await axios.get(`${API_URL}/api/motor-riders`);
-      setMotorRiders(motorRidersRes.data);
-
-      // Fetch categories
-      const categoriesRes = await axios.get(`${API_URL}/api/categories`);
-      setCategories(categoriesRes.data);
+      // Fetch all data in parallel
+      await Promise.all([
+        fetchDeliveries(),
+        fetchDrivers(),
+        fetchRides(),
+        fetchVendors(),
+        fetchMotorRiders(),
+        fetchCategories()
+      ]);
 
       // Get users from localStorage (since we're using localStorage auth)
       const perpwayUsers = JSON.parse(localStorage.getItem('perpwayUsers') || '[]');
@@ -297,12 +338,12 @@ const AdminDashboard = () => {
               transition={{ duration: 0.3 }}
             >
               {activeTab === 'overview' && <OverviewTab stats={stats} deliveries={deliveries} drivers={drivers} rides={rides} vendors={vendors} />}
-              {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchAllData} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
-              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
-              {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
-              {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
-              {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
-              {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
+              {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
+              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} />}
+              {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} />}
+              {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} />}
+              {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} />}
+              {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchCategories} exportToCSV={exportToCSV} />}
               {activeTab === 'users' && <UsersTab users={users} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
             </motion.div>
           </AnimatePresence>
@@ -1539,11 +1580,21 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
 
   const handleQuickStatusChange = async (driverId, newStatus) => {
     try {
+      // Optimistically update the UI immediately
+      const updatedDrivers = drivers.map(d =>
+        d._id === driverId ? { ...d, availability: newStatus } : d
+      );
+
+      // Update the database
       await axios.put(`${API_URL}/api/drivers/${driverId}`, { availability: newStatus });
+
+      // Silently refresh in the background (no loading spinner)
       fetchData();
     } catch (error) {
       console.error('Error updating driver status:', error);
       alert('Failed to update driver status: ' + (error.response?.data?.message || error.message));
+      // Revert optimistic update on error
+      fetchData();
     }
   };
 
