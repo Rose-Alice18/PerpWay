@@ -96,11 +96,28 @@ const UserDashboard = () => {
       setSaveLoading(true);
       setSuccessMessage('');
 
-      const response = await axios.put(`${API_URL}/api/users/profile`, {
+      // Validate password if provided
+      if (editedInfo.newPassword) {
+        if (editedInfo.newPassword.length < 6) {
+          setSuccessMessage('Password must be at least 6 characters long.');
+          setSaveLoading(false);
+          setTimeout(() => setSuccessMessage(''), 3000);
+          return;
+        }
+        if (editedInfo.newPassword !== editedInfo.confirmPassword) {
+          setSuccessMessage('Passwords do not match. Please try again.');
+          setSaveLoading(false);
+          setTimeout(() => setSuccessMessage(''), 3000);
+          return;
+        }
+      }
+
+      const response = await axios.put(`${API_URL}/api/auth/users/profile`, {
         email: userInfo.email,
         name: editedInfo.name,
         phone: editedInfo.phone,
         address: editedInfo.address,
+        newPassword: editedInfo.newPassword || undefined,
       });
 
       if (response.data.success) {
@@ -117,7 +134,7 @@ const UserDashboard = () => {
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      setSuccessMessage('Failed to update profile. Please try again.');
+      setSuccessMessage(error.response?.data?.message || 'Failed to update profile. Please try again.');
       setTimeout(() => setSuccessMessage(''), 3000);
     } finally {
       setSaveLoading(false);
@@ -245,7 +262,7 @@ const UserDashboard = () => {
             </motion.div>
             <div>
               <h1 className="text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {userInfo.name || 'User'}
+                {userInfo.name ? `${userInfo.name}'s Dashboard` : "User's Dashboard"}
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -372,6 +389,16 @@ const UserDashboard = () => {
                   >
                     <div className="text-5xl mb-3">🛍️</div>
                     <p className="font-bold text-gray-900 dark:text-white">Services</p>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/marketplace')}
+                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-pink-400"
+                  >
+                    <div className="text-5xl mb-3">🏪</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Marketplace</p>
                   </motion.button>
                 </div>
               </div>
@@ -914,6 +941,33 @@ const UserDashboard = () => {
                       <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.address || 'Not set'}</p>
                     )}
                   </div>
+                  {isEditMode && (
+                    <>
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
+                        <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password (Optional)</label>
+                        <input
+                          type="password"
+                          value={editedInfo.newPassword || ''}
+                          onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                          placeholder="Leave blank to keep current password"
+                          className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters</p>
+                      </div>
+                      {editedInfo.newPassword && (
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
+                          <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Confirm New Password</label>
+                          <input
+                            type="password"
+                            value={editedInfo.confirmPassword || ''}
+                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your new password"
+                            className="w-full text-lg font-bold text-gray-900 dark:text-white mt-1 bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-600 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
                     <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Account Type</label>
                     <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">Customer</p>

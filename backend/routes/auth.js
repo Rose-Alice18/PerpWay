@@ -335,7 +335,7 @@ router.get('/me', async (req, res) => {
 // Update user profile
 router.put('/users/profile', async (req, res) => {
   try {
-    const { email, name, phone, address } = req.body;
+    const { email, name, phone, address, newPassword } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -358,6 +358,21 @@ router.put('/users/profile', async (req, res) => {
     if (name) user.name = name;
     if (phone !== undefined) user.phone = phone;
     if (address !== undefined) user.address = address;
+
+    // Update password if provided
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: 'Password must be at least 6 characters long'
+        });
+      }
+
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      user.password = hashedPassword;
+    }
 
     await user.save();
 
