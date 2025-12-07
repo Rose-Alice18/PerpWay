@@ -1518,20 +1518,20 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Drivers Management</h2>
-            <p className="text-gray-600 dark:text-gray-400">Showing {filteredDrivers.length} / {drivers.length} drivers</p>
-          </div>
-          <div className="flex gap-3">
-            {/* View Toggle */}
-            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+      <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">Drivers Management</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Showing {filteredDrivers.length} / {drivers.length} drivers</p>
+            </div>
+            {/* View Toggle - Desktop only */}
+            <div className="hidden sm:flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
               <button
                 onClick={() => setViewMode('card')}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
+                className={`px-3 py-2 rounded-lg font-semibold transition-all text-xs ${
                   viewMode === 'card'
                     ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
                     : 'text-gray-600 dark:text-gray-400'
@@ -1541,7 +1541,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
+                className={`px-3 py-2 rounded-lg font-semibold transition-all text-xs ${
                   viewMode === 'table'
                     ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
                     : 'text-gray-600 dark:text-gray-400'
@@ -1550,41 +1550,45 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                 📋 Table
               </button>
             </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-gradient-to-r from-ashesi-primary to-ghana-red text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+              className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-ashesi-primary to-ghana-red text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
             >
-              <span>➕</span>
-              Add Driver
+              <span className="text-lg">➕</span>
+              <span>Add Driver</span>
             </button>
             <button
               onClick={() => exportToCSV(filteredDrivers, 'drivers', ['name', 'contact', 'carType', 'location'])}
-              className="px-4 py-2 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+              className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
             >
-              <span>📥</span>
-              Export CSV
+              <span className="text-lg">📥</span>
+              <span>Export CSV</span>
             </button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Search</label>
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Search</label>
             <input
               type="text"
               placeholder="Search by name, contact, or vehicle..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Location</label>
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">Location</label>
             <select
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
             >
               <option value="all">All Locations</option>
               {locations.map((location, index) => (
