@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
 const UserDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('home');
   const [deliveries, setDeliveries] = useState([]);
   const [createdRides, setCreatedRides] = useState([]);
   const [joinedRides, setJoinedRides] = useState([]);
@@ -12,6 +12,7 @@ const UserDashboard = () => {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [userInfo, setUserInfo] = useState({});
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const navigate = useNavigate();
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -67,20 +68,20 @@ const UserDashboard = () => {
     switch (status) {
       case 'delivered':
       case 'completed':
-        return 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400';
+        return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white';
       case 'in-progress':
-        return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
+        return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white';
       case 'assigned':
-        return 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400';
+        return 'bg-gradient-to-r from-purple-500 to-violet-500 text-white';
       case 'authorized':
-        return 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400';
+        return 'bg-gradient-to-r from-yellow-400 to-amber-400 text-gray-900';
       case 'pending':
       case 'active':
-        return 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400';
+        return 'bg-gradient-to-r from-orange-500 to-rose-500 text-white';
       case 'cancelled':
-        return 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400';
+        return 'bg-gradient-to-r from-red-500 to-pink-500 text-white';
       default:
-        return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400';
+        return 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
     }
   };
 
@@ -105,343 +106,850 @@ const UserDashboard = () => {
     return delivery.status === filter;
   });
 
+  // Separate active and history rides
+  const activeCreatedRides = createdRides.filter(r => r.status === 'active' || r.status === 'pending');
+  const historyCreatedRides = createdRides.filter(r => r.status === 'completed' || r.status === 'cancelled');
+  const activeJoinedRides = joinedRides.filter(r => r.status === 'active' || r.status === 'pending');
+  const historyJoinedRides = joinedRides.filter(r => r.status === 'completed' || r.status === 'cancelled');
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-ashesi-primary border-t-transparent mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">Loading your dashboard...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="inline-block rounded-full h-20 w-20 border-4 border-purple-500 border-t-transparent mb-4"
+          />
+          <p className="text-gray-700 dark:text-gray-300 text-lg font-semibold">Loading your vibe...</p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
-      {/* User Profile Header */}
-      <div className="bg-white dark:bg-gray-800 px-4 py-6 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 pb-24">
+      {/* Floating User Profile Header */}
+      <motion.div
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-4 py-6 shadow-lg sticky top-0 z-10 border-b border-purple-200 dark:border-gray-700"
+      >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-ashesi-primary to-ghana-red flex items-center justify-center text-white text-xl font-bold shadow-md">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center gap-4"
+          >
+            <motion.div
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.5 }}
+              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center text-white text-2xl font-black shadow-xl"
+            >
               {userInfo.name?.charAt(0).toUpperCase()}
-            </div>
+            </motion.div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h1 className="text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 {userInfo.name || 'User'}
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{userInfo.email}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Online
+              </p>
             </div>
-          </div>
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setActiveTab('home')}
+            className="p-3 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:shadow-lg transition-all"
           >
             <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
+        <AnimatePresence mode="wait">
+          {/* Home Tab - Navigate to Index */}
+          {activeTab === 'home' && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* Hero Card */}
               <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm"
+                whileHover={{ scale: 1.02 }}
+                className="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-3xl p-8 shadow-2xl text-white relative overflow-hidden"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                    <span className="text-xl">📦</span>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Deliveries</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.deliveries.total}</p>
-                  </div>
+                <motion.div
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 360],
+                  }}
+                  transition={{ duration: 20, repeat: Infinity }}
+                  className="absolute -top-20 -right-20 w-40 h-40 bg-white/10 rounded-full"
+                />
+                <motion.div
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    rotate: [360, 180, 0],
+                  }}
+                  transition={{ duration: 15, repeat: Infinity }}
+                  className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full"
+                />
+                <div className="relative z-10">
+                  <h2 className="text-3xl font-black mb-2">Welcome Back!</h2>
+                  <p className="text-purple-100 mb-6">Ready to explore Perpway? Let's get moving!</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/')}
+                    className="bg-white text-purple-600 px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-2xl transition-all"
+                  >
+                    🏠 Go to Home Page
+                  </motion.button>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500">GH₵ {stats.deliveries.totalSpent.toFixed(2)} spent</p>
               </motion.div>
 
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.05 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                    <span className="text-xl">🚗</span>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Rides</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.rides.created + stats.rides.joined}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500">{stats.rides.created} created, {stats.rides.joined} joined</p>
-              </motion.div>
-            </div>
-
-            {/* Quick Actions */}
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+              {/* Quick Stats Grid */}
               <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => navigate('/delivery')}
-                  className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 2 }}
+                  className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 shadow-xl text-white"
                 >
-                  <div className="text-3xl mb-2">📦</div>
-                  <p className="font-semibold text-sm">Request Delivery</p>
-                </button>
-                <button
-                  onClick={() => navigate('/rides')}
-                  className="bg-gradient-to-br from-green-500 to-green-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className="text-3xl mb-2">🚗</div>
-                  <p className="font-semibold text-sm">Find Ride</p>
-                </button>
-                <button
-                  onClick={() => navigate('/drivers')}
-                  className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className="text-3xl mb-2">🚙</div>
-                  <p className="font-semibold text-sm">Find Driver</p>
-                </button>
-                <button
-                  onClick={() => navigate('/services')}
-                  className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className="text-3xl mb-2">🛍️</div>
-                  <p className="font-semibold text-sm">Services</p>
-                </button>
-              </div>
-            </div>
+                  <div className="text-4xl mb-2">📦</div>
+                  <p className="text-3xl font-black">{stats.deliveries.total}</p>
+                  <p className="text-sm text-blue-100">Total Deliveries</p>
+                </motion.div>
 
-            {/* Recent Activity */}
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm divide-y divide-gray-100 dark:divide-gray-700">
-                {[...deliveries.slice(0, 3), ...createdRides.slice(0, 2)]
-                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .slice(0, 5)
-                  .map((item, index) => (
-                    <div key={index} className="p-4 flex items-center gap-3">
-                      <div className="text-2xl">{item.pickupPoint ? '📦' : '🚗'}</div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm text-gray-900 dark:text-white">
-                          {item.itemDescription || `${item.pickupLocation} → ${item.destination}`}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {new Date(item.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(item.status)}`}>
-                        {item.status}
-                      </span>
-                    </div>
-                  ))}
-                {deliveries.length === 0 && createdRides.length === 0 && (
-                  <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                    <p className="text-3xl mb-2">🎯</p>
-                    <p className="text-sm">No activity yet. Start using Perpway services!</p>
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: -2 }}
+                  className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl p-6 shadow-xl text-white"
+                >
+                  <div className="text-4xl mb-2">🚗</div>
+                  <p className="text-3xl font-black">{stats.rides.created + stats.rides.joined}</p>
+                  <p className="text-sm text-green-100">Total Rides</p>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: -2 }}
+                  className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 shadow-xl text-white"
+                >
+                  <div className="text-4xl mb-2">💰</div>
+                  <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
+                  <p className="text-sm text-orange-100">Total Spent</p>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 2 }}
+                  className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 shadow-xl text-white"
+                >
+                  <div className="text-4xl mb-2">⚡</div>
+                  <p className="text-3xl font-black">{stats.rides.active}</p>
+                  <p className="text-sm text-purple-100">Active Rides</p>
+                </motion.div>
+              </div>
+
+              {/* Quick Actions */}
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-3xl">⚡</span> Quick Actions
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/delivery')}
+                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400"
+                  >
+                    <div className="text-5xl mb-3">📦</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Request Delivery</p>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/rides')}
+                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-green-400"
+                  >
+                    <div className="text-5xl mb-3">🚗</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Find Ride</p>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/drivers')}
+                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-orange-400"
+                  >
+                    <div className="text-5xl mb-3">🚙</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Find Driver</p>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/services')}
+                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-purple-400"
+                  >
+                    <div className="text-5xl mb-3">🛍️</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Services</p>
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Overview Tab */}
+          {activeTab === 'overview' && (
+            <motion.div
+              key="overview"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* Recent Activity */}
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-3xl">🔥</span> Recent Activity
+                </h2>
+                <div className="space-y-3">
+                  {[...deliveries.slice(0, 3), ...createdRides.slice(0, 2)]
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .slice(0, 5)
+                    .map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{ scale: 1.02, x: 5 }}
+                        className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg flex items-center gap-4"
+                      >
+                        <div className="text-4xl">{item.pickupPoint ? '📦' : '🚗'}</div>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-900 dark:text-white">
+                            {item.itemDescription || `${item.pickupLocation} → ${item.destination}`}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-md ${getStatusColor(item.status)}`}>
+                          {item.status}
+                        </span>
+                      </motion.div>
+                    ))}
+                  {deliveries.length === 0 && createdRides.length === 0 && (
+                    <motion.div
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      className="bg-white dark:bg-gray-800 rounded-3xl p-12 text-center shadow-xl"
+                    >
+                      <motion.p
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="text-6xl mb-4"
+                      >
+                        🎯
+                      </motion.p>
+                      <p className="text-lg font-bold text-gray-900 dark:text-white mb-2">No activity yet!</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Start your Perpway journey now!</p>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+
+              {/* Stats Overview */}
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-3xl">📊</span> Your Stats
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Deliveries</p>
+                    <p className="text-3xl font-black text-blue-500">{stats.deliveries.total}</p>
+                    <p className="text-xs text-gray-500 mt-1">{stats.deliveries.delivered} completed</p>
                   </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Rides</p>
+                    <p className="text-3xl font-black text-green-500">{stats.rides.created + stats.rides.joined}</p>
+                    <p className="text-xs text-gray-500 mt-1">{stats.rides.active} active</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* My Deliveries Tab */}
+          {activeTab === 'deliveries' && (
+            <motion.div
+              key="deliveries"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-4"
+            >
+              {/* Filters */}
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {[
+                  { id: 'all', label: 'All', emoji: '📋', count: deliveries.length },
+                  { id: 'active', label: 'Active', emoji: '⚡', count: deliveries.filter(d => ['pending', 'authorized', 'assigned', 'in-progress'].includes(d.status)).length },
+                  { id: 'delivered', label: 'Done', emoji: '✅', count: stats.deliveries.delivered },
+                  { id: 'pending', label: 'Pending', emoji: '⏳', count: stats.deliveries.pending },
+                ].map(({ id, label, emoji, count }) => (
+                  <motion.button
+                    key={id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setFilter(id)}
+                    className={`px-5 py-3 rounded-2xl font-bold text-sm whitespace-nowrap transition-all shadow-lg ${
+                      filter === id
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white scale-105'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {emoji} {label} ({count})
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Deliveries List */}
+              <div className="space-y-4">
+                {filteredDeliveries.length === 0 ? (
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    className="bg-white dark:bg-gray-800 rounded-3xl p-12 shadow-xl text-center"
+                  >
+                    <div className="text-7xl mb-4">📦</div>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white mb-2">No deliveries here!</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Let's get your first package moving!</p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate('/delivery')}
+                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl font-bold shadow-lg hover:shadow-2xl transition-all"
+                    >
+                      📦 Request Delivery
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  filteredDeliveries.map((delivery, index) => (
+                    <motion.div
+                      key={delivery._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ scale: 1.02, y: -5 }}
+                      className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg hover:shadow-2xl transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-start gap-3">
+                          <div className="text-4xl">📦</div>
+                          <div>
+                            <p className="font-bold text-lg text-gray-900 dark:text-white">{delivery.itemDescription}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(delivery.createdAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <motion.span
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold shadow-lg ${getStatusColor(delivery.status)}`}
+                        >
+                          {delivery.status}
+                        </motion.span>
+                      </div>
+                      <div className="space-y-2 text-sm bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                        <p className="text-gray-700 dark:text-gray-300">
+                          <span className="font-bold">📍 Pickup:</span> {delivery.pickupPoint}
+                        </p>
+                        <p className="text-gray-700 dark:text-gray-300">
+                          <span className="font-bold">📍 Dropoff:</span> {delivery.dropoffPoint}
+                        </p>
+                        {delivery.price && (
+                          <p className="text-gray-900 dark:text-white font-black text-lg mt-2">
+                            💰 GH₵ {delivery.price.toFixed(2)}
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))
                 )}
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {/* My Deliveries Tab */}
-        {activeTab === 'deliveries' && (
-          <div className="space-y-4">
-            {/* Filters */}
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {[
-                { id: 'all', label: 'All', count: deliveries.length },
-                { id: 'active', label: 'Active', count: deliveries.filter(d => ['pending', 'authorized', 'assigned', 'in-progress'].includes(d.status)).length },
-                { id: 'delivered', label: 'Delivered', count: stats.deliveries.delivered },
-                { id: 'pending', label: 'Pending', count: stats.deliveries.pending },
-              ].map(({ id, label, count }) => (
-                <button
-                  key={id}
-                  onClick={() => setFilter(id)}
-                  className={`px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${
-                    filter === id
-                      ? 'bg-ashesi-primary text-white shadow-sm'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {label} ({count})
-                </button>
-              ))}
-            </div>
-
-            {/* Deliveries List */}
-            <div className="space-y-4">
-              {filteredDeliveries.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-sm text-center">
-                  <div className="text-5xl mb-4">📦</div>
-                  <p className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No deliveries found</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Start by requesting your first delivery!</p>
-                  <button
-                    onClick={() => navigate('/delivery')}
-                    className="px-6 py-3 bg-ashesi-primary text-white rounded-xl font-medium hover:shadow-md transition-all"
-                  >
-                    Request Delivery
-                  </button>
-                </div>
-              ) : (
-                filteredDeliveries.map((delivery) => (
-                  <div key={delivery._id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{delivery.itemDescription}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{new Date(delivery.createdAt).toLocaleDateString()}</p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(delivery.status)}`}>
-                        {delivery.status}
-                      </span>
-                    </div>
-                    <div className="space-y-1 text-sm">
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Pickup:</span> {delivery.pickupPoint}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        <span className="font-medium">Dropoff:</span> {delivery.dropoffPoint}
-                      </p>
-                      {delivery.price && (
-                        <p className="text-gray-900 dark:text-white font-semibold">
-                          GH₵ {delivery.price.toFixed(2)}
-                        </p>
-                      )}
-                    </div>
+          {/* My Rides Tab */}
+          {activeTab === 'rides' && (
+            <motion.div
+              key="rides"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* Create New Ride CTA */}
+              <motion.button
+                whileHover={{ scale: 1.02, y: -5 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/rides')}
+                className="w-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all flex items-center justify-between"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-4xl">
+                    ➕
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
+                  <div className="text-left">
+                    <p className="text-xl font-black">Create New Ride</p>
+                    <p className="text-sm text-green-100">Share your journey with others!</p>
+                  </div>
+                </div>
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                </svg>
+              </motion.button>
 
-        {/* My Rides Tab */}
-        {activeTab === 'rides' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Rides You Created</h2>
-              {createdRides.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm text-center">
-                  <p className="text-3xl mb-2">🚗</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">No rides created yet</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {createdRides.map((ride) => (
-                    <div key={ride._id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {ride.pickupLocation} → {ride.destination}
-                        </p>
-                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ride.status)}`}>
-                          {ride.status}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(ride.departureDate).toLocaleDateString()} at {ride.departureTime}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                        {ride.passengersJoined || 0} joined • {ride.availableSeats} seats available
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              {/* Rides You Created */}
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-3xl">🚗</span> Rides You Created
+                </h2>
 
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Rides You Joined</h2>
-              {joinedRides.length === 0 ? (
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm text-center">
-                  <p className="text-3xl mb-2">🎫</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">No rides joined yet</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {joinedRides.map((ride) => (
-                    <div key={ride._id} className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          {ride.pickupLocation} → {ride.destination}
-                        </p>
-                        <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getStatusColor(ride.status)}`}>
-                          {ride.status}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(ride.departureDate).toLocaleDateString()} at {ride.departureTime}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                {/* Active Created Rides */}
+                {activeCreatedRides.length > 0 && (
+                  <div className="space-y-3 mb-4">
+                    <p className="text-sm font-bold text-gray-600 dark:text-gray-400">Active</p>
+                    {activeCreatedRides.map((ride, index) => (
+                      <motion.div
+                        key={ride._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ scale: 1.02, x: 5 }}
+                        className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg hover:shadow-2xl transition-all"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-start gap-3">
+                            <div className="text-4xl">🚗</div>
+                            <div>
+                              <p className="font-bold text-lg text-gray-900 dark:text-white">
+                                {ride.pickupLocation} → {ride.destination}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                📅 {new Date(ride.departureDate).toLocaleDateString()} at {ride.departureTime}
+                              </p>
+                            </div>
+                          </div>
+                          <motion.span
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold shadow-lg ${getStatusColor(ride.status)}`}
+                          >
+                            {ride.status}
+                          </motion.span>
+                        </div>
+                        <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-3">
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            👥 <span className="font-bold text-purple-600 dark:text-purple-400">{ride.passengersJoined || 0}</span> joined
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            💺 <span className="font-bold text-blue-600 dark:text-blue-400">{ride.availableSeats}</span> seats available
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
 
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <div className="space-y-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Profile Information</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Name</label>
-                  <p className="text-gray-900 dark:text-white font-medium">{userInfo.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Email</label>
-                  <p className="text-gray-900 dark:text-white font-medium">{userInfo.email}</p>
+                {/* History Created Rides */}
+                {historyCreatedRides.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-bold text-gray-600 dark:text-gray-400">History</p>
+                    {historyCreatedRides.map((ride, index) => (
+                      <motion.div
+                        key={ride._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl p-4 opacity-75"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-start gap-2">
+                            <div className="text-2xl opacity-50">🚗</div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+                                {ride.pickupLocation} → {ride.destination}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-500">
+                                {new Date(ride.departureDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`px-3 py-1 rounded-lg text-xs font-bold ${getStatusColor(ride.status)}`}>
+                            {ride.status}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {createdRides.length === 0 && (
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl text-center"
+                  >
+                    <p className="text-5xl mb-3">🚗</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">No rides created yet</p>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Rides You Joined */}
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-3xl">🎫</span> Rides You Joined
+                </h2>
+
+                {/* Active Joined Rides */}
+                {activeJoinedRides.length > 0 && (
+                  <div className="space-y-3 mb-4">
+                    <p className="text-sm font-bold text-gray-600 dark:text-gray-400">Active</p>
+                    {activeJoinedRides.map((ride, index) => (
+                      <motion.div
+                        key={ride._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ scale: 1.02, x: 5 }}
+                        className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg hover:shadow-2xl transition-all"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-start gap-3">
+                            <div className="text-4xl">🎫</div>
+                            <div>
+                              <p className="font-bold text-lg text-gray-900 dark:text-white">
+                                {ride.pickupLocation} → {ride.destination}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                📅 {new Date(ride.departureDate).toLocaleDateString()} at {ride.departureTime}
+                              </p>
+                            </div>
+                          </div>
+                          <motion.span
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold shadow-lg ${getStatusColor(ride.status)}`}
+                          >
+                            {ride.status}
+                          </motion.span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {/* History Joined Rides */}
+                {historyJoinedRides.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-bold text-gray-600 dark:text-gray-400">History</p>
+                    {historyJoinedRides.map((ride, index) => (
+                      <motion.div
+                        key={ride._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl p-4 opacity-75"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-start gap-2">
+                            <div className="text-2xl opacity-50">🎫</div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-700 dark:text-gray-300">
+                                {ride.pickupLocation} → {ride.destination}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-500">
+                                {new Date(ride.departureDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`px-3 py-1 rounded-lg text-xs font-bold ${getStatusColor(ride.status)}`}>
+                            {ride.status}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {joinedRides.length === 0 && (
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl text-center"
+                  >
+                    <p className="text-5xl mb-3">🎫</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">No rides joined yet</p>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Profile Tab */}
+          {activeTab === 'profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* Profile Header */}
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                className="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-3xl p-8 shadow-2xl text-white text-center relative overflow-hidden"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"
+                />
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-24 h-24 mx-auto mb-4 rounded-3xl bg-white/20 backdrop-blur-xl flex items-center justify-center text-5xl font-black shadow-2xl relative z-10"
+                >
+                  {userInfo.name?.charAt(0).toUpperCase()}
+                </motion.div>
+                <h2 className="text-3xl font-black mb-2 relative z-10">{userInfo.name || 'User'}</h2>
+                <p className="text-purple-100 relative z-10">{userInfo.email}</p>
+              </motion.div>
+
+              {/* Profile Details */}
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-2xl">👤</span> Personal Info
+                </h3>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Full Name</label>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.name}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Email Address</label>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">{userInfo.email}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Account Type</label>
+                    <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mt-1">Customer</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <button
-              onClick={handleLogout}
-              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-medium transition-all shadow-sm"
+              {/* Account Stats */}
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-2xl">📊</span> Account Stats
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-2xl p-4">
+                    <p className="text-3xl font-black">{stats.deliveries.total}</p>
+                    <p className="text-xs text-blue-100">Total Deliveries</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-500 to-emerald-500 text-white rounded-2xl p-4">
+                    <p className="text-3xl font-black">{stats.rides.created + stats.rides.joined}</p>
+                    <p className="text-xs text-green-100">Total Rides</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-2xl p-4">
+                    <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
+                    <p className="text-xs text-orange-100">Total Spent</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-2xl p-4">
+                    <p className="text-3xl font-black">{stats.rides.active}</p>
+                    <p className="text-xs text-purple-100">Active Rides</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Settings */}
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-2xl">⚙️</span> Quick Settings
+                </h3>
+                <div className="space-y-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl p-4 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">🔔</span>
+                      <span className="font-bold text-gray-900 dark:text-white">Notifications</span>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl p-4 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">🎨</span>
+                      <span className="font-bold text-gray-900 dark:text-white">Appearance</span>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl p-4 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">🔒</span>
+                      <span className="font-bold text-gray-900 dark:text-white">Privacy & Security</span>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Logout Button */}
+              <motion.button
+                whileHover={{ scale: 1.02, y: -5 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleLogout}
+                className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white py-5 rounded-3xl font-black text-lg shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-3"
+              >
+                <span className="text-2xl">🚪</span>
+                Logout
+              </motion.button>
+            </motion.div>
+          )}
+
+          {/* More Tab */}
+          {activeTab === 'more' && (
+            <motion.div
+              key="more"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-4"
             >
-              🚪 Logout
-            </button>
-          </div>
-        )}
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span className="text-3xl">⚡</span> More Options
+              </h2>
+
+              <div className="grid grid-cols-2 gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/about')}
+                  className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all"
+                >
+                  <div className="text-5xl mb-3">ℹ️</div>
+                  <p className="font-bold text-gray-900 dark:text-white">About</p>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/contact')}
+                  className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all"
+                >
+                  <div className="text-5xl mb-3">📧</div>
+                  <p className="font-bold text-gray-900 dark:text-white">Contact</p>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all"
+                >
+                  <div className="text-5xl mb-3">❓</div>
+                  <p className="font-bold text-gray-900 dark:text-white">Help</p>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all"
+                >
+                  <div className="text-5xl mb-3">⚙️</div>
+                  <p className="font-bold text-gray-900 dark:text-white">Settings</p>
+                </motion.button>
+              </div>
+
+              {/* App Info */}
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl text-center mt-6">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Perpway v1.0.0</p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Personal Easy Rides & Packages</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg">
-        <div className="max-w-2xl mx-auto px-2 py-2">
+      {/* Bottom Navigation - 6 Tabs */}
+      <motion.div
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border-t-2 border-purple-200 dark:border-gray-700 shadow-2xl z-50"
+      >
+        <div className="max-w-2xl mx-auto px-1 py-3">
           <div className="flex justify-around items-center">
             {[
-              { id: 'overview', icon: '🏠', label: 'Home' },
+              { id: 'home', icon: '🏠', label: 'Home' },
+              { id: 'overview', icon: '📊', label: 'Overview' },
               { id: 'deliveries', icon: '📦', label: 'Deliveries' },
               { id: 'rides', icon: '🚗', label: 'Rides' },
               { id: 'profile', icon: '👤', label: 'Profile' },
+              { id: 'more', icon: '⚡', label: 'More' },
             ].map((tab) => (
-              <button
+              <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
+                whileHover={{ scale: 1.1, y: -3 }}
+                whileTap={{ scale: 0.9 }}
+                className={`flex flex-col items-center gap-1 px-2 py-2 rounded-2xl transition-all ${
                   activeTab === tab.id
-                    ? 'text-ashesi-primary font-semibold'
+                    ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg scale-110'
                     : 'text-gray-600 dark:text-gray-400'
                 }`}
               >
-                <span className="text-2xl">{tab.icon}</span>
-                <span className="text-xs">{tab.label}</span>
-              </button>
+                <motion.span
+                  animate={activeTab === tab.id ? { rotate: [0, 10, -10, 0] } : {}}
+                  transition={{ duration: 0.5 }}
+                  className="text-2xl"
+                >
+                  {tab.icon}
+                </motion.span>
+                <span className={`text-[10px] font-bold ${activeTab === tab.id ? 'text-white' : ''}`}>
+                  {tab.label}
+                </span>
+              </motion.button>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
