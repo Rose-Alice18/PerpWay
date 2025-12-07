@@ -16,7 +16,10 @@
       "Bash(node server.js:*)",
       "Bash(taskkill:*)",
       "Bash(awk:*)",
-      "Bash(node seedCategories.js:*)"
+      "Bash(node seedCategories.js:*)",
+      "Bash(node -e:*)",
+      "Bash(git commit:*)",
+      "Bash(should be reflected on the platform... whether pricing etc.\"\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

@@ -371,6 +371,82 @@ const AdminDashboard = () => {
 
 // Overview Tab Component with Analytics
 const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [financialMetrics, setFinancialMetrics] = useState(null);
+  const [growthMetrics, setGrowthMetrics] = useState(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+
+  // Fetch real analytics data
+  const fetchAnalytics = React.useCallback(async () => {
+    try {
+      setLoadingAnalytics(true);
+
+      // Fetch financial overview for this week
+      const financialRes = await axios.get(`${API_URL}/api/financials/overview?period=week`, getAuthHeaders());
+      setFinancialMetrics(financialRes.data);
+
+      // Fetch 7-day trends for weekly chart
+      const trendsRes = await axios.get(`${API_URL}/api/financials/trends?days=7`, getAuthHeaders());
+
+      // Transform trends data to weekly chart format
+      const trends = trendsRes.data.trends || [];
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const weeklyChartData = trends.map(trend => {
+        const date = new Date(trend.date);
+        return {
+          day: daysOfWeek[date.getDay()],
+          deliveries: trend.deliveryCount,
+          rides: 0, // TODO: Add rides data when available
+          revenue: trend.totalRevenue
+        };
+      });
+      setWeeklyData(weeklyChartData);
+
+      // Calculate growth metrics (compare this week vs last week)
+      const lastWeekRes = await axios.get(`${API_URL}/api/financials/overview?period=week`, getAuthHeaders());
+      const twoWeeksAgoRes = await axios.get(`${API_URL}/api/financials/trends?days=14`, getAuthHeaders());
+
+      // Calculate growth percentages
+      const thisWeekDeliveries = financialRes.data.deliveryStats?.total || 0;
+      const lastWeekDeliveries = twoWeeksAgoRes.data.trends.slice(0, 7).reduce((sum, d) => sum + d.deliveryCount, 0);
+      const deliveryGrowth = lastWeekDeliveries > 0
+        ? (((thisWeekDeliveries - lastWeekDeliveries) / lastWeekDeliveries) * 100).toFixed(1)
+        : 0;
+
+      setGrowthMetrics({
+        deliveryGrowth: deliveryGrowth,
+        ridesGrowth: '+0', // TODO: Calculate when rides data available
+        driversGrowth: '+0', // TODO: Calculate from user registration trends
+        usersGrowth: '+0' // TODO: Calculate from user registration trends
+      });
+
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      // Set default empty data
+      setWeeklyData([
+        { day: 'Mon', deliveries: 0, rides: 0, revenue: 0 },
+        { day: 'Tue', deliveries: 0, rides: 0, revenue: 0 },
+        { day: 'Wed', deliveries: 0, rides: 0, revenue: 0 },
+        { day: 'Thu', deliveries: 0, rides: 0, revenue: 0 },
+        { day: 'Fri', deliveries: 0, rides: 0, revenue: 0 },
+        { day: 'Sat', deliveries: 0, rides: 0, revenue: 0 },
+        { day: 'Sun', deliveries: 0, rides: 0, revenue: 0 },
+      ]);
+      setGrowthMetrics({
+        deliveryGrowth: '+0',
+        ridesGrowth: '+0',
+        driversGrowth: '+0',
+        usersGrowth: '+0'
+      });
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
+
   // Prepare data for charts
   const deliveryStatusData = [
     { name: 'Pending', value: deliveries.filter(d => d.status === 'pending').length, color: '#FCD116' },
@@ -380,17 +456,6 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
     { name: 'Delivered', value: deliveries.filter(d => d.status === 'delivered').length, color: '#006B3F' },
     { name: 'Cancelled', value: deliveries.filter(d => d.status === 'cancelled').length, color: '#CE1126' },
   ].filter(item => item.value > 0);
-
-  // Mock weekly data for trend chart
-  const weeklyData = [
-    { day: 'Mon', deliveries: 12, rides: 8, revenue: 450 },
-    { day: 'Tue', deliveries: 19, rides: 12, revenue: 680 },
-    { day: 'Wed', deliveries: 15, rides: 10, revenue: 520 },
-    { day: 'Thu', deliveries: 22, rides: 15, revenue: 890 },
-    { day: 'Fri', deliveries: 28, rides: 20, revenue: 1200 },
-    { day: 'Sat', deliveries: 35, rides: 25, revenue: 1450 },
-    { day: 'Sun', deliveries: 18, rides: 14, revenue: 780 },
-  ];
 
   // Platform metrics
   const platformMetrics = [
@@ -408,18 +473,18 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
       textColor: 'text-blue-600 dark:text-blue-400',
-      change: '+12%',
-      changeType: 'increase'
+      change: growthMetrics ? `${growthMetrics.deliveryGrowth >= 0 ? '+' : ''}${growthMetrics.deliveryGrowth}%` : '...',
+      changeType: growthMetrics && growthMetrics.deliveryGrowth >= 0 ? 'increase' : 'decrease'
     },
     {
-      label: 'Active Rides',
-      value: stats.activeRides,
-      icon: '🚙',
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-      textColor: 'text-purple-600 dark:text-purple-400',
-      change: '+8%',
-      changeType: 'increase'
+      label: 'Total Revenue',
+      value: financialMetrics ? `GH₵${financialMetrics.totalRevenue.toFixed(2)}` : 'GH₵0.00',
+      icon: '💰',
+      color: 'from-emerald-500 to-emerald-600',
+      bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
+      textColor: 'text-emerald-600 dark:text-emerald-400',
+      change: financialMetrics ? `${financialMetrics.deliveryStats?.total || 0} deliveries` : '...',
+      changeType: 'neutral'
     },
     {
       label: 'Total Drivers',
@@ -428,20 +493,31 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50 dark:bg-green-900/20',
       textColor: 'text-green-600 dark:text-green-400',
-      change: '+5%',
-      changeType: 'increase'
+      change: growthMetrics ? growthMetrics.driversGrowth : '...',
+      changeType: 'neutral'
     },
     {
-      label: 'Total Users',
-      value: stats.totalUsers,
-      icon: '👥',
-      color: 'from-pink-500 to-pink-600',
-      bgColor: 'bg-pink-50 dark:bg-pink-900/20',
-      textColor: 'text-pink-600 dark:text-pink-400',
-      change: '+15%',
-      changeType: 'increase'
+      label: 'Platform Share',
+      value: financialMetrics ? `GH₵${financialMetrics.platformRevenue.toFixed(2)}` : 'GH₵0.00',
+      icon: '🏦',
+      color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      textColor: 'text-purple-600 dark:text-purple-400',
+      change: financialMetrics ? `${financialMetrics.profitMargin}% margin` : '...',
+      changeType: 'neutral'
     },
   ];
+
+  if (loadingAnalytics) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading analytics...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -462,7 +538,9 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
               <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${
                 stat.changeType === 'increase'
                   ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400'
-                  : 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                  : stat.changeType === 'decrease'
+                  ? 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
               }`}>
                 {stat.change}
               </span>
@@ -483,41 +561,45 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Weekly Activity</h3>
-            <select className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-700 dark:text-gray-300">
-              <option>This Week</option>
-              <option>Last Week</option>
-              <option>This Month</option>
-            </select>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Weekly Activity (Last 7 Days)</h3>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={weeklyData}>
-              <defs>
-                <linearGradient id="colorDeliveries" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorRides" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
-              <XAxis dataKey="day" stroke="#9CA3AF" />
-              <YAxis stroke="#9CA3AF" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
-                  borderRadius: '12px',
-                  color: '#fff'
-                }}
-              />
-              <Legend />
-              <Area type="monotone" dataKey="deliveries" stroke="#3B82F6" fillOpacity={1} fill="url(#colorDeliveries)" />
-              <Area type="monotone" dataKey="rides" stroke="#8B5CF6" fillOpacity={1} fill="url(#colorRides)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {weeklyData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={weeklyData}>
+                <defs>
+                  <linearGradient id="colorDeliveries" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                <XAxis dataKey="day" stroke="#9CA3AF" />
+                <YAxis stroke="#9CA3AF" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1F2937',
+                    border: '1px solid #374151',
+                    borderRadius: '12px',
+                    color: '#fff'
+                  }}
+                />
+                <Legend />
+                <Area type="monotone" dataKey="deliveries" stroke="#3B82F6" fillOpacity={1} fill="url(#colorDeliveries)" name="Deliveries" />
+                <Area type="monotone" dataKey="revenue" stroke="#10B981" fillOpacity={1} fill="url(#colorRevenue)" name="Revenue (GH₵)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
+              <div className="text-center">
+                <p className="text-lg font-semibold">No activity data yet</p>
+                <p className="text-sm mt-2">Data will appear as deliveries are created</p>
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Delivery Status Pie Chart */}
