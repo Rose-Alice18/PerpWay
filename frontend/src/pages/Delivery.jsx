@@ -85,7 +85,8 @@ const Delivery = () => {
 
     try {
       // Send delivery request to backend
-      await axios.post('http://localhost:5000/api/delivery/request', formData);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      await axios.post(`${apiUrl}/api/delivery/request`, formData);
 
       // Show success animation
       setTimeout(() => {

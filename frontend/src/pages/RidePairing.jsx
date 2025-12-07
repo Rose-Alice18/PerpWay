@@ -44,7 +44,8 @@ const RidePairing = () => {
 
   const fetchRides = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/rides');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await axios.get(`${apiUrl}/api/rides`);
       setRides(response.data);
       setLoading(false);
     } catch (error) {
@@ -64,7 +65,8 @@ const RidePairing = () => {
     e.preventDefault();
 
     try {
-      await axios.post('http://localhost:5000/api/rides/create', formData);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      await axios.post(`${apiUrl}/api/rides/create`, formData);
 
       // Refresh rides list
       fetchRides();
@@ -97,8 +99,9 @@ const RidePairing = () => {
 
   const handleJoinSubmit = async (contactData) => {
     try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const rideId = selectedRide._id || selectedRide.id;
-      await axios.post(`http://localhost:5000/api/rides/${rideId}/join`, contactData);
+      await axios.post(`${apiUrl}/api/rides/${rideId}/join`, contactData);
       setSuccessMessage('Success! The ride creator might contact you soon. 🎉');
       setShowSuccessModal(true);
       fetchRides();
