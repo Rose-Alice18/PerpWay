@@ -4504,7 +4504,7 @@ const RevenueTab = ({ deliveries, motorRiders, exportToCSV }) => {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
 
       if (!token) {
         throw new Error('No authentication token found');
