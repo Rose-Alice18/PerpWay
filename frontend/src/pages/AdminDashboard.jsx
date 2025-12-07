@@ -4316,6 +4316,8 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
 // SETTINGS TAB - Configuration Management
 // ============================================
 const SettingsTab = () => {
+  const { toasts, removeToast, showSuccess, showError } = useToast();
+  const { confirmState, showConfirm, hideConfirm } = useConfirm();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
