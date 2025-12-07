@@ -187,7 +187,7 @@ const AdminDashboard = () => {
       )}
 
       {/* Sidebar - Expandable design */}
-      <aside className={`bg-[#1e293b] dark:bg-[#0f172a] flex flex-col py-4 fixed h-full z-50 transition-all duration-300 ${
+      <aside className={`bg-white dark:bg-[#0f172a] border-r border-gray-200 dark:border-gray-800 flex flex-col py-4 fixed h-full z-50 transition-all duration-300 ${
         sidebarOpen ? 'w-56' : 'w-16'
       }`}>
         {/* Logo/Brand */}
@@ -222,7 +222,7 @@ const AdminDashboard = () => {
               } ${
                 activeTab === item.id && !item.isLink
                   ? 'bg-ashesi-primary shadow-lg shadow-ashesi-primary/50 text-white'
-                  : 'bg-gray-700/50 dark:bg-gray-800/50 hover:bg-gray-600/50 dark:hover:bg-gray-700/50 text-gray-300'
+                  : 'bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
               }`}
               title={item.name}
             >
