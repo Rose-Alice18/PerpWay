@@ -444,22 +444,47 @@ const UserDashboard = () => {
                 </div>
               </div>
 
-              {/* Stats Overview */}
+              {/* Account Stats */}
               <div>
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="text-3xl">📊</span> Your Stats
+                  <span className="text-3xl">📊</span> Account Stats
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Deliveries</p>
-                    <p className="text-3xl font-black text-blue-500">{stats.deliveries.total}</p>
-                    <p className="text-xs text-gray-500 mt-1">{stats.deliveries.delivered} completed</p>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Rides</p>
-                    <p className="text-3xl font-black text-green-500">{stats.rides.created + stats.rides.joined}</p>
-                    <p className="text-xs text-gray-500 mt-1">{stats.rides.active} active</p>
-                  </div>
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 shadow-xl text-white"
+                  >
+                    <div className="text-4xl mb-2">📦</div>
+                    <p className="text-3xl font-black">{stats.deliveries.total}</p>
+                    <p className="text-sm text-blue-100">Total Deliveries</p>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: -2 }}
+                    className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl p-6 shadow-xl text-white"
+                  >
+                    <div className="text-4xl mb-2">🚗</div>
+                    <p className="text-3xl font-black">{stats.rides.created + stats.rides.joined}</p>
+                    <p className="text-sm text-green-100">Total Rides</p>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: -2 }}
+                    className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 shadow-xl text-white"
+                  >
+                    <div className="text-4xl mb-2">💰</div>
+                    <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
+                    <p className="text-sm text-orange-100">Total Spent</p>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 shadow-xl text-white"
+                  >
+                    <div className="text-4xl mb-2">⚡</div>
+                    <p className="text-3xl font-black">{stats.rides.active}</p>
+                    <p className="text-sm text-purple-100">Active Rides</p>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -929,80 +954,6 @@ const UserDashboard = () => {
                 )}
               </div>
 
-              {/* Account Stats */}
-              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
-                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="text-2xl">📊</span> Account Stats
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-2xl p-4">
-                    <p className="text-3xl font-black">{stats.deliveries.total}</p>
-                    <p className="text-xs text-blue-100">Total Deliveries</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-500 to-emerald-500 text-white rounded-2xl p-4">
-                    <p className="text-3xl font-black">{stats.rides.created + stats.rides.joined}</p>
-                    <p className="text-xs text-green-100">Total Rides</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-2xl p-4">
-                    <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
-                    <p className="text-xs text-orange-100">Total Spent</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-2xl p-4">
-                    <p className="text-3xl font-black">{stats.rides.active}</p>
-                    <p className="text-xs text-purple-100">Active Rides</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Settings */}
-              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
-                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <span className="text-2xl">⚙️</span> Quick Settings
-                </h3>
-                <div className="space-y-3">
-                  <motion.button
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl p-4 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🔔</span>
-                      <span className="font-bold text-gray-900 dark:text-white">Notifications</span>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl p-4 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🎨</span>
-                      <span className="font-bold text-gray-900 dark:text-white">Appearance</span>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl p-4 transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🔒</span>
-                      <span className="font-bold text-gray-900 dark:text-white">Privacy & Security</span>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </motion.button>
-                </div>
-              </div>
 
               {/* Logout Button */}
               <motion.button
