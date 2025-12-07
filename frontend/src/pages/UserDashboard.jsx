@@ -14,6 +14,7 @@ const UserDashboard = () => {
   const [userInfo, setUserInfo] = useState({});
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isPasswordEditMode, setIsPasswordEditMode] = useState(false);
   const [editedInfo, setEditedInfo] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -159,6 +160,7 @@ const UserDashboard = () => {
       if (response.data.success) {
         setEditedInfo({ ...editedInfo, newPassword: '', confirmPassword: '' });
         setPasswordMessage('Password updated successfully! 🎉');
+        setIsPasswordEditMode(false);
         setTimeout(() => setPasswordMessage(''), 3000);
       }
     } catch (error) {
@@ -172,6 +174,12 @@ const UserDashboard = () => {
 
   const handleCancelPassword = () => {
     setEditedInfo({ ...editedInfo, newPassword: '', confirmPassword: '' });
+    setPasswordMessage('');
+    setIsPasswordEditMode(false);
+  };
+
+  const handleEditPassword = () => {
+    setIsPasswordEditMode(true);
     setPasswordMessage('');
   };
 
@@ -1011,34 +1019,46 @@ const UserDashboard = () => {
               </div>
 
               {/* Password Update Section */}
-              {isEditMode && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl"
-                >
-                  <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
                     <span className="text-2xl">🔒</span> Change Password
                   </h3>
+                  {!isPasswordEditMode && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleEditPassword}
+                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+                    >
+                      <span>✏️</span> Edit
+                    </motion.button>
+                  )}
+                </div>
 
-                  {/* Password Success Message */}
-                  <AnimatePresence>
-                    {passwordMessage && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -20, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0.9 }}
-                        className={`rounded-2xl p-4 shadow-lg mb-4 ${
-                          passwordMessage.includes('success')
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                            : 'bg-gradient-to-r from-red-500 to-pink-500'
-                        } text-white font-bold text-center`}
-                      >
-                        {passwordMessage}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                {/* Password Success Message */}
+                <AnimatePresence>
+                  {passwordMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                      className={`rounded-2xl p-4 shadow-lg mb-4 ${
+                        passwordMessage.includes('success')
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                          : 'bg-gradient-to-r from-red-500 to-pink-500'
+                      } text-white font-bold text-center`}
+                    >
+                      {passwordMessage}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
+                {isPasswordEditMode ? (
                   <div className="space-y-4">
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-4 border-2 border-purple-200 dark:border-purple-700">
                       <label className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">New Password</label>
@@ -1065,33 +1085,40 @@ const UserDashboard = () => {
                     )}
                   </div>
 
-                  {/* Password Save/Cancel Buttons */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex gap-3 mt-6"
-                  >
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleSavePassword}
-                      disabled={passwordLoading || !editedInfo.newPassword}
-                      className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    {/* Password Save/Cancel Buttons */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-3 mt-6"
                     >
-                      {passwordLoading ? '💾 Saving...' : '✅ Save Password'}
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleCancelPassword}
-                      disabled={passwordLoading}
-                      className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ❌ Cancel
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              )}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleSavePassword}
+                        disabled={passwordLoading || !editedInfo.newPassword}
+                        className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {passwordLoading ? '💾 Saving...' : '✅ Save Password'}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleCancelPassword}
+                        disabled={passwordLoading}
+                        className="flex-1 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ❌ Cancel
+                      </motion.button>
+                    </motion.div>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-6 text-center">
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Click <span className="font-bold text-purple-600 dark:text-purple-400">Edit</span> to change your password
+                    </p>
+                  </div>
+                )}
+              </motion.div>
 
               {/* Quick Settings */}
               <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
