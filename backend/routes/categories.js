@@ -80,4 +80,59 @@ router.post('/update-counts', async (req, res) => {
   }
 });
 
+// Seed initial categories (admin only - for initial setup)
+router.post('/seed', async (req, res) => {
+  try {
+    const existingCategories = await Category.find();
+    if (existingCategories.length > 0) {
+      return res.json({ success: true, message: `Database already has ${existingCategories.length} categories. Skipping seed.`, categories: existingCategories });
+    }
+
+    const defaultCategories = [
+      {
+        name: 'Seamstress',
+        description: 'Professional tailoring and clothing alteration services',
+        icon: '🧵',
+        color: '#ec4899'
+      },
+      {
+        name: 'Fruit Vendors',
+        description: 'Fresh fruits and produce vendors',
+        icon: '🍎',
+        color: '#10b981'
+      },
+      {
+        name: 'Nail Tech',
+        description: 'Nail care, manicure, and pedicure services',
+        icon: '💅',
+        color: '#8b5cf6'
+      },
+      {
+        name: 'Barbers',
+        description: 'Professional barbershop and hair cutting services',
+        icon: '💈',
+        color: '#3b82f6'
+      },
+      {
+        name: 'Food Vendors',
+        description: 'Local food vendors and street food',
+        icon: '🍔',
+        color: '#f59e0b'
+      },
+      {
+        name: 'Tailors',
+        description: 'Custom clothing and suit tailoring',
+        icon: '👔',
+        color: '#06b6d4'
+      }
+    ];
+
+    const result = await Category.insertMany(defaultCategories);
+    res.json({ success: true, message: `Successfully seeded ${result.length} categories!`, categories: result });
+  } catch (error) {
+    console.error('Error seeding categories:', error);
+    res.status(500).json({ error: 'Failed to seed categories', message: error.message });
+  }
+});
+
 module.exports = router;
