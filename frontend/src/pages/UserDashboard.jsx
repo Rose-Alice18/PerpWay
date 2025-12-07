@@ -17,6 +17,12 @@ const UserDashboard = () => {
   const [editedInfo, setEditedInfo] = useState({});
   const [saveLoading, setSaveLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [userSettings, setUserSettings] = useState({
+    emailNotifications: true,
+    smsNotifications: false,
+    pushNotifications: true,
+    marketingEmails: false
+  });
   const navigate = useNavigate();
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -120,6 +126,34 @@ const UserDashboard = () => {
 
   const handleInputChange = (field, value) => {
     setEditedInfo({ ...editedInfo, [field]: value });
+  };
+
+  const handleSettingToggle = async (settingName) => {
+    try {
+      const newSettings = {
+        ...userSettings,
+        [settingName]: !userSettings[settingName]
+      };
+
+      setUserSettings(newSettings);
+
+      // Save to backend
+      const response = await axios.put(`${API_URL}/api/auth/users/settings`, {
+        email: userInfo.email,
+        settings: newSettings
+      });
+
+      if (response.data.success) {
+        setSuccessMessage('Settings updated successfully! 🎉');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      // Revert on error
+      setUserSettings({ ...userSettings });
+      setSuccessMessage('Failed to update settings. Please try again.');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -954,6 +988,109 @@ const UserDashboard = () => {
                 )}
               </div>
 
+              {/* Quick Settings */}
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-2xl">⚙️</span> Quick Settings
+                </h3>
+                <div className="space-y-4">
+                  {/* Email Notifications */}
+                  <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">📧</span>
+                      <div>
+                        <p className="font-bold text-gray-900 dark:text-white">Email Notifications</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Get updates via email</p>
+                      </div>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSettingToggle('emailNotifications')}
+                      className={`relative w-14 h-8 rounded-full transition-colors ${
+                        userSettings.emailNotifications ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}
+                    >
+                      <motion.div
+                        animate={{ x: userSettings.emailNotifications ? 24 : 2 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg"
+                      />
+                    </motion.button>
+                  </div>
+
+                  {/* SMS Notifications */}
+                  <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">💬</span>
+                      <div>
+                        <p className="font-bold text-gray-900 dark:text-white">SMS Notifications</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Receive text messages</p>
+                      </div>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSettingToggle('smsNotifications')}
+                      className={`relative w-14 h-8 rounded-full transition-colors ${
+                        userSettings.smsNotifications ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}
+                    >
+                      <motion.div
+                        animate={{ x: userSettings.smsNotifications ? 24 : 2 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg"
+                      />
+                    </motion.button>
+                  </div>
+
+                  {/* Push Notifications */}
+                  <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">🔔</span>
+                      <div>
+                        <p className="font-bold text-gray-900 dark:text-white">Push Notifications</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">App notifications</p>
+                      </div>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSettingToggle('pushNotifications')}
+                      className={`relative w-14 h-8 rounded-full transition-colors ${
+                        userSettings.pushNotifications ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}
+                    >
+                      <motion.div
+                        animate={{ x: userSettings.pushNotifications ? 24 : 2 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg"
+                      />
+                    </motion.button>
+                  </div>
+
+                  {/* Marketing Emails */}
+                  <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">📢</span>
+                      <div>
+                        <p className="font-bold text-gray-900 dark:text-white">Marketing Emails</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Promotions and offers</p>
+                      </div>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSettingToggle('marketingEmails')}
+                      className={`relative w-14 h-8 rounded-full transition-colors ${
+                        userSettings.marketingEmails ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}
+                    >
+                      <motion.div
+                        animate={{ x: userSettings.marketingEmails ? 24 : 2 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg"
+                      />
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
 
               {/* Logout Button */}
               <motion.button

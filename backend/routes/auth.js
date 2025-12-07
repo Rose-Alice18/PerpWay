@@ -380,4 +380,47 @@ router.put('/users/profile', async (req, res) => {
   }
 });
 
+// Update user settings
+router.put('/users/settings', async (req, res) => {
+  try {
+    const { email, settings } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update settings
+    if (settings) {
+      user.settings = { ...user.settings, ...settings };
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Settings updated successfully',
+      settings: user.settings
+    });
+  } catch (error) {
+    console.error('Update settings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update settings'
+    });
+  }
+});
+
 module.exports = router;
