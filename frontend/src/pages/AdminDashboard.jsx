@@ -1473,7 +1473,8 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
     name: '',
     contact: '',
     carType: '',
-    location: ''
+    location: '',
+    availability: 'available'
   });
 
   const filteredDrivers = drivers.filter(driver => {
@@ -1491,7 +1492,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
     try {
       await axios.post(`${API_URL}/api/drivers`, formData);
       setShowAddModal(false);
-      setFormData({ name: '', contact: '', carType: '', location: '' });
+      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
       fetchData();
     } catch (error) {
       console.error('Error adding driver:', error);
@@ -1504,7 +1505,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
       await axios.put(`${API_URL}/api/drivers/${selectedDriver._id}`, formData);
       setShowEditModal(false);
       setSelectedDriver(null);
-      setFormData({ name: '', contact: '', carType: '', location: '' });
+      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
       fetchData();
     } catch (error) {
       console.error('Error updating driver:', error);
@@ -1530,9 +1531,34 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
       name: driver.name,
       contact: driver.contact,
       carType: driver.carType,
-      location: driver.location
+      location: driver.location,
+      availability: driver.availability || 'available'
     });
     setShowEditModal(true);
+  };
+
+  const handleQuickStatusChange = async (driverId, newStatus) => {
+    try {
+      await axios.put(`${API_URL}/api/drivers/${driverId}`, { availability: newStatus });
+      fetchData();
+    } catch (error) {
+      console.error('Error updating driver status:', error);
+      alert('Failed to update driver status: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const getAvailabilityBadge = (availability) => {
+    const statusConfig = {
+      'available': { label: 'AVAILABLE', bg: 'bg-green-100 dark:bg-green-900/20', textColor: 'text-green-800 dark:text-green-400', border: 'border-green-300 dark:border-green-700' },
+      'busy': { label: 'BUSY', bg: 'bg-orange-100 dark:bg-orange-900/20', textColor: 'text-orange-800 dark:text-orange-400', border: 'border-orange-300 dark:border-orange-700' },
+      'offline': { label: 'OFFLINE', bg: 'bg-gray-100 dark:bg-gray-900/20', textColor: 'text-gray-800 dark:text-gray-400', border: 'border-gray-300 dark:border-gray-700' }
+    };
+    const config = statusConfig[availability] || statusConfig['available'];
+    return (
+      <span className={`px-3 py-1 ${config.bg} ${config.textColor} rounded-xl text-xs font-bold border-2 ${config.border}`}>
+        {config.label}
+      </span>
+    );
   };
 
   return (
@@ -1580,7 +1606,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
               <span>Add Driver</span>
             </button>
             <button
-              onClick={() => exportToCSV(filteredDrivers, 'drivers', ['name', 'contact', 'carType', 'location'])}
+              onClick={() => exportToCSV(filteredDrivers, 'drivers', ['name', 'contact', 'carType', 'location', 'availability'])}
               className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm"
             >
               <span className="text-lg">📥</span>
@@ -1636,9 +1662,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                   <div className="bg-green-100 dark:bg-green-900/20 rounded-xl p-3">
                     <span className="text-2xl">🚗</span>
                   </div>
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 rounded-xl text-xs font-bold border-2 border-green-300 dark:border-green-700">
-                    ACTIVE
-                  </span>
+                  {getAvailabilityBadge(driver.availability || 'available')}
                 </div>
 
                 <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{driver.name}</h3>
@@ -1658,19 +1682,33 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                   </p>
                 </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => openEditModal(driver)}
-                    className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all text-sm"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(driver._id)}
-                    className="flex-1 px-3 py-2 bg-ghana-red text-white rounded-xl font-semibold hover:bg-ghana-red/90 transition-all text-sm"
-                  >
-                    🗑️ Delete
-                  </button>
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Status</label>
+                    <select
+                      value={driver.availability || 'available'}
+                      onChange={(e) => handleQuickStatusChange(driver._id, e.target.value)}
+                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-semibold"
+                    >
+                      <option value="available">✅ Available</option>
+                      <option value="busy">⏳ Busy</option>
+                      <option value="offline">⛔ Offline</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(driver)}
+                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all text-sm"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(driver._id)}
+                      className="flex-1 px-3 py-2 bg-ghana-red text-white rounded-xl font-semibold hover:bg-ghana-red/90 transition-all text-sm"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))
@@ -1689,13 +1727,14 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Contact</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Car Type</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Location</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Status</th>
                   <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 dark:text-gray-300">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredDrivers.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                       No drivers found matching your filters
                     </td>
                   </tr>
@@ -1718,6 +1757,17 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{driver.contact}</td>
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{driver.carType}</td>
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{driver.location}</td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={driver.availability || 'available'}
+                          onChange={(e) => handleQuickStatusChange(driver._id, e.target.value)}
+                          className="px-3 py-1.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs font-semibold"
+                        >
+                          <option value="available">✅ Available</option>
+                          <option value="busy">⏳ Busy</option>
+                          <option value="offline">⛔ Offline</option>
+                        </select>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
                           <button
@@ -1795,6 +1845,18 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                   className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Availability Status</label>
+                <select
+                  value={formData.availability}
+                  onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
+                >
+                  <option value="available">✅ Available</option>
+                  <option value="busy">⏳ Busy</option>
+                  <option value="offline">⛔ Offline</option>
+                </select>
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -1807,7 +1869,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setFormData({ name: '', contact: '', carType: '', location: '' });
+                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
                 }}
                 className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
               >
@@ -1865,6 +1927,18 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                   className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Availability Status</label>
+                <select
+                  value={formData.availability}
+                  onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
+                >
+                  <option value="available">✅ Available</option>
+                  <option value="busy">⏳ Busy</option>
+                  <option value="offline">⛔ Offline</option>
+                </select>
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -1878,7 +1952,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                 onClick={() => {
                   setShowEditModal(false);
                   setSelectedDriver(null);
-                  setFormData({ name: '', contact: '', carType: '', location: '' });
+                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
                 }}
                 className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
               >
