@@ -161,7 +161,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-1">
             {navLinks.map((link, index) => (
               <motion.div
                 key={link.path}
@@ -176,7 +176,7 @@ const Navbar = () => {
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden ${
+                    className={`px-3 py-2 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden ${
                       isActive(link.path)
                         ? 'bg-ashesi-primary text-white shadow-lg'
                         : 'text-gray-700 dark:text-gray-200'
@@ -208,8 +208,9 @@ const Navbar = () => {
                       />
                     )}
 
-                    <span className="relative z-10 flex items-center gap-2">
+                    <span className="relative z-10 flex items-center gap-1.5">
                       <motion.span
+                        className="text-sm"
                         animate={{
                           rotate: isActive(link.path) ? [0, 10, -10, 0] : 0,
                         }}
@@ -244,7 +245,7 @@ const Navbar = () => {
                 onClick={() => setShowMoreMenu(!showMoreMenu)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden flex items-center gap-2 ${
+                className={`px-3 py-2 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden flex items-center gap-1.5 ${
                   showMoreMenu || moreLinks.some(link => isActive(link.path))
                     ? 'bg-ashesi-primary text-white shadow-lg'
                     : 'text-gray-700 dark:text-gray-200'
@@ -257,10 +258,10 @@ const Navbar = () => {
                   />
                 )}
 
-                <span className="relative z-10 flex items-center gap-2 text-sm">
+                <span className="relative z-10 flex items-center gap-1 text-sm">
                   <span>More</span>
                   <motion.svg
-                    className="w-4 h-4"
+                    className="w-3.5 h-3.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -329,7 +330,7 @@ const Navbar = () => {
               whileHover={{ scale: 1.1, rotate: 180 }}
               whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="ml-2 p-2.5 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:shadow-lg transition-all text-xl relative overflow-hidden group"
+              className="ml-1 p-2 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:shadow-lg transition-all text-lg relative overflow-hidden group"
               title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               <motion.div
@@ -349,7 +350,7 @@ const Navbar = () => {
 
             {/* User Menu or Sign In Button */}
             {isAuthenticated ? (
-              <div className="flex items-center gap-2 ml-4">
+              <div className="flex items-center gap-1.5 ml-2">
                 {/* Dashboard Button */}
                 <Link
                   to={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
@@ -357,12 +358,12 @@ const Navbar = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-3 py-2 rounded-full bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium hover:shadow-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium hover:shadow-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
                   >
-                    <div className="w-7 h-7 rounded-full bg-ashesi-primary/10 dark:bg-ashesi-primary/20 flex items-center justify-center text-xs font-bold">
+                    <div className="w-6 h-6 rounded-full bg-ashesi-primary/10 dark:bg-ashesi-primary/20 flex items-center justify-center text-xs font-bold">
                       {userRole === 'admin' ? '👑' : userName.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-sm font-semibold max-w-[80px] truncate">{userName}</span>
+                    <span className="text-sm font-semibold max-w-[70px] truncate">{userName}</span>
                   </motion.button>
                 </Link>
 
@@ -371,11 +372,11 @@ const Navbar = () => {
                   onClick={handleLogout}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white dark:bg-gray-700 text-ghana-red dark:text-red-400 font-medium hover:shadow-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white dark:bg-gray-700 text-ghana-red dark:text-red-400 font-medium hover:shadow-lg transition-all duration-200 border border-gray-300 dark:border-gray-600"
                   title="Sign Out"
                 >
                   <span className="text-sm">🚪</span>
-                  <span className="text-sm font-semibold">Sign Out</span>
+                  <span className="text-sm font-semibold">Logout</span>
                 </motion.button>
               </div>
             ) : (
