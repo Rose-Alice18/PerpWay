@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import FloatingDashboard from '../components/FloatingDashboard';
 
 const Marketplace = () => {
   const businesses = [
@@ -149,6 +150,9 @@ const Marketplace = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Floating Dashboard Button */}
+      <FloatingDashboard />
     </div>
   );
 };

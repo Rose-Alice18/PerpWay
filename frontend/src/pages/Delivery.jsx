@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import FloatingDashboard from '../components/FloatingDashboard';
 
 const Delivery = () => {
   const [formData, setFormData] = useState({
@@ -694,6 +695,9 @@ const Delivery = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Floating Dashboard Button */}
+      <FloatingDashboard />
     </div>
   );
 };
