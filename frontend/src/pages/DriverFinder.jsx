@@ -11,6 +11,7 @@ const DriverFinder = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [revealedContacts, setRevealedContacts] = useState(new Set());
   const [filter, setFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
   // Fetch drivers from backend
   useEffect(() => {
@@ -107,7 +108,7 @@ const DriverFinder = () => {
           </p>
 
           {/* Filter Buttons */}
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-3 mb-6">
             {['all', 'available', 'busy', 'offline'].map((status) => (
               <motion.button
                 key={status}
@@ -124,39 +125,68 @@ const DriverFinder = () => {
               </motion.button>
             ))}
           </div>
+
+          {/* View Toggle */}
+          <div className="flex justify-center gap-2 bg-white dark:bg-gray-800 rounded-full p-1 w-fit mx-auto shadow-md">
+            <motion.button
+              onClick={() => setViewMode('cards')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                viewMode === 'cards'
+                  ? 'bg-ashesi-primary text-white shadow-md'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              <span>📁</span> Cards
+            </motion.button>
+            <motion.button
+              onClick={() => setViewMode('table')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
+                viewMode === 'table'
+                  ? 'bg-ashesi-primary text-white shadow-md'
+                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              <span>📋</span> Table
+            </motion.button>
+          </div>
         </motion.div>
 
-        {/* Drivers Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredDrivers.map((driver, index) => {
-              const isRevealed = revealedContacts.has(driver.id);
+        {/* Cards View */}
+        {viewMode === 'cards' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredDrivers.map((driver, index) => {
+                const isRevealed = revealedContacts.has(driver.id);
 
-              return (
-                <motion.div
-                  key={driver.id}
-                  layout
-                  initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 100,
-                    damping: 15,
-                    delay: index * 0.08
-                  }}
-                  whileHover={{
-                    y: -12,
-                    scale: 1.02,
-                    rotate: [0, 1, -1, 0],
-                    transition: { type: 'spring', stiffness: 300, damping: 20 }
-                  }}
-                  className="card relative overflow-hidden group"
-                >
+                return (
+                  <motion.div
+                    key={driver.id}
+                    layout
+                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 100,
+                      damping: 15,
+                      delay: index * 0.08
+                    }}
+                    whileHover={{
+                      y: -12,
+                      scale: 1.02,
+                      rotate: [0, 1, -1, 0],
+                      transition: { type: 'spring', stiffness: 300, damping: 20 }
+                    }}
+                    className="card relative overflow-hidden group"
+                  >
                 {/* Status Badge */}
                 <motion.div
                   className="absolute top-4 right-4 z-10"
@@ -284,11 +314,197 @@ const DriverFinder = () => {
                     "{driver.note}"
                   </p>
                 )}
-              </motion.div>
-            );
-          })}
-          </AnimatePresence>
-        </motion.div>
+                </motion.div>
+              );
+            })}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* Table View */}
+        {viewMode === 'table' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden"
+          >
+            {/* Mobile: Card-like rows */}
+            <div className="block md:hidden">
+              {filteredDrivers.map((driver, index) => {
+                const isRevealed = revealedContacts.has(driver.id);
+                return (
+                  <motion.div
+                    key={driver.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="border-b border-gray-200 dark:border-gray-700 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="text-3xl">{driver.photo || '👨‍✈️'}</div>
+                        <div>
+                          <h3 className="font-bold text-gray-900 dark:text-white">{driver.name}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{driver.carType}</p>
+                        </div>
+                      </div>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          driver.availability === 'available'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                            : driver.availability === 'busy'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        }`}
+                      >
+                        {driver.availability}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                      <p className="text-gray-600 dark:text-gray-400">
+                        <span className="font-semibold">Location:</span> {driver.location}
+                      </p>
+                      {driver.rating && (
+                        <p className="text-yellow-500 font-semibold">⭐ {driver.rating}/5.0</p>
+                      )}
+                    </div>
+                    {isRevealed ? (
+                      <div className="bg-green-50 dark:bg-green-900/20 border border-green-500 dark:border-green-600 rounded-lg p-3">
+                        <p className="text-green-800 dark:text-green-300 font-semibold text-sm mb-1">Contact:</p>
+                        <a href={`tel:${driver.contact}`} className="text-green-600 dark:text-green-400 font-bold block">
+                          📞 {driver.contact}
+                        </a>
+                        {driver.whatsapp && (
+                          <a
+                            href={`https://wa.me/${driver.whatsapp}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 dark:text-green-400 font-semibold text-sm mt-1 block"
+                          >
+                            💬 WhatsApp
+                          </a>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleViewContact(driver)}
+                        disabled={driver.availability === 'offline'}
+                        className="w-full btn-primary text-sm py-2"
+                      >
+                        View Contact
+                      </button>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Desktop: Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Driver
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Car Type
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Location
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Rating
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredDrivers.map((driver, index) => {
+                    const isRevealed = revealedContacts.has(driver.id);
+                    return (
+                      <motion.tr
+                        key={driver.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="text-2xl">{driver.photo || '👨‍✈️'}</div>
+                            <div className="font-semibold text-gray-900 dark:text-white">{driver.name}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
+                          {driver.carType}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
+                          {driver.location}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {driver.rating ? (
+                            <span className="text-yellow-500 font-semibold">⭐ {driver.rating}/5.0</span>
+                          ) : (
+                            <span className="text-gray-400">N/A</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              driver.availability === 'available'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                                : driver.availability === 'busy'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                            }`}
+                          >
+                            {driver.availability}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {isRevealed ? (
+                            <div className="space-y-1">
+                              <a
+                                href={`tel:${driver.contact}`}
+                                className="text-green-600 dark:text-green-400 font-bold hover:underline block"
+                              >
+                                📞 {driver.contact}
+                              </a>
+                              {driver.whatsapp && (
+                                <a
+                                  href={`https://wa.me/${driver.whatsapp}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-green-600 dark:text-green-400 font-semibold text-sm hover:underline block"
+                                >
+                                  💬 WhatsApp
+                                </a>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleViewContact(driver)}
+                              disabled={driver.availability === 'offline'}
+                              className="px-4 py-2 bg-ashesi-primary text-white rounded-lg font-semibold hover:bg-ashesi-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              View Contact
+                            </button>
+                          )}
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        )}
 
         {/* No Results */}
         {filteredDrivers.length === 0 && (
