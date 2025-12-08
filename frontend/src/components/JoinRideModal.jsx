@@ -43,19 +43,19 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
-        className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="text-center mb-6">
           <div className="text-5xl mb-3">🚙</div>
-          <h2 className="font-display text-2xl font-bold mb-2">
+          <h2 className="font-display text-2xl font-bold mb-2 dark:text-white">
             Join This Ride!
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Going to <span className="font-semibold text-ashesi-primary">{ride.destination}</span>
           </p>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             {new Date(ride.departureDate).toLocaleDateString('en-GB', {
               weekday: 'short',
               day: 'numeric',
@@ -68,7 +68,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Your Name *
             </label>
             <input
@@ -84,7 +84,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Phone Number *
             </label>
             <input
@@ -97,14 +97,14 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
               required
               pattern="[0-9]{10}"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               The ride creator will call/text you
             </p>
           </div>
 
           {/* Seats Needed */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               How Many Seats Do You Need? * 💺
             </label>
             <input
@@ -117,7 +117,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
               className="input-field"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span className="font-semibold text-ghana-red">Available: {ride.availableSeats} {ride.availableSeats === 1 ? 'seat' : 'seats'}</span>
               <br />
               You selected: <strong>{formData.seatsNeeded}</strong> {formData.seatsNeeded === 1 ? 'seat' : 'seats'}
@@ -129,7 +129,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
 
           {/* WhatsApp */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               WhatsApp Number (Optional)
             </label>
             <input
@@ -141,14 +141,14 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
               className="input-field"
               pattern="[0-9]{10}"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               For quick chats. Leave blank if same as phone number
             </p>
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Email (Optional)
             </label>
             <input
@@ -159,14 +159,14 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
               placeholder="your.email@example.com"
               className="input-field"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               For confirmation messages
             </p>
           </div>
 
           {/* Info Box */}
-          <div className="bg-ghana-yellow/10 border-2 border-ghana-yellow rounded-lg p-4">
-            <p className="text-sm text-gray-700">
+          <div className="bg-ghana-yellow/10 dark:bg-ghana-yellow/20 border-2 border-ghana-yellow rounded-lg p-4">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               <span className="font-semibold">📞 Note:</span> The ride creator will see your
               contact details and reach out to you directly. Make sure your phone is reachable!
             </p>
@@ -177,7 +177,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+              className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white transition-all"
               disabled={submitting}
             >
               Cancel
