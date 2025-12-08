@@ -64,7 +64,7 @@ const Delivery = () => {
       id: 'weekly-station',
       name: 'Weekly Station Pickup',
       icon: '📦',
-      description: 'Deliver your item to our station at Kwabenya, we will bring it to campus for you weekly',
+      description: 'Deliver your item to our station at Kwabenya to be stored, we will bring it to campus for you on a weekday',
       price: `GH₵${pricing.weeklyStation}`,
     },
   ];
@@ -486,7 +486,11 @@ const Delivery = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField('dropoffPoint')}
                         onBlur={() => setFocusedField(null)}
-                        placeholder="e.g., Ashesi Campus - Volta Hall"
+                        placeholder={
+                          formData.deliveryType === 'weekly-station'
+                            ? 'e.g., Kwabenya Community Hospital Goil Station'
+                            : 'e.g., Ashesi Campus - Volta Hall'
+                        }
                         className={`input-field ${
                           errors.dropoffPoint ? 'border-red-500 dark:border-red-500' : ''
                         } ${
