@@ -488,7 +488,7 @@ const Delivery = () => {
                         onBlur={() => setFocusedField(null)}
                         placeholder={
                           formData.deliveryType === 'weekly-station'
-                            ? 'e.g., Kwabenya Community Hospital Goil Station'
+                            ? 'Our drop-off: Kwabenya Community Hospital - The Goil Station'
                             : 'e.g., Ashesi Campus - Volta Hall'
                         }
                         className={`input-field ${
