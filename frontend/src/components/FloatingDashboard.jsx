@@ -126,7 +126,7 @@ const FloatingDashboard = () => {
               }}
             />
 
-            {/* Main button with breathing animation */}
+            {/* Main button with breathing animation - Desktop & Mobile unified */}
             <motion.div
               animate={{
                 scale: [1, 1.05, 1],
@@ -141,7 +141,7 @@ const FloatingDashboard = () => {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-3xl shadow-2xl px-6 py-4 flex items-center gap-3 border-2 border-white/30"
+              className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white rounded-3xl shadow-2xl px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 border-2 border-white/30"
             >
               {/* Animated shine overlay */}
               <motion.div
@@ -170,7 +170,7 @@ const FloatingDashboard = () => {
               >
                 📊
               </motion.div>
-              <div className="hidden sm:block relative z-10">
+              <div className="relative z-10">
                 <motion.p
                   animate={{
                     opacity: [1, 0.8, 1]
@@ -180,11 +180,11 @@ const FloatingDashboard = () => {
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="font-black text-sm"
+                  className="font-black text-xs sm:text-sm"
                 >
                   My Dashboard
                 </motion.p>
-                <p className="text-xs opacity-90 font-semibold">Click to view</p>
+                <p className="hidden sm:block text-xs opacity-90 font-semibold">Click to view</p>
               </div>
 
               {/* Pulsing notification badge */}
@@ -202,52 +202,6 @@ const FloatingDashboard = () => {
               >
                 !
               </motion.div>
-            </motion.div>
-
-            {/* Mobile version - compact with breathing and text */}
-            <motion.div
-              animate={{
-                scale: [1, 1.08, 1],
-                rotate: [0, 5, -5, 0],
-                boxShadow: [
-                  "0 8px 30px rgba(59, 130, 246, 0.4)",
-                  "0 12px 45px rgba(168, 85, 247, 0.6)",
-                  "0 8px 30px rgba(236, 72, 153, 0.4)"
-                ]
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="sm:hidden absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-3xl px-4 py-3 flex flex-col items-center justify-center shadow-2xl border-2 border-white/40 min-w-[90px]"
-            >
-              <motion.span
-                animate={{
-                  rotate: [0, 360],
-                  scale: [1, 1.15, 1]
-                }}
-                transition={{
-                  rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                }}
-                className="text-2xl mb-1"
-              >
-                📊
-              </motion.span>
-              <motion.p
-                animate={{
-                  opacity: [1, 0.8, 1]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="text-[9px] font-black text-white leading-tight text-center"
-              >
-                Dashboard
-              </motion.p>
             </motion.div>
           </motion.div>
           </div>
