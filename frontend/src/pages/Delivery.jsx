@@ -18,9 +18,9 @@ const Delivery = () => {
   const [focusedField, setFocusedField] = useState(null);
   const [errors, setErrors] = useState({});
   const [pricing, setPricing] = useState({
-    instant: 10,
-    nextDay: 7,
-    weeklyStation: 5,
+    instant: 70,
+    nextDay: 50,
+    weeklyStation: 35,
   });
 
   // Fetch pricing from Settings API
@@ -31,9 +31,9 @@ const Delivery = () => {
         const response = await axios.get(`${apiUrl}/api/settings`);
         if (response.data && response.data.pricing) {
           setPricing({
-            instant: response.data.pricing.instant || 10,
-            nextDay: response.data.pricing.nextDay || 7,
-            weeklyStation: response.data.pricing.weeklyStation || 5,
+            instant: response.data.pricing.instant || 70,
+            nextDay: response.data.pricing.nextDay || 50,
+            weeklyStation: response.data.pricing.weeklyStation || 35,
           });
         }
       } catch (error) {
@@ -64,7 +64,7 @@ const Delivery = () => {
       id: 'weekly-station',
       name: 'Weekly Station Pickup',
       icon: '📦',
-      description: 'Pickup from campus station weekly',
+      description: 'Deliver your item to our station at Kwabenya, we will bring it to campus for you weekly',
       price: `GH₵${pricing.weeklyStation}`,
     },
   ];
