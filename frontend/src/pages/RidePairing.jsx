@@ -223,7 +223,7 @@ const RidePairing = () => {
                 }`}
               >
                 {f === 'month' ? 'This Month' : f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
+              </motion.button>
             ))}
 
             {/* Custom Range Button */}
