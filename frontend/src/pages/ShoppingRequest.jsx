@@ -82,6 +82,8 @@ const ShoppingRequest = () => {
 
     setSubmitting(true);
 
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('userEmail', userEmail);
@@ -93,7 +95,6 @@ const ShoppingRequest = () => {
       formDataToSend.append('estimatedPrice', formData.estimatedPrice);
       formDataToSend.append('productImage', imageFile);
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       await axios.post(`${apiUrl}/api/shopping/create`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
