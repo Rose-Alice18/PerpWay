@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const FloatingDashboard = () => {
@@ -8,7 +8,6 @@ const FloatingDashboard = () => {
   const [isDragged, setIsDragged] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const authStatus = localStorage.getItem('userAuthenticated');
@@ -53,15 +52,6 @@ const FloatingDashboard = () => {
   // Don't show if not authenticated
   if (!isAuthenticated) {
     console.log('FloatingDashboard - Not authenticated, returning null');
-    return null;
-  }
-
-  // Don't show if already on a dashboard page
-  const isDashboardPage = location.pathname === '/dashboard' ||
-                          location.pathname.startsWith('/admin/dashboard');
-
-  if (isDashboardPage) {
-    console.log('FloatingDashboard - Already on dashboard page, hiding');
     return null;
   }
 

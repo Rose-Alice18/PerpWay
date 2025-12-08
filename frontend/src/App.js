@@ -50,8 +50,8 @@ function AppContent() {
       </main>
       {!isAdminRoute && !isUserDashboardRoute && !isRiderUpdateRoute && <Footer />}
 
-      {/* Floating Dashboard - appears on all pages when user is signed in */}
-      <FloatingDashboard />
+      {/* Floating Dashboard - appears on all pages except dashboards when user is signed in */}
+      {!isAdminRoute && !isUserDashboardRoute && <FloatingDashboard />}
     </div>
   );
 }
