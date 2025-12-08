@@ -171,6 +171,29 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
               Contact Information Visibility 🔒
             </label>
             <div className="space-y-3">
+              {/* Public Option */}
+              <label className="flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                style={{
+                  borderColor: formData.contactVisibility === 'public' ? '#8B0000' : '',
+                  backgroundColor: formData.contactVisibility === 'public' ? 'rgba(139, 0, 0, 0.05)' : ''
+                }}
+              >
+                <input
+                  type="radio"
+                  name="contactVisibility"
+                  value="public"
+                  checked={formData.contactVisibility === 'public'}
+                  onChange={handleChange}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900 dark:text-white">🌐 Public</div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    All passengers and ride creator can see your contact details.
+                  </p>
+                </div>
+              </label>
+
               {/* Private Option */}
               <label className="flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 style={{
@@ -192,30 +215,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
                     <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full font-semibold">Recommended</span>
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    Only the ride creator can see your contact details. Other passengers won't see your phone number.
-                  </p>
-                </div>
-              </label>
-
-              {/* Public Option */}
-              <label className="flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                style={{
-                  borderColor: formData.contactVisibility === 'public' ? '#8B0000' : '',
-                  backgroundColor: formData.contactVisibility === 'public' ? 'rgba(139, 0, 0, 0.05)' : ''
-                }}
-              >
-                <input
-                  type="radio"
-                  name="contactVisibility"
-                  value="public"
-                  checked={formData.contactVisibility === 'public'}
-                  onChange={handleChange}
-                  className="mt-1"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900 dark:text-white">🌐 Public</div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    All passengers and the ride creator can see your contact details for coordination.
+                    Only ride creator sees your contact. Others won't see your number.
                   </p>
                 </div>
               </label>
@@ -225,8 +225,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
           {/* Info Box */}
           <div className="bg-ghana-yellow/10 dark:bg-ghana-yellow/20 border-2 border-ghana-yellow rounded-lg p-4">
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              <span className="font-semibold">📞 Note:</span> The ride creator will always see your
-              contact details and reach out to you directly. Make sure your phone is reachable!
+              <span className="font-semibold">📞 Note:</span> Ride creator always sees your contact to coordinate pickup.
             </p>
           </div>
 
