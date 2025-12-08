@@ -44,6 +44,7 @@ const AdminDashboard = () => {
   const [motorRiders, setMotorRiders] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
+  const [shoppingRequests, setShoppingRequests] = useState([]);
 
   // Filter states
   const [loading, setLoading] = useState(true);
@@ -126,6 +127,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchShoppingRequests = async () => {
+    try {
+      const shoppingRes = await axios.get(`${API_URL}/api/shopping/admin/all`, getAuthHeaders());
+      setShoppingRequests(shoppingRes.data);
+    } catch (error) {
+      console.error('Error fetching shopping requests:', error);
+    }
+  };
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -137,7 +147,8 @@ const AdminDashboard = () => {
         fetchRides(),
         fetchVendors(),
         fetchMotorRiders(),
-        fetchCategories()
+        fetchCategories(),
+        fetchShoppingRequests()
       ]);
 
       // Get users from localStorage (since we're using localStorage auth)
@@ -208,6 +219,7 @@ const AdminDashboard = () => {
     { id: 'home', name: 'Home', icon: '🏠', color: 'text-gray-600', isLink: true, path: '/' },
     { id: 'overview', name: 'Overview', icon: '📊', color: 'text-blue-600' },
     { id: 'deliveries', name: 'Deliveries', icon: '📦', color: 'text-indigo-600' },
+    { id: 'shopping', name: 'Shopping Requests', icon: '🛒', color: 'text-yellow-600' },
     { id: 'revenue', name: 'Revenue', icon: '💰', color: 'text-emerald-600' },
     { id: 'drivers', name: 'Drivers', icon: '🚗', color: 'text-green-600' },
     { id: 'rides', name: 'Rides', icon: '🚙', color: 'text-purple-600' },
@@ -353,6 +365,7 @@ const AdminDashboard = () => {
             >
               {activeTab === 'overview' && <OverviewTab stats={stats} deliveries={deliveries} drivers={drivers} rides={rides} vendors={vendors} />}
               {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
+              {activeTab === 'shopping' && <ShoppingTab shoppingRequests={shoppingRequests} fetchData={fetchShoppingRequests} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
               {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} />}
               {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} />}
@@ -5879,6 +5892,554 @@ const SettingsTab = () => {
         cancelText={confirmState.cancelText}
         type={confirmState.type}
       />
+    </div>
+  );
+};
+
+// Shopping Tab Component
+const ShoppingTab = ({ shoppingRequests, fetchData, motorRiders, exportToCSV, showSuccess, showError }) => {
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [showAuthorizeModal, setShowAuthorizeModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedRiderId, setSelectedRiderId] = useState('');
+  const [actualPrice, setActualPrice] = useState('');
+  const [adminNotes, setAdminNotes] = useState('');
+  const [viewMode, setViewMode] = useState('table');
+
+  const filteredRequests = shoppingRequests.filter(request => {
+    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+    const matchesSearch = !searchTerm ||
+      request.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.shopLocations?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  const statusColors = {
+    pending: { bg: 'bg-yellow-100 dark:bg-yellow-900/20', text: 'text-yellow-800 dark:text-yellow-400', border: 'border-yellow-300' },
+    authorized: { bg: 'bg-blue-100 dark:bg-blue-900/20', text: 'text-blue-800 dark:text-blue-400', border: 'border-blue-300' },
+    assigned: { bg: 'bg-purple-100 dark:bg-purple-900/20', text: 'text-purple-800 dark:text-purple-400', border: 'border-purple-300' },
+    purchased: { bg: 'bg-indigo-100 dark:bg-indigo-900/20', text: 'text-indigo-800 dark:text-indigo-400', border: 'border-indigo-300' },
+    delivered: { bg: 'bg-green-100 dark:bg-green-900/20', text: 'text-green-800 dark:text-green-400', border: 'border-green-300' },
+    cancelled: { bg: 'bg-red-100 dark:bg-red-900/20', text: 'text-red-800 dark:text-red-400', border: 'border-red-300' },
+  };
+
+  const handleAuthorizeRequest = async () => {
+    if (!selectedRequest || !actualPrice) {
+      showError('Please enter the actual price');
+      return;
+    }
+
+    try {
+      await axios.put(`${API_URL}/api/shopping/${selectedRequest._id}/status`, {
+        status: 'authorized',
+        actualPrice: parseFloat(actualPrice),
+        adminNotes: adminNotes
+      }, getAuthHeaders());
+
+      showSuccess('Shopping request authorized successfully!');
+      setShowAuthorizeModal(false);
+      setSelectedRequest(null);
+      setActualPrice('');
+      setAdminNotes('');
+      fetchData();
+    } catch (error) {
+      console.error('Error authorizing request:', error);
+      showError('Failed to authorize request: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handleAssignRider = async () => {
+    if (!selectedRiderId || !selectedRequest) {
+      showError('Please select a rider');
+      return;
+    }
+
+    const rider = motorRiders.find(r => r._id === selectedRiderId);
+
+    try {
+      await axios.put(`${API_URL}/api/shopping/${selectedRequest._id}/status`, {
+        status: 'assigned',
+        assignedTo: {
+          id: rider._id,
+          name: rider.name,
+          contact: rider.phone
+        }
+      }, getAuthHeaders());
+
+      showSuccess(`Shopping request assigned to ${rider.name}!`);
+      setShowAssignModal(false);
+      setSelectedRequest(null);
+      setSelectedRiderId('');
+      fetchData();
+    } catch (error) {
+      console.error('Error assigning request:', error);
+      showError('Failed to assign request: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handleUpdateStatus = async (requestId, newStatus) => {
+    try {
+      await axios.put(`${API_URL}/api/shopping/${requestId}/status`, {
+        status: newStatus
+      }, getAuthHeaders());
+
+      showSuccess(`Status updated to ${newStatus}!`);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating status:', error);
+      showError('Failed to update status: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handleDeleteRequest = async (requestId) => {
+    try {
+      await axios.delete(`${API_URL}/api/shopping/${requestId}`, getAuthHeaders());
+      showSuccess('Shopping request deleted!');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting request:', error);
+      showError('Failed to delete request: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const stats = {
+    total: shoppingRequests.length,
+    pending: shoppingRequests.filter(r => r.status === 'pending').length,
+    authorized: shoppingRequests.filter(r => r.status === 'authorized').length,
+    assigned: shoppingRequests.filter(r => r.status === 'assigned').length,
+    purchased: shoppingRequests.filter(r => r.status === 'purchased').length,
+    delivered: shoppingRequests.filter(r => r.status === 'delivered').length,
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[
+          { label: 'Total', value: stats.total, color: 'from-gray-500 to-gray-600', icon: '🛒' },
+          { label: 'Pending', value: stats.pending, color: 'from-yellow-500 to-yellow-600', icon: '⏳' },
+          { label: 'Authorized', value: stats.authorized, color: 'from-blue-500 to-blue-600', icon: '✅' },
+          { label: 'Assigned', value: stats.assigned, color: 'from-purple-500 to-purple-600', icon: '👤' },
+          { label: 'Purchased', value: stats.purchased, color: 'from-indigo-500 to-indigo-600', icon: '🛍️' },
+          { label: 'Delivered', value: stats.delivered, color: 'from-green-500 to-green-600', icon: '✨' },
+        ].map((stat) => (
+          <motion.div
+            key={stat.label}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className={`bg-gradient-to-br ${stat.color} rounded-2xl p-4 shadow-lg`}
+          >
+            <div className="text-3xl mb-2">{stat.icon}</div>
+            <div className="text-2xl font-black text-white">{stat.value}</div>
+            <div className="text-sm text-white/80">{stat.label}</div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Filters and Search */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
+        <div className="flex flex-col md:flex-row gap-4 mb-4">
+          {/* Search */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search by product, customer, or shop..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          >
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="authorized">Authorized</option>
+            <option value="assigned">Assigned</option>
+            <option value="purchased">Purchased</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+
+          {/* View Toggle */}
+          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 w-full sm:w-auto">
+            <button
+              onClick={() => setViewMode('card')}
+              className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-semibold transition-all ${
+                viewMode === 'card'
+                  ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
+                  : 'text-gray-600 dark:text-gray-300'
+              }`}
+            >
+              🗂️ Cards
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`flex-1 sm:flex-none px-6 py-2 rounded-lg font-semibold transition-all ${
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
+                  : 'text-gray-600 dark:text-gray-300'
+              }`}
+            >
+              📋 Table
+            </button>
+          </div>
+
+          {/* Export Button */}
+          <button
+            onClick={() => exportToCSV(filteredRequests, 'shopping_requests', ['productName', 'userName', 'userContact', 'shopLocations', 'status', 'actualPrice'])}
+            className="px-6 py-3 bg-ghana-green text-white rounded-xl font-semibold hover:bg-ghana-green/90 transition-all shadow-lg whitespace-nowrap"
+          >
+            📥 Export CSV
+          </button>
+        </div>
+      </div>
+
+      {/* Requests List/Table */}
+      {viewMode === 'card' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredRequests.map((request, index) => (
+            <motion.div
+              key={request._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all"
+            >
+              {/* Product Image */}
+              <div className="mb-4">
+                <img
+                  src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}/${request.productImage}`}
+                  alt={request.productName}
+                  className="w-full h-48 object-cover rounded-xl"
+                />
+              </div>
+
+              {/* Product Info */}
+              <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{request.productName}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{request.productDescription}</p>
+
+              {/* Status Badge */}
+              <div className="mb-3">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColors[request.status]?.bg} ${statusColors[request.status]?.text}`}>
+                  {request.status.toUpperCase()}
+                </span>
+              </div>
+
+              {/* Customer Info */}
+              <div className="space-y-2 text-sm mb-4">
+                <p className="text-gray-700 dark:text-gray-300">
+                  <span className="font-bold">👤 Customer:</span> {request.userName}
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  <span className="font-bold">📞 Contact:</span> {request.userContact}
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  <span className="font-bold">🏪 Shop:</span> {request.shopLocations}
+                </p>
+                {request.estimatedPrice && (
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <span className="font-bold">💵 Est. Price:</span> GH₵{request.estimatedPrice.toFixed(2)}
+                  </p>
+                )}
+                {request.actualPrice && (
+                  <p className="text-gray-900 dark:text-white font-bold">
+                    💰 Actual: GH₵{request.actualPrice.toFixed(2)}
+                  </p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 flex-wrap">
+                {request.status === 'pending' && (
+                  <button
+                    onClick={() => {
+                      setSelectedRequest(request);
+                      setShowAuthorizeModal(true);
+                    }}
+                    className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition-all"
+                  >
+                    ✅ Authorize
+                  </button>
+                )}
+                {request.status === 'authorized' && (
+                  <button
+                    onClick={() => {
+                      setSelectedRequest(request);
+                      setShowAssignModal(true);
+                    }}
+                    className="flex-1 px-3 py-2 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600 transition-all"
+                  >
+                    👤 Assign
+                  </button>
+                )}
+                {request.status === 'assigned' && (
+                  <button
+                    onClick={() => handleUpdateStatus(request._id, 'purchased')}
+                    className="flex-1 px-3 py-2 bg-indigo-500 text-white rounded-lg text-sm font-semibold hover:bg-indigo-600 transition-all"
+                  >
+                    🛍️ Purchased
+                  </button>
+                )}
+                {request.status === 'purchased' && (
+                  <button
+                    onClick={() => handleUpdateStatus(request._id, 'delivered')}
+                    className="flex-1 px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition-all"
+                  >
+                    ✨ Delivered
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDeleteRequest(request._id)}
+                  className="px-3 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-all"
+                >
+                  🗑️
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Image</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Product</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Customer</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Shop</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Price</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredRequests.map((request) => (
+                  <tr key={request._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <img
+                        src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}/${request.productImage}`}
+                        alt={request.productName}
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-gray-900 dark:text-white">{request.productName}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{request.productDescription}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-gray-900 dark:text-white">{request.userName}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{request.userContact}</div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{request.shopLocations}</td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
+                        {request.estimatedPrice && `Est: GH₵${request.estimatedPrice.toFixed(2)}`}
+                      </div>
+                      {request.actualPrice && (
+                        <div className="font-bold text-gray-900 dark:text-white">
+                          GH₵{request.actualPrice.toFixed(2)}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColors[request.status]?.bg} ${statusColors[request.status]?.text}`}>
+                        {request.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        {request.status === 'pending' && (
+                          <button
+                            onClick={() => {
+                              setSelectedRequest(request);
+                              setShowAuthorizeModal(true);
+                            }}
+                            className="px-3 py-1 bg-blue-500 text-white rounded text-xs font-semibold hover:bg-blue-600"
+                          >
+                            ✅ Authorize
+                          </button>
+                        )}
+                        {request.status === 'authorized' && (
+                          <button
+                            onClick={() => {
+                              setSelectedRequest(request);
+                              setShowAssignModal(true);
+                            }}
+                            className="px-3 py-1 bg-purple-500 text-white rounded text-xs font-semibold hover:bg-purple-600"
+                          >
+                            👤 Assign
+                          </button>
+                        )}
+                        {request.status === 'assigned' && (
+                          <button
+                            onClick={() => handleUpdateStatus(request._id, 'purchased')}
+                            className="px-3 py-1 bg-indigo-500 text-white rounded text-xs font-semibold hover:bg-indigo-600"
+                          >
+                            🛍️ Purchased
+                          </button>
+                        )}
+                        {request.status === 'purchased' && (
+                          <button
+                            onClick={() => handleUpdateStatus(request._id, 'delivered')}
+                            className="px-3 py-1 bg-green-500 text-white rounded text-xs font-semibold hover:bg-green-600"
+                          >
+                            ✨ Delivered
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteRequest(request._id)}
+                          className="px-3 py-1 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {filteredRequests.length === 0 && (
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl">
+          <div className="text-6xl mb-4">🛒</div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No shopping requests found</h3>
+          <p className="text-gray-600 dark:text-gray-400">Requests will appear here when customers submit them</p>
+        </div>
+      )}
+
+      {/* Authorize Modal */}
+      <AnimatePresence>
+        {showAuthorizeModal && selectedRequest && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Authorize Shopping Request</h3>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Product</label>
+                  <p className="text-gray-900 dark:text-white">{selectedRequest.productName}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Actual Price (GH₵) *</label>
+                  <input
+                    type="number"
+                    value={actualPrice}
+                    onChange={(e) => setActualPrice(e.target.value)}
+                    placeholder="Enter actual price"
+                    className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Admin Notes (Optional)</label>
+                  <textarea
+                    value={adminNotes}
+                    onChange={(e) => setAdminNotes(e.target.value)}
+                    placeholder="Add any notes for the customer..."
+                    rows="3"
+                    className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAuthorizeRequest}
+                  className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-all"
+                >
+                  ✅ Authorize
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAuthorizeModal(false);
+                    setSelectedRequest(null);
+                    setActualPrice('');
+                    setAdminNotes('');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Assign Rider Modal */}
+      <AnimatePresence>
+        {showAssignModal && selectedRequest && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Assign Rider</h3>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Product</label>
+                  <p className="text-gray-900 dark:text-white">{selectedRequest.productName}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Select Rider *</label>
+                  <select
+                    value={selectedRiderId}
+                    onChange={(e) => setSelectedRiderId(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Choose a rider...</option>
+                    {motorRiders.map((rider) => (
+                      <option key={rider._id} value={rider._id}>
+                        {rider.name} - {rider.phone} ({rider.motorcycleType || 'No bike info'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAssignRider}
+                  className="flex-1 px-4 py-3 bg-purple-500 text-white rounded-xl font-semibold hover:bg-purple-600 transition-all"
+                >
+                  👤 Assign
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAssignModal(false);
+                    setSelectedRequest(null);
+                    setSelectedRiderId('');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

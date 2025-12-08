@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PaymentModal from '../components/PaymentModal';
 import LoadingSkeleton from '../components/LoadingSkeleton';
@@ -125,6 +126,83 @@ const ServiceHub = () => {
               </motion.button>
             ))}
           </div>
+        </motion.div>
+
+        {/* Shopping Service Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-12"
+        >
+          <motion.div
+            whileHover={{ scale: 1.02, y: -5 }}
+            onClick={() => navigate('/shopping-request')}
+            className="relative overflow-hidden cursor-pointer bg-gradient-to-br from-ashesi-primary via-ghana-red to-ghana-yellow rounded-3xl p-8 shadow-2xl"
+          >
+            {/* Decorative Background Elements */}
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full"
+            />
+            <motion.div
+              animate={{
+                rotate: [360, 0],
+                scale: [1, 1.3, 1],
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+              className="absolute -bottom-16 -left-16 w-48 h-48 bg-white/10 rounded-full"
+            />
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+              <motion.div
+                animate={{
+                  y: [0, -10, 0],
+                  rotate: [0, 5, -5, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="text-7xl md:text-8xl"
+              >
+                🛒
+              </motion.div>
+              <div className="flex-1 text-white text-center md:text-left">
+                <h2 className="text-3xl md:text-4xl font-black mb-3">Shopping Service</h2>
+                <p className="text-lg md:text-xl text-white/90 mb-4">
+                  Need something from town but don't want to go yourself? We'll get it for you!
+                </p>
+                <p className="text-sm md:text-base text-white/80 mb-6">
+                  Chargers, body lotion, perfume, slippers, and more - just send us an image and tell us where to find it!
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-white text-ashesi-primary px-8 py-4 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl transition-all inline-flex items-center gap-2"
+                >
+                  <span>📦</span> Request Shopping Service
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  </svg>
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* Vendors Grid */}

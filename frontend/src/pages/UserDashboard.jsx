@@ -8,6 +8,7 @@ const UserDashboard = () => {
   const [deliveries, setDeliveries] = useState([]);
   const [createdRides, setCreatedRides] = useState([]);
   const [joinedRides, setJoinedRides] = useState([]);
+  const [shoppingRequests, setShoppingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
@@ -59,6 +60,11 @@ const UserDashboard = () => {
       if (ridesResponse.data.success) {
         setCreatedRides(ridesResponse.data.createdRides);
         setJoinedRides(ridesResponse.data.joinedRides);
+      }
+
+      const shoppingResponse = await axios.get(`${API_URL}/api/shopping/user/${email}`);
+      if (shoppingResponse.data) {
+        setShoppingRequests(shoppingResponse.data);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -248,6 +254,13 @@ const UserDashboard = () => {
       joined: joinedRides.length,
       active: [...createdRides, ...joinedRides].filter(r => r.status === 'active').length,
       completed: [...createdRides, ...joinedRides].filter(r => r.status === 'completed').length,
+    },
+    shopping: {
+      total: shoppingRequests.length,
+      pending: shoppingRequests.filter(s => s.status === 'pending').length,
+      authorized: shoppingRequests.filter(s => s.status === 'authorized').length,
+      assigned: shoppingRequests.filter(s => s.status === 'assigned').length,
+      delivered: shoppingRequests.filter(s => s.status === 'delivered').length,
     },
   };
 
@@ -441,6 +454,16 @@ const UserDashboard = () => {
                   >
                     <div className="text-5xl mb-3">🏪</div>
                     <p className="font-bold text-gray-900 dark:text-white">Marketplace</p>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/shopping-request')}
+                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-yellow-400"
+                  >
+                    <div className="text-5xl mb-3">🛒</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Shopping Service</p>
                   </motion.button>
                 </div>
               </div>
@@ -864,6 +887,139 @@ const UserDashboard = () => {
                     <p className="text-sm text-gray-600 dark:text-gray-400">No rides joined yet</p>
                   </motion.div>
                 )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Shopping Requests Tab */}
+          {activeTab === 'shopping' && (
+            <motion.div
+              key="shopping"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              {/* Request Shopping Service CTA */}
+              <motion.button
+                whileHover={{ scale: 1.02, y: -5 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/shopping-request')}
+                className="w-full bg-gradient-to-r from-ashesi-primary via-ghana-red to-ghana-yellow text-white p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all flex items-center justify-between"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-4xl">
+                    🛒
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xl font-black">Request Shopping Service</p>
+                    <p className="text-sm text-white/90">Get items from town delivered to you!</p>
+                  </div>
+                </div>
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                </svg>
+              </motion.button>
+
+              {/* Shopping Requests */}
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-3xl">🛒</span> Your Shopping Requests
+                </h2>
+
+                <div className="space-y-4">
+                  {shoppingRequests.length === 0 ? (
+                    <motion.div
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      className="bg-white dark:bg-gray-800 rounded-3xl p-12 shadow-xl text-center"
+                    >
+                      <div className="text-7xl mb-4">🛒</div>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white mb-2">No shopping requests yet!</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Need something from town? Let us get it for you!</p>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => navigate('/shopping-request')}
+                        className="px-8 py-4 bg-gradient-to-r from-ashesi-primary to-ghana-red text-white rounded-2xl font-bold shadow-lg hover:shadow-2xl transition-all"
+                      >
+                        🛒 Request Shopping Service
+                      </motion.button>
+                    </motion.div>
+                  ) : (
+                    shoppingRequests.map((request, index) => (
+                      <motion.div
+                        key={request._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ scale: 1.02, y: -5 }}
+                        className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg hover:shadow-2xl transition-all"
+                      >
+                        <div className="flex gap-4 mb-4">
+                          {/* Product Image */}
+                          <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                            {request.productImage && (
+                              <img
+                                src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}/${request.productImage}`}
+                                alt={request.productName}
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                          </div>
+
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <p className="font-bold text-lg text-gray-900 dark:text-white">{request.productName}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{request.productDescription}</p>
+                              </div>
+                              <motion.span
+                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold shadow-lg ${getStatusColor(request.status)}`}
+                              >
+                                {request.status}
+                              </motion.span>
+                            </div>
+
+                            <div className="space-y-2 text-sm bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-3 mb-3">
+                              <p className="text-gray-700 dark:text-gray-300">
+                                <span className="font-bold">🏪 Shop Location:</span> {request.shopLocations}
+                              </p>
+                              {request.estimatedPrice && (
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-bold">💵 Estimated Price:</span> GH₵ {request.estimatedPrice.toFixed(2)}
+                                </p>
+                              )}
+                              {request.actualPrice && (
+                                <p className="text-gray-900 dark:text-white font-black text-base">
+                                  💰 Actual Price: GH₵ {request.actualPrice.toFixed(2)}
+                                </p>
+                              )}
+                              {request.assignedTo && (
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  <span className="font-bold">👤 Assigned To:</span> {request.assignedTo.name}
+                                </p>
+                              )}
+                            </div>
+
+                            {request.adminNotes && (
+                              <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded">
+                                <p className="text-sm text-blue-900 dark:text-blue-300">
+                                  <span className="font-bold">📝 Admin Notes:</span> {request.adminNotes}
+                                </p>
+                              </div>
+                            )}
+
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                              Requested on {new Date(request.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
               </div>
             </motion.div>
           )}
@@ -1314,8 +1470,8 @@ const UserDashboard = () => {
               { id: 'overview', icon: '📊', label: 'Overview' },
               { id: 'deliveries', icon: '📦', label: 'Deliveries' },
               { id: 'rides', icon: '🚗', label: 'Rides' },
+              { id: 'shopping', icon: '🛒', label: 'Shopping' },
               { id: 'profile', icon: '👤', label: 'Profile' },
-              { id: 'more', icon: '⚡', label: 'More' },
             ].map((tab) => (
               <motion.button
                 key={tab.id}

@@ -66,6 +66,7 @@ const motorRiderRoutes = require('./routes/motorRiders');
 const categoryRoutes = require('./routes/categories');
 const settingsRoutes = require('./routes/settings');
 const financialRoutes = require('./routes/financials');
+const shoppingRoutes = require('./routes/shopping');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
@@ -77,6 +78,10 @@ app.use('/api/motor-riders', motorRiderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/financials', financialRoutes);
+app.use('/api/shopping', shoppingRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // API health check and welcome route
 app.get('/', (req, res) => {

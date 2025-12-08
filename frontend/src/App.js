@@ -18,6 +18,7 @@ import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 import Terms from './pages/Terms';
 import Marketplace from './pages/Marketplace';
+import ShoppingRequest from './pages/ShoppingRequest';
 
 function AppContent() {
   const location = useLocation();
@@ -46,6 +47,7 @@ function AppContent() {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/shopping-request" element={<ShoppingRequest />} />
         </Routes>
       </main>
       {!isAdminRoute && !isUserDashboardRoute && !isRiderUpdateRoute && <Footer />}
