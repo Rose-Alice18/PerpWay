@@ -958,13 +958,19 @@ const UserDashboard = () => {
                       >
                         <div className="flex gap-4 mb-4">
                           {/* Product Image */}
-                          <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                            {request.productImage && (
+                          <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                            {request.productImage ? (
                               <img
                                 src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}${request.productImage}`}
                                 alt={request.productName}
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML = '<div class="text-4xl">📦</div>';
+                                }}
                               />
+                            ) : (
+                              <div className="text-4xl">📦</div>
                             )}
                           </div>
 
