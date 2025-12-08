@@ -431,7 +431,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden pb-4 space-y-2"
+            className="md:hidden pb-4 space-y-2 max-h-[calc(100vh-5rem)] overflow-y-auto"
           >
             {navLinks.map((link, index) => (
               <motion.div
