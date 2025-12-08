@@ -961,7 +961,7 @@ const UserDashboard = () => {
                           <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
                             {request.productImage && (
                               <img
-                                src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}/${request.productImage}`}
+                                src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}${request.productImage}`}
                                 alt={request.productName}
                                 className="w-full h-full object-cover"
                               />
