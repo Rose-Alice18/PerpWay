@@ -1278,7 +1278,7 @@ const UserDashboard = () => {
               </motion.div>
 
               {/* Quick Settings */}
-              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl">
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl" data-section="quick-settings">
                 <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-2xl">⚙️</span> Quick Settings
                 </h3>
@@ -1380,6 +1380,71 @@ const UserDashboard = () => {
                   </div>
                 </div>
               </div>
+
+              {/* More Options */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl"
+              >
+                <h3 className="text-xl font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                  <span className="text-2xl">⚡</span> More Options
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* About */}
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/about')}
+                    className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl p-6 cursor-pointer shadow-lg hover:shadow-xl transition-all text-center"
+                  >
+                    <div className="text-5xl mb-3">ℹ️</div>
+                    <p className="font-bold text-gray-900 dark:text-white">About</p>
+                  </motion.div>
+
+                  {/* Contact */}
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/contact')}
+                    className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-2xl p-6 cursor-pointer shadow-lg hover:shadow-xl transition-all text-center"
+                  >
+                    <div className="text-5xl mb-3">📧</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Contact</p>
+                  </motion.div>
+
+                  {/* Help/FAQ */}
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/faq')}
+                    className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30 rounded-2xl p-6 cursor-pointer shadow-lg hover:shadow-xl transition-all text-center"
+                  >
+                    <div className="text-5xl mb-3">❓</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Help</p>
+                  </motion.div>
+
+                  {/* Settings */}
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      // Scroll to Quick Settings section
+                      document.querySelector('[data-section="quick-settings"]')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/30 dark:to-gray-600/30 rounded-2xl p-6 cursor-pointer shadow-lg hover:shadow-xl transition-all text-center"
+                  >
+                    <div className="text-5xl mb-3">⚙️</div>
+                    <p className="font-bold text-gray-900 dark:text-white">Settings</p>
+                  </motion.div>
+                </div>
+
+                {/* App Version */}
+                <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <p className="font-semibold">Perpway v1.0.0</p>
+                  <p className="text-xs">Personal Easy Rides & Packages</p>
+                </div>
+              </motion.div>
 
               {/* Logout Button */}
               <motion.button
