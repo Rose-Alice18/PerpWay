@@ -244,37 +244,37 @@ const UserDashboard = () => {
 
   const stats = {
     deliveries: {
-      total: deliveries.length,
-      pending: deliveries.filter(d => d.status === 'pending').length,
-      delivered: deliveries.filter(d => d.status === 'delivered').length,
-      totalSpent: deliveries.reduce((sum, d) => sum + (d.price || 0), 0),
+      total: Array.isArray(deliveries) ? deliveries.length : 0,
+      pending: Array.isArray(deliveries) ? deliveries.filter(d => d.status === 'pending').length : 0,
+      delivered: Array.isArray(deliveries) ? deliveries.filter(d => d.status === 'delivered').length : 0,
+      totalSpent: Array.isArray(deliveries) ? deliveries.reduce((sum, d) => sum + (d.price || 0), 0) : 0,
     },
     rides: {
-      created: createdRides.length,
-      joined: joinedRides.length,
-      active: [...createdRides, ...joinedRides].filter(r => r.status === 'active').length,
-      completed: [...createdRides, ...joinedRides].filter(r => r.status === 'completed').length,
+      created: Array.isArray(createdRides) ? createdRides.length : 0,
+      joined: Array.isArray(joinedRides) ? joinedRides.length : 0,
+      active: (Array.isArray(createdRides) && Array.isArray(joinedRides)) ? [...createdRides, ...joinedRides].filter(r => r.status === 'active').length : 0,
+      completed: (Array.isArray(createdRides) && Array.isArray(joinedRides)) ? [...createdRides, ...joinedRides].filter(r => r.status === 'completed').length : 0,
     },
     shopping: {
-      total: shoppingRequests.length,
-      pending: shoppingRequests.filter(s => s.status === 'pending').length,
-      authorized: shoppingRequests.filter(s => s.status === 'authorized').length,
-      assigned: shoppingRequests.filter(s => s.status === 'assigned').length,
-      delivered: shoppingRequests.filter(s => s.status === 'delivered').length,
+      total: Array.isArray(shoppingRequests) ? shoppingRequests.length : 0,
+      pending: Array.isArray(shoppingRequests) ? shoppingRequests.filter(s => s.status === 'pending').length : 0,
+      authorized: Array.isArray(shoppingRequests) ? shoppingRequests.filter(s => s.status === 'authorized').length : 0,
+      assigned: Array.isArray(shoppingRequests) ? shoppingRequests.filter(s => s.status === 'assigned').length : 0,
+      delivered: Array.isArray(shoppingRequests) ? shoppingRequests.filter(s => s.status === 'delivered').length : 0,
     },
   };
 
-  const filteredDeliveries = deliveries.filter(delivery => {
+  const filteredDeliveries = Array.isArray(deliveries) ? deliveries.filter(delivery => {
     if (filter === 'all') return true;
     if (filter === 'active') return ['pending', 'authorized', 'assigned', 'in-progress'].includes(delivery.status);
     return delivery.status === filter;
-  });
+  }) : [];
 
   // Separate active and history rides
-  const activeCreatedRides = createdRides.filter(r => r.status === 'active' || r.status === 'pending');
-  const historyCreatedRides = createdRides.filter(r => r.status === 'completed' || r.status === 'cancelled');
-  const activeJoinedRides = joinedRides.filter(r => r.status === 'active' || r.status === 'pending');
-  const historyJoinedRides = joinedRides.filter(r => r.status === 'completed' || r.status === 'cancelled');
+  const activeCreatedRides = Array.isArray(createdRides) ? createdRides.filter(r => r.status === 'active' || r.status === 'pending') : [];
+  const historyCreatedRides = Array.isArray(createdRides) ? createdRides.filter(r => r.status === 'completed' || r.status === 'cancelled') : [];
+  const activeJoinedRides = Array.isArray(joinedRides) ? joinedRides.filter(r => r.status === 'active' || r.status === 'pending') : [];
+  const historyJoinedRides = Array.isArray(joinedRides) ? joinedRides.filter(r => r.status === 'completed' || r.status === 'cancelled') : [];
 
   if (loading) {
     return (
