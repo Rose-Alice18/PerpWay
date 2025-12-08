@@ -8,7 +8,7 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
     whatsapp: '',
     email: '',
     seatsNeeded: 1,
-    contactVisibility: 'private', // 'private' or 'public'
+    contactVisibility: 'public', // 'private' or 'public' - default to public
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -225,7 +225,12 @@ const JoinRideModal = ({ ride, onClose, onSubmit }) => {
           {/* Info Box */}
           <div className="bg-ghana-yellow/10 dark:bg-ghana-yellow/20 border-2 border-ghana-yellow rounded-lg p-4">
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              <span className="font-semibold">📞 Note:</span> Ride creator always sees your contact to coordinate pickup.
+              <span className="font-semibold">📞 Note:</span> Keep your phone close! The ride creator will call you to coordinate pickup.
+              {!localStorage.getItem('userEmail') && (
+                <span className="block mt-2">
+                  💡 <span className="font-semibold">Tip:</span> Sign up to track and manage all your rides in one place.
+                </span>
+              )}
             </p>
           </div>
 
