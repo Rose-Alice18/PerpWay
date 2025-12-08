@@ -46,6 +46,32 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// Toggle category visibility
+router.patch('/:id/toggle-visibility', async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    // Toggle the visibility
+    category.isVisible = !category.isVisible;
+    await category.save();
+
+    console.log(`📂 Category "${category.name}" visibility toggled to: ${category.isVisible ? 'VISIBLE' : 'HIDDEN'}`);
+
+    res.json({
+      success: true,
+      message: `Category ${category.isVisible ? 'shown' : 'hidden'} successfully`,
+      category
+    });
+  } catch (error) {
+    console.error('Error toggling category visibility:', error);
+    res.status(500).json({ error: 'Failed to toggle category visibility', message: error.message });
+  }
+});
+
 // Delete category
 router.delete('/:id', async (req, res) => {
   try {

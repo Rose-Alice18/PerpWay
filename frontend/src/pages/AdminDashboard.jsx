@@ -4316,6 +4316,18 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
     }
   };
 
+  const handleToggleCategoryVisibility = async (category) => {
+    try {
+      const response = await axios.patch(`${API_URL}/api/categories/${category._id}/toggle-visibility`);
+      fetchData();
+      const newStatus = response.data.category.isVisible;
+      showSuccess(`Category ${newStatus ? 'shown' : 'hidden'} successfully! ${newStatus ? '👁️' : '🙈'}`);
+    } catch (error) {
+      console.error('Error toggling category visibility:', error);
+      showError('Failed to toggle category visibility');
+    }
+  };
+
   const handleDeleteCategory = async (categoryId) => {
     showConfirm({
       title: 'Delete Category?',
@@ -4445,6 +4457,17 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex gap-2">
                           <button
+                            onClick={() => handleToggleCategoryVisibility(category)}
+                            className={`px-3 py-1.5 rounded-lg font-semibold transition-all text-xs ${
+                              category.isVisible
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-gray-500 text-white hover:bg-gray-600'
+                            }`}
+                            title={category.isVisible ? 'Click to hide from customers' : 'Click to show to customers'}
+                          >
+                            {category.isVisible ? '👁️ Visible' : '🙈 Hidden'}
+                          </button>
+                          <button
                             onClick={() => handleEditClick(category)}
                             className="px-3 py-1.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-xs"
                           >
@@ -4499,19 +4522,32 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{category.description}</p>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => handleEditClick(category)}
-                    className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all text-sm"
+                    onClick={() => handleToggleCategoryVisibility(category)}
+                    className={`w-full px-3 py-2 rounded-xl font-semibold transition-all text-sm ${
+                      category.isVisible
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-gray-500 text-white hover:bg-gray-600'
+                    }`}
+                    title={category.isVisible ? 'Click to hide from customers' : 'Click to show to customers'}
                   >
-                    ✏️ Edit
+                    {category.isVisible ? '👁️ Visible to Customers' : '🙈 Hidden from Customers'}
                   </button>
-                  <button
-                    onClick={() => handleDeleteCategory(category._id)}
-                    className="flex-1 px-3 py-2 bg-ghana-red text-white rounded-xl font-semibold hover:bg-ghana-red/90 transition-all text-sm"
-                  >
-                    🗑️ Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditClick(category)}
+                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all text-sm"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCategory(category._id)}
+                      className="flex-1 px-3 py-2 bg-ghana-red text-white rounded-xl font-semibold hover:bg-ghana-red/90 transition-all text-sm"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             ))
