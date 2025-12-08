@@ -76,6 +76,7 @@ const Navbar = () => {
   ];
 
   const moreLinks = [
+    { name: 'Shopping Service', path: '/shopping-request', emoji: '🛒' },
     { name: 'Marketplace', path: '/marketplace', emoji: '🏪' },
     { name: 'About Us', path: '/about', emoji: 'ℹ️' },
     { name: 'Contact', path: '/contact', emoji: '📧' },
