@@ -63,8 +63,8 @@ const UserDashboard = () => {
       }
 
       const shoppingResponse = await axios.get(`${API_URL}/api/shopping/user/${email}`);
-      if (shoppingResponse.data) {
-        setShoppingRequests(shoppingResponse.data);
+      if (shoppingResponse.data.success) {
+        setShoppingRequests(shoppingResponse.data.requests);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
