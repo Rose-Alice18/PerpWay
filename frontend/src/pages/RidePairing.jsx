@@ -182,7 +182,7 @@ const RidePairing = () => {
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto mb-6">
             Going somewhere? Find others heading the same way!
-            Hop in, we go campus together chale! 🚗💨
+            Hop in, make we go campus together chale! 🚗💨
           </p>
 
           {/* Action Buttons */}
@@ -238,7 +238,7 @@ const RidePairing = () => {
               whileTap={{ scale: 0.95 }}
               className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
                 filter === 'custom'
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                  ? 'bg-ashesi-primary text-white shadow-lg'
                   : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
@@ -256,7 +256,7 @@ const RidePairing = () => {
                 transition={{ duration: 0.3 }}
                 className="mb-6 overflow-hidden"
               >
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 max-w-2xl mx-auto border-2 border-purple-200 dark:border-purple-700">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 max-w-2xl mx-auto border-2 border-red-200 dark:border-red-700">
                   <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
                     <span>📆</span> Select Date Range
                   </h3>
@@ -270,7 +270,7 @@ const RidePairing = () => {
                         value={customRange.startDate}
                         onChange={(e) => setCustomRange({ ...customRange, startDate: e.target.value })}
                         min={getTodayDate()}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-900 transition-all duration-200"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-ashesi-primary dark:focus:border-ashesi-primary focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900 transition-all duration-200"
                       />
                     </div>
                     <div>
@@ -282,7 +282,7 @@ const RidePairing = () => {
                         value={customRange.endDate}
                         onChange={(e) => setCustomRange({ ...customRange, endDate: e.target.value })}
                         min={customRange.startDate || getTodayDate()}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-900 transition-all duration-200"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-ashesi-primary dark:focus:border-ashesi-primary focus:ring-2 focus:ring-red-200 dark:focus:ring-red-900 transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -290,9 +290,9 @@ const RidePairing = () => {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700"
+                      className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-700"
                     >
-                      <p className="text-sm text-purple-800 dark:text-purple-200 font-semibold text-center">
+                      <p className="text-sm text-red-800 dark:text-red-200 font-semibold text-center">
                         ✨ Showing rides from {new Date(customRange.startDate).toLocaleDateString()} to {new Date(customRange.endDate).toLocaleDateString()}
                       </p>
                     </motion.div>
