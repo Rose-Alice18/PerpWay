@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const FloatingDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -58,32 +58,30 @@ const FloatingDashboard = () => {
   console.log('FloatingDashboard - Rendering component visible');
 
   return (
-    <AnimatePresence>
-      <motion.div
-        drag
-        dragMomentum={false}
-        dragElastic={0.1}
-        dragConstraints={{
-          top: -window.innerHeight + 150,
-          left: -window.innerWidth + 150,
-          right: window.innerWidth - 150,
-          bottom: window.innerHeight - 150
-        }}
-        onDragStart={handleDragStart}
-        style={{
-          position: 'fixed',
-          bottom: '1.5rem',
-          right: '1.5rem',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          touchAction: 'none',
-        }}
-        initial={{ scale: 0, opacity: 0, rotate: -180 }}
-        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-        exit={{ scale: 0, opacity: 0, rotate: 180 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="z-[9999] select-none"
-      >
+    <motion.div
+      drag
+      dragMomentum={false}
+      dragElastic={0.1}
+      dragConstraints={{
+        top: -window.innerHeight + 150,
+        left: -window.innerWidth + 150,
+        right: window.innerWidth - 150,
+        bottom: window.innerHeight - 150
+      }}
+      onDragStart={handleDragStart}
+      style={{
+        position: 'fixed',
+        bottom: '1.5rem',
+        right: '1.5rem',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        touchAction: 'none',
+      }}
+      initial={{ scale: 0, opacity: 0, rotate: -180 }}
+      animate={{ scale: 1, opacity: 1, rotate: 0 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className="z-[9999] select-none"
+    >
           <div className="relative group">
             {/* Drag Handle - visible on hover */}
             <motion.div
@@ -274,8 +272,7 @@ const FloatingDashboard = () => {
               }}
             />
           </motion.div>
-        </motion.div>
-    </AnimatePresence>
+    </motion.div>
   );
 };
 
