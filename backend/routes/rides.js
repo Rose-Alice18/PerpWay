@@ -92,7 +92,7 @@ router.post('/create', async (req, res) => {
 // Join a ride
 router.post('/:id/join', async (req, res) => {
   try {
-    const { name, phone, whatsapp, email, seatsNeeded } = req.body;
+    const { name, phone, whatsapp, email, seatsNeeded, contactVisibility } = req.body;
     const ride = await Ride.findById(req.params.id);
 
     if (!ride) {
@@ -119,19 +119,20 @@ router.post('/:id/join', async (req, res) => {
       return res.status(400).json({ error: 'You have already joined this ride' });
     }
 
-    // Add user with full contact details including seats needed
+    // Add user with full contact details including seats needed and visibility preference
     ride.joinedUsers.push({
       name,
       phone,
       whatsapp: whatsapp || phone, // Use phone if WhatsApp not provided
       email: email || '',
       seatsNeeded: seatsRequested,
+      contactVisibility: contactVisibility || 'private', // Default to private
     });
     ride.availableSeats -= seatsRequested;
 
     await ride.save();
 
-    console.log(`🚙 ${name} (${phone}) joined ride ${ride._id} - took ${seatsRequested} seat(s)`);
+    console.log(`🚙 ${name} (${phone}) joined ride ${ride._id} - took ${seatsRequested} seat(s) [${contactVisibility || 'private'}]`);
 
     res.json({
       success: true,

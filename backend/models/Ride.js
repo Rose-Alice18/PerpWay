@@ -61,6 +61,11 @@ const rideSchema = new mongoose.Schema({
       min: 1,
       max: 4,
     },
+    contactVisibility: {
+      type: String,
+      enum: ['private', 'public'],
+      default: 'private',
+    },
     joinedAt: {
       type: Date,
       default: Date.now,
