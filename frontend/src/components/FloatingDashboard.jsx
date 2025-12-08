@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const FloatingDashboard = () => {
@@ -8,6 +8,7 @@ const FloatingDashboard = () => {
   const [isDragged, setIsDragged] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const authStatus = localStorage.getItem('userAuthenticated');
@@ -49,10 +50,19 @@ const FloatingDashboard = () => {
 
   console.log('FloatingDashboard rendering - isAuthenticated:', isAuthenticated);
 
-  // Always show for testing
+  // Don't show if not authenticated
   if (!isAuthenticated) {
     console.log('FloatingDashboard - Not authenticated, returning null');
-    return null; // Return null for now, will show when authenticated
+    return null;
+  }
+
+  // Don't show if already on a dashboard page
+  const isDashboardPage = location.pathname === '/dashboard' ||
+                          location.pathname.startsWith('/admin/dashboard');
+
+  if (isDashboardPage) {
+    console.log('FloatingDashboard - Already on dashboard page, hiding');
+    return null;
   }
 
   console.log('FloatingDashboard - Rendering component visible');
