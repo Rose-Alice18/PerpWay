@@ -928,7 +928,7 @@ const UserDashboard = () => {
                 </h2>
 
                 <div className="space-y-4">
-                  {shoppingRequests.length === 0 ? (
+                  {!Array.isArray(shoppingRequests) || shoppingRequests.length === 0 ? (
                     <motion.div
                       initial={{ scale: 0.9 }}
                       animate={{ scale: 1 }}
@@ -947,7 +947,7 @@ const UserDashboard = () => {
                       </motion.button>
                     </motion.div>
                   ) : (
-                    shoppingRequests.map((request, index) => (
+                    Array.isArray(shoppingRequests) && shoppingRequests.map((request, index) => (
                       <motion.div
                         key={request._id}
                         initial={{ opacity: 0, y: 20 }}
