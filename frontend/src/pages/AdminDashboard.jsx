@@ -136,6 +136,17 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const usersRes = await axios.get(`${API_URL}/api/auth/users`);
+      if (usersRes.data.success) {
+        setUsers(usersRes.data.users);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -148,12 +159,9 @@ const AdminDashboard = () => {
         fetchVendors(),
         fetchMotorRiders(),
         fetchCategories(),
-        fetchShoppingRequests()
+        fetchShoppingRequests(),
+        fetchUsers()
       ]);
-
-      // Get users from localStorage (since we're using localStorage auth)
-      const perpwayUsers = JSON.parse(localStorage.getItem('perpwayUsers') || '[]');
-      setUsers(perpwayUsers);
 
       setLoading(false);
     } catch (error) {
@@ -372,7 +380,7 @@ const AdminDashboard = () => {
               {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} />}
               {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchCategories} exportToCSV={exportToCSV} />}
-              {activeTab === 'users' && <UsersTab users={users} fetchData={fetchAllData} exportToCSV={exportToCSV} />}
+              {activeTab === 'users' && <UsersTab users={users} fetchData={fetchUsers} exportToCSV={exportToCSV} />}
               {activeTab === 'settings' && <SettingsTab />}
             </motion.div>
           </AnimatePresence>

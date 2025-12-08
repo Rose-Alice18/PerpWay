@@ -438,4 +438,36 @@ router.put('/users/settings', async (req, res) => {
   }
 });
 
+// Get all users (Admin only)
+router.get('/users', async (req, res) => {
+  try {
+    // Fetch all users from database
+    const users = await User.find({}, {
+      password: 0 // Exclude password field
+    }).sort({ createdAt: -1 }); // Sort by newest first
+
+    res.json({
+      success: true,
+      users: users.map(user => ({
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        authProvider: user.authProvider,
+        profilePicture: user.profilePicture,
+        phone: user.phone,
+        address: user.address,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin
+      }))
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users'
+    });
+  }
+});
+
 module.exports = router;
