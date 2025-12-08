@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const FloatingDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('');
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragged, setIsDragged] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const navigate = useNavigate();
 
@@ -19,18 +19,18 @@ const FloatingDashboard = () => {
     setIsAuthenticated(authStatus === 'true');
     setUserRole(role);
 
-    // Load saved position from localStorage
-    const savedPosition = localStorage.getItem('floatingDashboardPosition');
-    if (savedPosition) {
-      setPosition(JSON.parse(savedPosition));
+    // Check if dashboard was previously dragged
+    const wasDragged = localStorage.getItem('floatingDashboardDragged');
+    if (wasDragged === 'true') {
+      setIsDragged(true);
     }
   }, []);
 
-  const handleDragEnd = (event, info) => {
-    const newPosition = { x: info.point.x, y: info.point.y };
-    setPosition(newPosition);
-    // Save position to localStorage
-    localStorage.setItem('floatingDashboardPosition', JSON.stringify(newPosition));
+  const handleDragStart = () => {
+    if (!isDragged) {
+      setIsDragged(true);
+      localStorage.setItem('floatingDashboardDragged', 'true');
+    }
   };
 
   const handleClick = () => {
@@ -51,8 +51,11 @@ const FloatingDashboard = () => {
 
   // Always show for testing
   if (!isAuthenticated) {
+    console.log('FloatingDashboard - Not authenticated, returning null');
     return null; // Return null for now, will show when authenticated
   }
+
+  console.log('FloatingDashboard - Rendering component visible');
 
   return (
     <AnimatePresence>
@@ -61,20 +64,16 @@ const FloatingDashboard = () => {
         dragMomentum={false}
         dragElastic={0.1}
         dragConstraints={{
-          top: 0,
-          left: 0,
-          right: window.innerWidth - 200,
-          bottom: window.innerHeight - 100
+          top: -window.innerHeight + 150,
+          left: -window.innerWidth + 150,
+          right: window.innerWidth - 150,
+          bottom: window.innerHeight - 150
         }}
-        onDragEnd={handleDragEnd}
+        onDragStart={handleDragStart}
         style={{
-          x: position.x,
-          y: position.y,
           position: 'fixed',
-          bottom: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
-          right: position.x === 0 && position.y === 0 ? '1.5rem' : 'auto',
-          top: position.x === 0 && position.y === 0 ? 'auto' : 0,
-          left: position.x === 0 && position.y === 0 ? 'auto' : 0,
+          bottom: '1.5rem',
+          right: '1.5rem',
           userSelect: 'none',
           WebkitUserSelect: 'none',
           touchAction: 'none',
