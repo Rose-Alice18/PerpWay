@@ -116,8 +116,23 @@ const ShoppingRequest = () => {
       }, 2000);
     } catch (error) {
       console.error('Shopping request error:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      console.error('API URL:', apiUrl);
       setSubmitting(false);
-      alert('Failed to submit request. Please try again!');
+
+      let errorMessage = 'Failed to submit request.';
+      if (error.response) {
+        // Server responded with error
+        errorMessage = error.response.data?.message || error.response.data?.error || 'Server error occurred';
+      } else if (error.request) {
+        // Request made but no response
+        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+      } else {
+        // Something else happened
+        errorMessage = error.message || 'An unexpected error occurred';
+      }
+
+      alert(`${errorMessage}\n\nPlease try again!`);
     }
   };
 
