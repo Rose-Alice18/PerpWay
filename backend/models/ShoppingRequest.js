@@ -14,7 +14,7 @@ const shoppingRequestSchema = new mongoose.Schema({
   },
   userContact: {
     type: String,
-    required: true,
+    required: false,
   },
   productName: {
     type: String,
