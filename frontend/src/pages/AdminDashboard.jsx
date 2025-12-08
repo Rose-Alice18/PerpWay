@@ -709,24 +709,87 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
       >
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
         <div className="space-y-3">
-          {deliveries.slice(0, 5).map((delivery, index) => (
-            <div key={index} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                <span className="text-xl">📦</span>
+          {(() => {
+            // Combine all activities with timestamps
+            const allActivities = [
+              ...deliveries.map(d => ({
+                type: 'delivery',
+                icon: '📦',
+                color: 'blue',
+                name: d.name || 'Anonymous',
+                description: d.itemDescription,
+                status: d.status,
+                timestamp: new Date(d.createdAt || d.requestDate || Date.now())
+              })),
+              ...rides.map(r => ({
+                type: 'ride',
+                icon: '🚗',
+                color: 'purple',
+                name: r.name || 'Anonymous',
+                description: `${r.pickupLocation} → ${r.destination}`,
+                status: r.status,
+                timestamp: new Date(r.createdAt || Date.now())
+              })),
+              ...drivers.map(d => ({
+                type: 'driver',
+                icon: '🚗',
+                color: 'green',
+                name: d.name,
+                description: 'New driver registered',
+                status: 'active',
+                timestamp: new Date(d.createdAt || Date.now())
+              })),
+              ...vendors.slice(0, 3).map(v => ({
+                type: 'vendor',
+                icon: '🏪',
+                color: 'orange',
+                name: v.name,
+                description: `${v.category} vendor`,
+                status: 'active',
+                timestamp: new Date(v.createdAt || Date.now())
+              }))
+            ];
+
+            // Sort by timestamp (most recent first) and take top 8
+            const recentActivities = allActivities
+              .sort((a, b) => b.timestamp - a.timestamp)
+              .slice(0, 8);
+
+            if (recentActivities.length === 0) {
+              return (
+                <div className="text-center py-8">
+                  <div className="text-5xl mb-3">📊</div>
+                  <p className="text-gray-500 dark:text-gray-400">No recent activity yet</p>
+                </div>
+              );
+            }
+
+            return recentActivities.map((activity, index) => (
+              <div key={index} className="flex items-center gap-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <div className={`w-10 h-10 rounded-full bg-${activity.color}-100 dark:bg-${activity.color}-900/20 flex items-center justify-center`}>
+                  <span className="text-xl">{activity.icon}</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{activity.name}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{activity.description}</p>
+                </div>
+                <div className="text-right">
+                  <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${
+                    activity.status === 'delivered' || activity.status === 'completed' || activity.status === 'active' ?
+                      'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400' :
+                    activity.status === 'in-progress' || activity.status === 'assigned' ?
+                      'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
+                      'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400'
+                  }`}>
+                    {activity.status}
+                  </span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {activity.timestamp.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900 dark:text-white text-sm">{delivery.name || 'Anonymous'}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">{delivery.itemDescription}</p>
-              </div>
-              <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${
-                delivery.status === 'delivered' ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400' :
-                delivery.status === 'in-progress' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' :
-                'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400'
-              }`}>
-                {delivery.status}
-              </span>
-            </div>
-          ))}
+            ));
+          })()}
         </div>
       </motion.div>
     </div>
