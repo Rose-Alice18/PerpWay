@@ -2108,11 +2108,11 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">Drivers Management</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">Showing {filteredDrivers.length} / {drivers.length} drivers</p>
             </div>
-            {/* View Toggle - Desktop only */}
-            <div className="hidden sm:flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+            {/* View Toggle - Mobile & Desktop */}
+            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1 w-full sm:w-auto">
               <button
                 onClick={() => setViewMode('card')}
-                className={`px-3 py-2 rounded-lg font-semibold transition-all text-xs ${
+                className={`flex-1 sm:flex-none px-3 py-2 rounded-lg font-semibold transition-all text-xs ${
                   viewMode === 'card'
                     ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
                     : 'text-gray-600 dark:text-gray-400'
@@ -2122,7 +2122,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`px-3 py-2 rounded-lg font-semibold transition-all text-xs ${
+                className={`flex-1 sm:flex-none px-3 py-2 rounded-lg font-semibold transition-all text-xs ${
                   viewMode === 'table'
                     ? 'bg-white dark:bg-gray-600 text-ashesi-primary shadow-md'
                     : 'text-gray-600 dark:text-gray-400'
@@ -2255,8 +2255,9 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
 
       {/* Table View */}
       {viewMode === 'table' && (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-700 border-b-2 border-gray-200 dark:border-gray-600">
                 <tr>
@@ -2326,6 +2327,80 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Table View - Compact List */}
+          <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+            {filteredDrivers.length === 0 ? (
+              <div className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                No drivers found matching your filters
+              </div>
+            ) : (
+              filteredDrivers.map((driver) => (
+                <motion.div
+                  key={driver._id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  {/* Header Row */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center shrink-0">
+                        <span className="text-lg">🚗</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{driver.name}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{driver.contact}</p>
+                      </div>
+                    </div>
+                    {getAvailabilityBadge(driver.availability || 'available')}
+                  </div>
+
+                  {/* Details Grid */}
+                  <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400 block mb-0.5">Car Type</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{driver.carType}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400 block mb-0.5">Location</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{driver.location}</span>
+                    </div>
+                  </div>
+
+                  {/* Status Selector */}
+                  <div className="mb-3">
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Status</label>
+                    <select
+                      value={driver.availability || 'available'}
+                      onChange={(e) => handleQuickStatusChange(driver._id, e.target.value)}
+                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs font-semibold"
+                    >
+                      <option value="available">✅ Available</option>
+                      <option value="busy">⏳ Busy</option>
+                      <option value="offline">⛔ Offline</option>
+                    </select>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(driver)}
+                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-xs"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(driver._id)}
+                      className="flex-1 px-3 py-2 bg-ghana-red text-white rounded-lg font-semibold hover:bg-ghana-red/90 transition-all text-xs"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       )}
