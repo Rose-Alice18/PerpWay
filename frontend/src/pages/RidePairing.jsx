@@ -15,6 +15,11 @@ const RidePairing = () => {
   const [filter, setFilter] = useState('all');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showCustomRange, setShowCustomRange] = useState(false);
+  const [customRange, setCustomRange] = useState({
+    startDate: '',
+    endDate: '',
+  });
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
@@ -123,15 +128,32 @@ const RidePairing = () => {
 
   const filteredRides = rides.filter((ride) => {
     if (filter === 'all') return true;
+
     if (filter === 'today') {
       const today = new Date().toISOString().split('T')[0];
       return ride.departureDate === today;
     }
+
     if (filter === 'tomorrow') {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       return ride.departureDate === tomorrow.toISOString().split('T')[0];
     }
+
+    if (filter === 'month') {
+      const rideDate = new Date(ride.departureDate);
+      const now = new Date();
+      return rideDate.getMonth() === now.getMonth() &&
+             rideDate.getFullYear() === now.getFullYear();
+    }
+
+    if (filter === 'custom' && customRange.startDate && customRange.endDate) {
+      const rideDate = new Date(ride.departureDate);
+      const start = new Date(customRange.startDate);
+      const end = new Date(customRange.endDate);
+      return rideDate >= start && rideDate <= end;
+    }
+
     return true;
   });
 
@@ -184,21 +206,101 @@ const RidePairing = () => {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {['all', 'today', 'tomorrow'].map((f) => (
-              <button
+          <div className="flex flex-wrap justify-center gap-3 mb-4">
+            {['all', 'today', 'tomorrow', 'month'].map((f) => (
+              <motion.button
                 key={f}
-                onClick={() => setFilter(f)}
+                onClick={() => {
+                  setFilter(f);
+                  if (f !== 'custom') setShowCustomRange(false);
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
                   filter === f
                     ? 'bg-ashesi-primary text-white shadow-lg'
                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                {f.charAt(0).toUpperCase() + f.slice(1)}
+                {f === 'month' ? 'This Month' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
+
+            {/* Custom Range Button */}
+            <motion.button
+              onClick={() => {
+                setShowCustomRange(!showCustomRange);
+                if (!showCustomRange) {
+                  setFilter('custom');
+                }
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-2 rounded-full font-semibold transition-all duration-300 ${
+                filter === 'custom'
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              📅 Custom Range
+            </motion.button>
           </div>
+
+          {/* Custom Date Range Picker */}
+          <AnimatePresence>
+            {showCustomRange && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6 overflow-hidden"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 max-w-2xl mx-auto border-2 border-purple-200 dark:border-purple-700">
+                  <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+                    <span>📆</span> Select Date Range
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        From Date
+                      </label>
+                      <input
+                        type="date"
+                        value={customRange.startDate}
+                        onChange={(e) => setCustomRange({ ...customRange, startDate: e.target.value })}
+                        min={getTodayDate()}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-900 transition-all duration-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        To Date
+                      </label>
+                      <input
+                        type="date"
+                        value={customRange.endDate}
+                        onChange={(e) => setCustomRange({ ...customRange, endDate: e.target.value })}
+                        min={customRange.startDate || getTodayDate()}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-900 transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+                  {customRange.startDate && customRange.endDate && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700"
+                    >
+                      <p className="text-sm text-purple-800 dark:text-purple-200 font-semibold text-center">
+                        ✨ Showing rides from {new Date(customRange.startDate).toLocaleDateString()} to {new Date(customRange.endDate).toLocaleDateString()}
+                      </p>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Rides List */}
