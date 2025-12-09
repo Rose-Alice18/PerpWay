@@ -296,12 +296,13 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 pb-24" style={{ isolation: 'isolate' }}>
       {/* Floating User Profile Header */}
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-4 py-6 shadow-lg sticky top-0 z-10 border-b border-purple-200 dark:border-gray-700"
+        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl px-4 py-6 shadow-lg sticky top-0 border-b border-purple-200 dark:border-gray-700"
+        style={{ zIndex: 1000 }}
       >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <motion.div
@@ -354,7 +355,7 @@ const UserDashboard = () => {
         </div>
       </motion.div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 scroll-smooth">
         <AnimatePresence mode="wait">
           {/* Home Tab - Navigate to Index */}
           {activeTab === 'home' && (
@@ -386,7 +387,7 @@ const UserDashboard = () => {
                   transition={{ duration: 15, repeat: Infinity }}
                   className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full"
                 />
-                <div className="relative z-10">
+                <div className="relative">
                   <h2 className="text-3xl font-black mb-2">Welcome Back!</h2>
                   <p className="text-purple-100 mb-6">Ready to explore Perpway? Let's get moving!</p>
                   <motion.button
@@ -1532,7 +1533,8 @@ const UserDashboard = () => {
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border-t-2 border-purple-200 dark:border-gray-700 shadow-2xl z-50"
+        className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-t-2 border-purple-200 dark:border-gray-700 shadow-2xl"
+        style={{ zIndex: 999 }}
       >
         <div className="max-w-2xl mx-auto px-1 py-3">
           <div className="flex justify-around items-center">

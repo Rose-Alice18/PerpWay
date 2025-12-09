@@ -337,17 +337,17 @@ const RidePairing = () => {
               {ride.availableSeats != null && (
                 <div className={`mb-3 p-2.5 rounded-lg border ${
                   ride.availableSeats === 0
-                    ? 'bg-red-50 border-red-200'
+                    ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-700'
                     : ride.availableSeats <= 1
-                    ? 'bg-orange-50 border-orange-200'
-                    : 'bg-yellow-50 border-yellow-200'
+                    ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700'
+                    : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700'
                 }`}>
                   <p className={`text-xs font-medium flex items-center gap-1.5 ${
                     ride.availableSeats === 0
-                      ? 'text-red-800'
+                      ? 'text-red-800 dark:text-red-300'
                       : ride.availableSeats <= 1
-                      ? 'text-orange-800'
-                      : 'text-yellow-800'
+                      ? 'text-orange-800 dark:text-orange-300'
+                      : 'text-yellow-800 dark:text-yellow-300'
                   }`}>
                     <span>💺</span>
                     <span>
@@ -361,21 +361,21 @@ const RidePairing = () => {
               )}
 
               {/* Route Information */}
-              <div className="mb-4 bg-gradient-to-r from-ghana-red/10 via-ghana-yellow/10 to-ghana-green/10 rounded-lg p-4">
+              <div className="mb-4 bg-gradient-to-r from-ghana-red/10 via-ghana-yellow/10 to-ghana-green/10 dark:from-ghana-red/30 dark:via-ghana-yellow/30 dark:to-ghana-green/30 rounded-lg p-4 dark:bg-gray-700/50">
                 <div className="space-y-2">
                   <div>
-                    <p className="text-gray-600 text-xs mb-1">From</p>
-                    <p className="font-bold flex items-center">
+                    <p className="text-gray-600 dark:text-gray-300 text-xs mb-1 font-semibold">From</p>
+                    <p className="font-bold text-gray-900 dark:text-white flex items-center">
                       <span className="mr-2">🚩</span>
                       {ride.pickupLocation || 'N/A'}
                     </p>
                   </div>
                   <div className="flex justify-center">
-                    <span className="text-2xl">→</span>
+                    <span className="text-2xl text-gray-700 dark:text-gray-200">→</span>
                   </div>
                   <div>
-                    <p className="text-gray-600 text-xs mb-1">To</p>
-                    <p className="font-bold flex items-center">
+                    <p className="text-gray-600 dark:text-gray-300 text-xs mb-1 font-semibold">To</p>
+                    <p className="font-bold text-gray-900 dark:text-white flex items-center">
                       <span className="mr-2">📍</span>
                       {ride.destination}
                     </p>
@@ -385,7 +385,7 @@ const RidePairing = () => {
 
               {/* Departure Info */}
               <div className="space-y-2 mb-4">
-                <p className="text-gray-700 flex items-center">
+                <p className="text-gray-700 dark:text-gray-300 flex items-center">
                   <span className="mr-2">📅</span>
                   <span className="font-semibold">
                     {new Date(ride.departureDate).toLocaleDateString('en-GB', {
@@ -395,7 +395,7 @@ const RidePairing = () => {
                     })}
                   </span>
                 </p>
-                <p className="text-gray-700 flex items-center">
+                <p className="text-gray-700 dark:text-gray-300 flex items-center">
                   <span className="mr-2">🕒</span>
                   <span className="font-semibold">{ride.departureTime}</span>
                 </p>
@@ -403,11 +403,11 @@ const RidePairing = () => {
 
               {/* Notes */}
               {ride.notes && (
-                <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-l-4 border-blue-400">
-                  <p className="text-xs text-gray-500 mb-1 font-semibold">
+                <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border-l-4 border-blue-400 dark:border-blue-600">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">
                     💬 Note from Ride Creator:
                   </p>
-                  <p className="text-sm text-gray-700 italic">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 italic">
                     "{ride.notes}"
                   </p>
                 </div>
