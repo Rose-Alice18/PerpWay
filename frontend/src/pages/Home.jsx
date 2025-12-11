@@ -77,7 +77,7 @@ const Home = () => {
   return (
     <div className="min-h-screen overflow-hidden">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-ghana-red via-ghana-yellow to-ghana-green py-20 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-ghana-red via-ghana-yellow to-ghana-green dark:from-green-600 dark:via-green-800 dark:to-gray-900 py-20 px-4 overflow-hidden">
         {/* Animated background circles */}
         <motion.div
           className="absolute top-10 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"
