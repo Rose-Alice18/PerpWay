@@ -7,6 +7,7 @@ const FloatingDashboard = () => {
   const [userRole, setUserRole] = useState('');
   const [isDragged, setIsDragged] = useState(false);
   const [lastTap, setLastTap] = useState(0);
+  const [dragConstraints, setDragConstraints] = useState({ top: 0, left: 0, right: 0, bottom: 0 });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,6 +25,24 @@ const FloatingDashboard = () => {
     if (wasDragged === 'true') {
       setIsDragged(true);
     }
+
+    // Calculate drag constraints to keep element within viewport
+    const updateConstraints = () => {
+      const buttonWidth = 200; // Approximate width of the floating button
+      const buttonHeight = 80; // Approximate height of the floating button
+
+      setDragConstraints({
+        top: -window.innerHeight + buttonHeight + 24, // 24px padding from top
+        left: -window.innerWidth + buttonWidth + 24,  // 24px padding from left
+        right: 24,   // 24px padding from right (1.5rem)
+        bottom: 24   // 24px padding from bottom (1.5rem)
+      });
+    };
+
+    updateConstraints();
+    window.addEventListener('resize', updateConstraints);
+
+    return () => window.removeEventListener('resize', updateConstraints);
   }, []);
 
   const handleDragStart = () => {
@@ -61,13 +80,8 @@ const FloatingDashboard = () => {
     <motion.div
       drag
       dragMomentum={false}
-      dragElastic={0.1}
-      dragConstraints={{
-        top: -window.innerHeight + 150,
-        left: -window.innerWidth + 150,
-        right: window.innerWidth - 150,
-        bottom: window.innerHeight - 150
-      }}
+      dragElastic={0.05}
+      dragConstraints={dragConstraints}
       onDragStart={handleDragStart}
       style={{
         position: 'fixed',
