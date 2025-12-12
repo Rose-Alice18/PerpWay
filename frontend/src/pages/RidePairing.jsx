@@ -43,11 +43,34 @@ const RidePairing = () => {
     return now.toTimeString().slice(0, 5);
   };
 
-  // Check if a ride has expired
-  const isRideExpired = (ride) => {
+  // Check if ride time has passed (same day but time expired)
+  const isRideTimePassed = (ride) => {
     const now = new Date();
     const rideDateTime = new Date(`${ride.departureDate}T${ride.departureTime}`);
-    return rideDateTime < now;
+
+    // Check if the scheduled time has passed
+    if (rideDateTime < now) {
+      // Check if it's still the same date
+      const rideDate = new Date(ride.departureDate);
+      rideDate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return rideDate.getTime() === today.getTime(); // Same day
+    }
+    return false;
+  };
+
+  // Check if a ride has expired (after 24 hours - full day has passed)
+  const isRideExpired = (ride) => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Start of today
+
+    const rideDate = new Date(ride.departureDate);
+    rideDate.setHours(0, 0, 0, 0); // Start of ride date
+
+    // Ride is expired if the ride date is before today (full day has passed)
+    return rideDate < now;
   };
 
   useEffect(() => {
@@ -339,6 +362,29 @@ const RidePairing = () => {
                   {ride.availableSeats} {ride.availableSeats === 1 ? 'seat' : 'seats'}
                 </div>
               </div>
+
+              {/* Time Passed Alert - Show if scheduled time passed but same day */}
+              {isRideTimePassed(ride) && !isRideExpired(ride) && (
+                <motion.div
+                  animate={{
+                    opacity: [0.85, 1, 0.85],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="mb-3 p-2.5 rounded-lg border border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20"
+                >
+                  <p className="text-xs font-semibold flex items-center gap-2 text-orange-700 dark:text-orange-300">
+                    <span className="text-base">🕐</span>
+                    <span>Scheduled time has passed</span>
+                  </p>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                    Contact {ride.name} at {ride.contact} to check if you can still join or if they've already left.
+                  </p>
+                </motion.div>
+              )}
 
               {/* Expired Ride Alert - Show if ride has passed */}
               {isRideExpired(ride) && (
