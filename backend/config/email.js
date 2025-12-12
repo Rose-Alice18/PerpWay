@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const User = require('../models/User');
 
 // Create reusable transporter
 const createTransporter = () => {
@@ -13,6 +14,30 @@ const createTransporter = () => {
 
 // Send notification to ride creator when someone joins
 const sendRideJoinNotification = async (rideCreator, joiner, rideDetails) => {
+  // Check if ride creator has an email (is a registered user)
+  if (!rideCreator.email) {
+    console.log(`⚠️  Ride creator ${rideCreator.name} has no email - skipping notification`);
+    return { success: false, reason: 'No email provided' };
+  }
+
+  // Check if user has enabled email notifications
+  try {
+    const user = await User.findOne({ email: rideCreator.email });
+
+    if (!user) {
+      console.log(`⚠️  Ride creator ${rideCreator.email} is not a registered user - skipping notification`);
+      return { success: false, reason: 'Not a registered user' };
+    }
+
+    if (!user.settings || !user.settings.emailNotifications) {
+      console.log(`⚠️  ${rideCreator.email} has disabled email notifications - skipping`);
+      return { success: false, reason: 'Email notifications disabled' };
+    }
+  } catch (error) {
+    console.error('Error checking user notification settings:', error);
+    return { success: false, error };
+  }
+
   const transporter = createTransporter();
 
   const mailOptions = {
@@ -96,6 +121,16 @@ const sendRideReminder = async (ride) => {
 
   // Send to ride creator
   if (ride.userEmail) {
+    // Check if creator has enabled email notifications
+    try {
+      const creatorUser = await User.findOne({ email: ride.userEmail });
+
+      if (!creatorUser) {
+        console.log(`⚠️  Ride creator ${ride.userEmail} is not a registered user - skipping reminder`);
+      } else if (!creatorUser.settings || !creatorUser.settings.emailNotifications) {
+        console.log(`⚠️  ${ride.userEmail} has disabled email notifications - skipping reminder`);
+      } else {
+        // User exists and has notifications enabled - send reminder
     const creatorMailOptions = {
       from: process.env.EMAIL_USER,
       to: ride.userEmail,
@@ -158,17 +193,36 @@ const sendRideReminder = async (ride) => {
       `,
     };
 
-    try {
-      await transporter.sendMail(creatorMailOptions);
-      console.log(`✅ Reminder sent to ride creator: ${ride.name}`);
+        try {
+          await transporter.sendMail(creatorMailOptions);
+          console.log(`✅ Reminder sent to ride creator: ${ride.name}`);
+        } catch (error) {
+          console.error(`❌ Error sending reminder to ${ride.name}:`, error);
+        }
+      }
     } catch (error) {
-      console.error(`❌ Error sending reminder to ${ride.name}:`, error);
+      console.error('Error checking creator notification settings:', error);
     }
   }
 
   // Send to joined riders
   for (const joiner of ride.joinedUsers || []) {
     if (joiner.email) {
+      // Check if joiner has enabled email notifications
+      try {
+        const joinerUser = await User.findOne({ email: joiner.email });
+
+        if (!joinerUser) {
+          console.log(`⚠️  Rider ${joiner.email} is not a registered user - skipping reminder`);
+          continue;
+        }
+
+        if (!joinerUser.settings || !joinerUser.settings.emailNotifications) {
+          console.log(`⚠️  ${joiner.email} has disabled email notifications - skipping reminder`);
+          continue;
+        }
+
+        // User exists and has notifications enabled - send reminder
       const joinerMailOptions = {
         from: process.env.EMAIL_USER,
         to: joiner.email,
@@ -227,11 +281,14 @@ const sendRideReminder = async (ride) => {
         `,
       };
 
-      try {
-        await transporter.sendMail(joinerMailOptions);
-        console.log(`✅ Reminder sent to rider: ${joiner.name}`);
+        try {
+          await transporter.sendMail(joinerMailOptions);
+          console.log(`✅ Reminder sent to rider: ${joiner.name}`);
+        } catch (error) {
+          console.error(`❌ Error sending reminder to ${joiner.name}:`, error);
+        }
       } catch (error) {
-        console.error(`❌ Error sending reminder to ${joiner.name}:`, error);
+        console.error(`Error checking rider ${joiner.email} notification settings:`, error);
       }
     }
   }
