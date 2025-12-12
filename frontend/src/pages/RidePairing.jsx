@@ -367,18 +367,25 @@ const RidePairing = () => {
               {isRideTimePassed(ride) && !isRideExpired(ride) && (
                 <motion.div
                   animate={{
+                    scale: [1, 1.01, 1],
                     opacity: [0.85, 1, 0.85],
                   }}
                   transition={{
-                    duration: 3,
+                    duration: 2.5,
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
                   className="mb-3 p-2.5 rounded-lg border border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20"
                 >
                   <p className="text-xs font-semibold flex items-center gap-2 text-orange-700 dark:text-orange-300">
-                    <span className="text-base">🕐</span>
-                    <span>Scheduled time has passed</span>
+                    <motion.span
+                      animate={{ rotate: [0, 5, -5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="text-base"
+                    >
+                      🕐
+                    </motion.span>
+                    <span>Scheduled time of {ride.departureTime} has passed</span>
                   </p>
                   <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
                     Contact {ride.name} at {ride.contact} to check if you can still join or if they've already left.
