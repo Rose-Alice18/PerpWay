@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Ride = require('../models/Ride');
+const { sendRideJoinNotification } = require('../config/email');
 
 // Get all rides
 router.get('/', async (req, res) => {
@@ -133,6 +134,34 @@ router.post('/:id/join', async (req, res) => {
     await ride.save();
 
     console.log(`🚙 ${name} (${phone}) joined ride ${ride._id} - took ${seatsRequested} seat(s) [${contactVisibility || 'private'}]`);
+
+    // Send email notification to ride creator
+    const rideCreator = {
+      name: ride.name,
+      email: ride.userEmail,
+      contact: ride.contact,
+    };
+
+    const joiner = {
+      name,
+      phone,
+      whatsapp: whatsapp || phone,
+      email: email || '',
+      seatsNeeded: seatsRequested,
+    };
+
+    const rideDetails = {
+      pickupLocation: ride.pickupLocation,
+      destination: ride.destination,
+      departureDate: ride.departureDate,
+      departureTime: ride.departureTime,
+      availableSeats: ride.availableSeats,
+    };
+
+    // Send notification (don't wait for it - send async)
+    sendRideJoinNotification(rideCreator, joiner, rideDetails).catch(err => {
+      console.error('Failed to send notification email:', err);
+    });
 
     res.json({
       success: true,

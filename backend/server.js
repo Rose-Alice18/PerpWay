@@ -7,6 +7,7 @@ const session = require('express-session');
 require('dotenv').config();
 const connectDatabase = require('./config/database');
 const passport = require('./config/passport');
+const { startRideReminderService } = require('./services/rideReminders');
 
 const app = express();
 
@@ -132,4 +133,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Perpway server is running on port ${PORT}`);
   console.log(`🌍 Visit http://localhost:${PORT}`);
+
+  // Start ride reminder service
+  startRideReminderService();
 });
