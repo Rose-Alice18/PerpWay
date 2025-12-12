@@ -134,12 +134,12 @@ const ServiceHub = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-8"
+          className="mb-8 max-w-4xl mx-auto"
         >
           <motion.div
             whileHover={{ scale: 1.01, y: -3 }}
             onClick={() => navigate('/shopping-request')}
-            className="relative overflow-hidden cursor-pointer bg-gradient-to-br from-ashesi-primary via-ghana-red to-ghana-yellow rounded-2xl p-6 md:p-6 shadow-xl"
+            className="relative overflow-hidden cursor-pointer bg-gradient-to-br from-ashesi-primary via-ghana-red to-ghana-yellow rounded-2xl p-5 md:p-5 shadow-xl"
           >
             {/* Decorative Background Elements */}
             <motion.div
@@ -168,7 +168,7 @@ const ServiceHub = () => {
             />
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-6">
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-3 md:gap-4">
               <motion.div
                 animate={{
                   y: [0, -8, 0],
@@ -179,25 +179,25 @@ const ServiceHub = () => {
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="text-5xl md:text-6xl flex-shrink-0"
+                className="text-4xl md:text-5xl flex-shrink-0"
               >
                 🛒
               </motion.div>
               <div className="flex-1 text-white text-center md:text-left">
-                <h2 className="text-2xl md:text-3xl font-black mb-2">Shopping Service</h2>
-                <p className="text-sm md:text-base text-white/90 mb-3">
+                <h2 className="text-xl md:text-2xl font-black mb-1.5">Shopping Service</h2>
+                <p className="text-xs md:text-sm text-white/90 mb-2">
                   Need something from town but don't want to go yourself? We'll get it for you!
                 </p>
-                <p className="text-xs md:text-sm text-white/75 mb-4">
+                <p className="text-xs text-white/75 mb-3">
                   Chargers, body lotion, perfume, slippers, and more - just send us an image and tell us where to find it!
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-white text-ashesi-primary px-6 py-3 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2"
+                  className="bg-white text-ashesi-primary px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2"
                 >
                   <span>📦</span> Request Shopping Service
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                   </svg>
                 </motion.button>
