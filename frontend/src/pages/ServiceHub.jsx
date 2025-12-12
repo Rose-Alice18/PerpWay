@@ -134,12 +134,12 @@ const ServiceHub = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-12"
+          className="mb-8"
         >
           <motion.div
-            whileHover={{ scale: 1.02, y: -5 }}
+            whileHover={{ scale: 1.01, y: -3 }}
             onClick={() => navigate('/shopping-request')}
-            className="relative overflow-hidden cursor-pointer bg-gradient-to-br from-ashesi-primary via-ghana-red to-ghana-yellow rounded-3xl p-8 shadow-2xl"
+            className="relative overflow-hidden cursor-pointer bg-gradient-to-br from-ashesi-primary via-ghana-red to-ghana-yellow rounded-2xl p-6 md:p-6 shadow-xl"
           >
             {/* Decorative Background Elements */}
             <motion.div
@@ -152,7 +152,7 @@ const ServiceHub = () => {
                 repeat: Infinity,
                 ease: "linear"
               }}
-              className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full"
+              className="absolute -top-16 -right-16 w-40 h-40 bg-white/10 rounded-full"
             />
             <motion.div
               animate={{
@@ -164,14 +164,14 @@ const ServiceHub = () => {
                 repeat: Infinity,
                 ease: "linear"
               }}
-              className="absolute -bottom-16 -left-16 w-48 h-48 bg-white/10 rounded-full"
+              className="absolute -bottom-12 -left-12 w-32 h-32 bg-white/10 rounded-full"
             />
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-4 md:gap-6">
               <motion.div
                 animate={{
-                  y: [0, -10, 0],
+                  y: [0, -8, 0],
                   rotate: [0, 5, -5, 0],
                 }}
                 transition={{
@@ -179,26 +179,26 @@ const ServiceHub = () => {
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="text-7xl md:text-8xl"
+                className="text-5xl md:text-6xl flex-shrink-0"
               >
                 🛒
               </motion.div>
               <div className="flex-1 text-white text-center md:text-left">
-                <h2 className="text-3xl md:text-4xl font-black mb-3">Shopping Service</h2>
-                <p className="text-lg md:text-xl text-white/90 mb-4">
+                <h2 className="text-2xl md:text-3xl font-black mb-2">Shopping Service</h2>
+                <p className="text-sm md:text-base text-white/90 mb-3">
                   Need something from town but don't want to go yourself? We'll get it for you!
                 </p>
-                <p className="text-sm md:text-base text-white/80 mb-6">
+                <p className="text-xs md:text-sm text-white/75 mb-4">
                   Chargers, body lotion, perfume, slippers, and more - just send us an image and tell us where to find it!
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-white text-ashesi-primary px-8 py-4 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl transition-all inline-flex items-center gap-2"
+                  className="bg-white text-ashesi-primary px-6 py-3 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2"
                 >
                   <span>📦</span> Request Shopping Service
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                   </svg>
                 </motion.button>
               </div>
