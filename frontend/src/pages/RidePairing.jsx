@@ -43,6 +43,13 @@ const RidePairing = () => {
     return now.toTimeString().slice(0, 5);
   };
 
+  // Check if a ride has expired
+  const isRideExpired = (ride) => {
+    const now = new Date();
+    const rideDateTime = new Date(`${ride.departureDate}T${ride.departureTime}`);
+    return rideDateTime < now;
+  };
+
   useEffect(() => {
     fetchRides();
   }, []);
@@ -333,6 +340,36 @@ const RidePairing = () => {
                 </div>
               </div>
 
+              {/* Expired Ride Alert - Show if ride has passed */}
+              {isRideExpired(ride) && (
+                <motion.div
+                  animate={{
+                    scale: [1, 1.02, 1],
+                    opacity: [0.9, 1, 0.9],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="mb-3 p-3 rounded-lg border-2 border-red-500 dark:border-red-400 bg-red-100 dark:bg-red-900/30"
+                >
+                  <p className="text-sm font-bold flex items-center gap-2 text-red-800 dark:text-red-300">
+                    <motion.span
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                      className="text-xl"
+                    >
+                      ⚠️
+                    </motion.span>
+                    <span>RIDE HAS PASSED!</span>
+                  </p>
+                  <p className="text-xs text-red-700 dark:text-red-400 mt-1">
+                    This ride will be deleted soon. Please look for other rides or create a new one.
+                  </p>
+                </motion.div>
+              )}
+
               {/* Seats Info Alert - Only show if availableSeats is valid */}
               {ride.availableSeats != null && (
                 <div className={`mb-3 p-2.5 rounded-lg border ${
@@ -416,17 +453,23 @@ const RidePairing = () => {
               {/* Action Buttons */}
               <div className="space-y-2">
                 <motion.button
-                  whileHover={{ scale: ride.availableSeats === 0 ? 1 : 1.02 }}
-                  whileTap={{ scale: ride.availableSeats === 0 ? 1 : 0.98 }}
+                  whileHover={{ scale: (ride.availableSeats === 0 || isRideExpired(ride)) ? 1 : 1.02 }}
+                  whileTap={{ scale: (ride.availableSeats === 0 || isRideExpired(ride)) ? 1 : 0.98 }}
                   onClick={() => handleJoinRide(ride)}
                   className={`w-full px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                    ride.availableSeats === 0
+                    isRideExpired(ride)
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : ride.availableSeats === 0
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                       : 'bg-ghana-red hover:bg-ghana-red/90 text-white hover:shadow-lg'
                   }`}
-                  disabled={ride.availableSeats === 0}
+                  disabled={ride.availableSeats === 0 || isRideExpired(ride)}
                 >
-                  {ride.availableSeats === 0 ? 'Ride Full 😔' : 'Join This Ride 🚗'}
+                  {isRideExpired(ride)
+                    ? 'Ride Expired ⏰'
+                    : ride.availableSeats === 0
+                    ? 'Ride Full 😔'
+                    : 'Join This Ride 🚗'}
                 </motion.button>
 
                 <motion.button
@@ -434,14 +477,16 @@ const RidePairing = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate('/drivers')}
                   className={`w-full px-4 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-                    ride.availableSeats === 0
+                    isRideExpired(ride) || ride.availableSeats === 0
                       ? 'bg-ghana-green text-white animate-pulse'
                       : 'bg-ghana-yellow text-gray-800'
                   }`}
                 >
                   <span className="text-lg">🚕</span>
                   <span>
-                    {ride.availableSeats === 0
+                    {isRideExpired(ride)
+                      ? 'Find Another Ride or Call a Driver!'
+                      : ride.availableSeats === 0
                       ? 'Now Go Ahead & Call a Driver!'
                       : 'Or Call a Driver Directly!'}
                   </span>
