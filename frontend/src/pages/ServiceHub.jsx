@@ -8,34 +8,40 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 const ServiceHub = () => {
   const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
+  const [categories, setCategories] = useState([{ id: 'all', name: 'All Services', icon: '🛍️' }]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [revealedContacts, setRevealedContacts] = useState(new Set());
 
-  const categories = [
-    { id: 'all', name: 'All Services', icon: '🛍️' },
-    { id: 'fruit', name: 'Fruit Vendors', icon: '🍎' },
-    { id: 'tailor', name: 'Tailors', icon: '👗' },
-    { id: 'barber', name: 'Barbers', icon: '💈' },
-    { id: 'food', name: 'Food Vendors', icon: '🍲' },
-  ];
-
   useEffect(() => {
-    const fetchVendors = async () => {
+    const fetchData = async () => {
       try {
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${apiUrl}/api/vendors`);
-        setVendors(response.data);
+
+        // Fetch vendors
+        const vendorsResponse = await axios.get(`${apiUrl}/api/vendors`);
+        setVendors(vendorsResponse.data);
+
+        // Fetch categories (only visible ones)
+        const categoriesResponse = await axios.get(`${apiUrl}/api/categories`);
+        const visibleCategories = categoriesResponse.data.filter(cat => cat.isVisible);
+
+        // Add "All Services" at the beginning
+        setCategories([
+          { id: 'all', name: 'All Services', icon: '🛍️' },
+          ...visibleCategories
+        ]);
+
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching vendors:', error);
+        console.error('Error fetching data:', error);
         setLoading(false);
       }
     };
 
-    fetchVendors();
+    fetchData();
   }, []);
 
   const handleViewContact = (vendor) => {
