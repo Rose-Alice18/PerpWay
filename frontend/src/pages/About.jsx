@@ -85,9 +85,9 @@ const About = () => {
             >
               ℹ️
             </motion.div>
-            <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">About Perpway</h1>
+            <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">About PERPway</h1>
             <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
-              Your trusted community platform for personal easy rides and packages. Making campus life simple, one service at a time! 🚀
+              Your trusted community platform for Personal Easy Rides and Packages (PERP). Making campus life simple, one service at a time!
             </p>
           </motion.div>
         </div>

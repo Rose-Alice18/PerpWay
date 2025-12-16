@@ -149,7 +149,7 @@ const DriverFinder = () => {
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto mb-8">
             Connect with trusted local drivers for your transport needs.
-            Small tip den you will see all driver's number! 😄
+            Small tip den you will see all drivers' number! 😄
           </p>
 
           {/* Filter Buttons */}

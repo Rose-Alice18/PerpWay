@@ -2672,13 +2672,39 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedRide, setSelectedRide] = useState(null);
 
+  // Check if ride time has passed (same day but time expired)
+  const isRideTimePassed = (ride) => {
+    if (!ride.departureDate || !ride.departureTime) return false;
+    const now = new Date();
+    const rideDateTime = new Date(`${ride.departureDate}T${ride.departureTime}`);
+
+    if (rideDateTime < now) {
+      const rideDate = new Date(ride.departureDate);
+      rideDate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return rideDate.getTime() === today.getTime(); // Same day
+    }
+    return false;
+  };
+
+  // Check if a ride has expired (after 24 hours - full day has passed)
+  const isRideExpired = (ride) => {
+    if (!ride.departureDate) return false;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const rideDate = new Date(ride.departureDate);
+    rideDate.setHours(0, 0, 0, 0);
+    return rideDate < now;
+  };
+
   const filteredRides = rides.filter(ride => {
     const matchesSearch = !searchTerm ||
-      ride.pickup?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ride.pickupLocation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ride.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ride.creatorName?.toLowerCase().includes(searchTerm.toLowerCase());
+      ride.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const isActive = ride.date ? (new Date(ride.date) >= new Date()) : false;
+    const isActive = !isRideExpired(ride);
     const matchesStatus = statusFilter === 'all' ||
       (statusFilter === 'active' && isActive) ||
       (statusFilter === 'completed' && !isActive);
@@ -2714,10 +2740,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
   };
 
   const isRideActive = (ride) => {
-    if (!ride.date) return false;
-    const rideDate = new Date(ride.date);
-    if (isNaN(rideDate.getTime())) return false;
-    return rideDate >= new Date();
+    return !isRideExpired(ride);
   };
 
   return (
@@ -2750,7 +2773,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
               </button>
             </div>
             <button
-              onClick={() => exportToCSV(filteredRides, 'rides', ['pickup', 'destination', 'date', 'time', 'availableSeats', 'creatorName'])}
+              onClick={() => exportToCSV(filteredRides, 'rides', ['pickupLocation', 'destination', 'departureDate', 'departureTime', 'availableSeats', 'name'])}
               className="px-4 py-2 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
             >
               <span>📥</span> Export CSV
@@ -2818,7 +2841,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                     <span className="text-green-600 text-lg">📍</span>
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">From</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">{ride.pickup}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{ride.pickupLocation}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -2835,17 +2858,17 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                     <span className="text-sm">👤</span>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Created by</p>
                   </div>
-                  <p className="font-semibold text-gray-900 dark:text-white ml-6">{ride.creatorName || 'N/A'}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white ml-6">{ride.name || 'N/A'}</p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-4 text-center">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
                     <p className="text-xs text-gray-500 dark:text-gray-400">Date</p>
-                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{formatDate(ride.date)}</p>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{formatDate(ride.departureDate)}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
                     <p className="text-xs text-gray-500 dark:text-gray-400">Time</p>
-                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{ride.time || 'N/A'}</p>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{ride.departureTime || 'N/A'}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
                     <p className="text-xs text-gray-500 dark:text-gray-400">Seats</p>
@@ -2853,12 +2876,42 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                   </div>
                 </div>
 
-                {!isRideActive(ride) && (
-                  <div className="mb-3 p-2 bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700 rounded-lg">
-                    <p className="text-xs text-orange-800 dark:text-orange-400 text-center font-semibold">
-                      ⚠️ This ride has expired
+                {/* Time passed banner (same day) */}
+                {isRideTimePassed(ride) && !isRideExpired(ride) && (
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.01, 1],
+                      opacity: [0.85, 1, 0.85],
+                    }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="mb-3 p-2.5 rounded-lg border border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20"
+                  >
+                    <p className="text-xs font-semibold flex items-center gap-2 text-orange-700 dark:text-orange-300">
+                      <motion.span animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                        🕐
+                      </motion.span>
+                      <span>Scheduled time of {ride.departureTime} has passed</span>
                     </p>
-                  </div>
+                  </motion.div>
+                )}
+
+                {/* Full day expired banner */}
+                {isRideExpired(ride) && (
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.02, 1],
+                      opacity: [0.9, 1, 0.9],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="mb-3 p-3 rounded-lg border-2 border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-900/20"
+                  >
+                    <p className="text-xs font-bold flex items-center gap-2 text-red-700 dark:text-red-300">
+                      <motion.span animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 1.2, repeat: Infinity }}>
+                        ⚠️
+                      </motion.span>
+                      <span>This ride has expired and will be deleted soon</span>
+                    </p>
+                  </motion.div>
                 )}
 
                 <div className="flex gap-2">
@@ -2931,7 +2984,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-semibold text-gray-900 dark:text-white flex items-center gap-1">
-                            <span className="text-green-600">📍</span> {ride.pickup}
+                            <span className="text-green-600">📍</span> {ride.pickupLocation}
                           </span>
                           <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <span className="text-red-600">🎯</span> {ride.destination}
@@ -2940,8 +2993,8 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="font-semibold text-gray-900 dark:text-white">{formatDate(ride.date)}</span>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{ride.time || 'N/A'}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">{formatDate(ride.departureDate)}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{ride.departureTime || 'N/A'}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -2949,18 +3002,27 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                           {ride.availableSeats} seats
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{ride.creatorName || 'N/A'}</td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{ride.name || 'N/A'}</td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
-                          <span className={`px-3 py-1 rounded-lg text-xs font-bold inline-block w-fit ${
-                            isRideActive(ride)
-                              ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400'
-                              : 'bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-400'
-                          }`}>
-                            {isRideActive(ride) ? 'ACTIVE' : 'EXPIRED'}
-                          </span>
-                          {!isRideActive(ride) && (
-                            <span className="text-xs text-orange-600 dark:text-orange-400">⚠️ Ready to delete</span>
+                          {isRideExpired(ride) ? (
+                            <>
+                              <span className="px-3 py-1 rounded-lg text-xs font-bold inline-block w-fit bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400">
+                                EXPIRED
+                              </span>
+                              <span className="text-xs text-red-600 dark:text-red-400">⚠️ Day has passed</span>
+                            </>
+                          ) : isRideTimePassed(ride) ? (
+                            <>
+                              <span className="px-3 py-1 rounded-lg text-xs font-bold inline-block w-fit bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-400">
+                                TIME PASSED
+                              </span>
+                              <span className="text-xs text-orange-600 dark:text-orange-400">🕐 Same day</span>
+                            </>
+                          ) : (
+                            <span className="px-3 py-1 rounded-lg text-xs font-bold inline-block w-fit bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">
+                              ACTIVE
+                            </span>
                           )}
                         </div>
                       </td>
@@ -3027,28 +3089,44 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
             <div className="space-y-4 mb-6">
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Route</p>
-                <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.pickup || 'N/A'} → {selectedRide.destination || 'N/A'}</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.pickupLocation || 'N/A'} → {selectedRide.destination || 'N/A'}</p>
               </div>
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Created By</p>
                 <p className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span>👤</span> {selectedRide.creatorName || 'N/A'}
+                  <span>👤</span> {selectedRide.name || 'N/A'}
                 </p>
+                {selectedRide.contact && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    📞 {selectedRide.contact}
+                  </p>
+                )}
+                {selectedRide.userEmail && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    ✉️ {selectedRide.userEmail}
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Date</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{formatDate(selectedRide.date)}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{formatDate(selectedRide.departureDate)}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Time</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.time || 'N/A'}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.departureTime || 'N/A'}</p>
                 </div>
               </div>
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Available Seats</p>
                 <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.availableSeats || 'N/A'}</p>
               </div>
+              {selectedRide.notes && (
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Notes</p>
+                  <p className="text-sm text-gray-900 dark:text-white">{selectedRide.notes}</p>
+                </div>
+              )}
               {selectedRide.joinedUsers && selectedRide.joinedUsers.length > 0 && (
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Joined Passengers ({selectedRide.joinedUsers.length})</p>

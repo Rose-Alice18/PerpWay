@@ -64,7 +64,7 @@ const Delivery = () => {
       id: 'weekly-station',
       name: 'Weekly Station Pickup',
       icon: '📦',
-      description: 'Deliver your item to our station at Kwabenya to be stored, we will bring it to campus for you on a weekday',
+      description: 'Deliver your item to our station at Kwabenya to be stored, we will bring it to campus for you on a selected weekday',
       price: `GH₵${pricing.weeklyStation}`,
     },
   ];
