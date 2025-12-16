@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -14,18 +14,44 @@ const Contact = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
   const [errors, setErrors] = useState({});
+  const [contactDetails, setContactDetails] = useState({
+    email: 'support@perpway.com',
+    phone: '+233 XX XXX XXXX',
+    whatsapp: ''
+  });
+
+  // Fetch admin contact settings
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+        const response = await axios.get(`${apiUrl}/api/settings`);
+        if (response.data && response.data.general) {
+          setContactDetails({
+            email: 'support@perpway.com', // Always show this on frontend
+            phone: response.data.general.supportPhone || '+233 XX XXX XXXX',
+            whatsapp: response.data.general.supportPhone || '' // Use same number for WhatsApp
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching contact info:', error);
+      }
+    };
+
+    fetchContactInfo();
+  }, []);
 
   const contactInfo = [
     {
       icon: '📧',
       title: 'Email Us',
-      value: 'support@perpway.com',
+      value: contactDetails.email,
       description: 'We dey reply within 24 hours!',
     },
     {
       icon: '📱',
       title: 'Call Us',
-      value: '+233 XX XXX XXXX',
+      value: contactDetails.phone,
       description: 'Monday - Friday, 8am - 6pm',
     },
     {
@@ -37,7 +63,7 @@ const Contact = () => {
     {
       icon: '💬',
       title: 'WhatsApp',
-      value: '+233 XX XXX XXXX',
+      value: contactDetails.whatsapp,
       description: 'Quick responses, all day!',
     },
   ];
@@ -83,7 +109,8 @@ const Contact = () => {
 
     try {
       // Send contact form to backend
-      await axios.post('http://localhost:5000/api/contact/submit', formData);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      await axios.post(`${apiUrl}/api/contact/submit`, formData);
 
       setShowSuccess(true);
       setSubmitting(false);

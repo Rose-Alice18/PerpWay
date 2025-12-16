@@ -84,6 +84,7 @@ const categoryRoutes = require('./routes/categories');
 const settingsRoutes = require('./routes/settings');
 const financialRoutes = require('./routes/financials');
 const shoppingRoutes = require('./routes/shopping');
+const contactRoutes = require('./routes/contact');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
@@ -96,6 +97,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/financials', financialRoutes);
 app.use('/api/shopping', shoppingRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
