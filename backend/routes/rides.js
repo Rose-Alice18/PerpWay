@@ -6,7 +6,10 @@ const { sendRideJoinNotification } = require('../config/email');
 // Get all rides
 router.get('/', async (req, res) => {
   try {
-    const rides = await Ride.find({ status: 'active' }).sort({ departureDate: 1, departureTime: 1 });
+    // Check if request is for all rides (admin) or just active rides (public)
+    const includeAll = req.query.all === 'true';
+    const query = includeAll ? {} : { status: 'active' };
+    const rides = await Ride.find(query).sort({ departureDate: -1, departureTime: -1 });
     res.json(rides);
   } catch (error) {
     console.error('Error fetching rides:', error);

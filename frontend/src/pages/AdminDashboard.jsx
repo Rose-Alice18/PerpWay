@@ -93,7 +93,7 @@ const AdminDashboard = () => {
 
   const fetchRides = async () => {
     try {
-      const ridesRes = await axios.get(`${API_URL}/api/rides`);
+      const ridesRes = await axios.get(`${API_URL}/api/rides?all=true`);
       setRides(ridesRes.data);
     } catch (error) {
       console.error('Error fetching rides:', error);
@@ -3669,7 +3669,7 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
   });
 
   const allUsers = [
-    { _id: 'admin', name: 'Admin Roseline', email: 'admin@perpway.com', role: 'admin', date: 'System' },
+    { _id: 'admin', name: 'Admin Roseline', email: 'admin@perpway.com', role: 'admin', createdAt: 'System' },
     ...filteredUsers
   ];
 
@@ -3707,7 +3707,7 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
               </button>
             </div>
             <button
-              onClick={() => exportToCSV(allUsers, 'users', ['name', 'email', 'role', 'date'])}
+              onClick={() => exportToCSV(allUsers, 'users', ['name', 'email', 'role', 'createdAt'])}
               className="px-4 py-2 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
             >
               <span>📥</span> Export CSV
@@ -3779,7 +3779,7 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                        {user.date === 'System' ? 'System User' : new Date(user.date).toLocaleDateString()}
+                        {user.createdAt === 'System' ? 'System User' : new Date(user.createdAt).toLocaleDateString()}
                       </td>
                     </motion.tr>
                   ))
@@ -3831,7 +3831,7 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
                   </div>
                   <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                     <span>📅</span>
-                    <span>{user.date === 'System' ? 'System User' : new Date(user.date).toLocaleDateString()}</span>
+                    <span>{user.createdAt === 'System' ? 'System User' : new Date(user.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </motion.div>

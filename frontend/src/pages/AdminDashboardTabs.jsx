@@ -17,11 +17,11 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
 
   const filteredRides = rides.filter(ride => {
     const matchesSearch = !searchTerm ||
-      ride.pickup?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ride.pickupLocation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ride.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ride.creatorName?.toLowerCase().includes(searchTerm.toLowerCase());
+      ride.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const isActive = new Date(ride.date) >= new Date();
+    const isActive = new Date(ride.departureDate) >= new Date();
     const matchesStatus = statusFilter === 'all' ||
       (statusFilter === 'active' && isActive) ||
       (statusFilter === 'completed' && !isActive);
@@ -45,7 +45,7 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
     return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
-  const isRideActive = (ride) => new Date(ride.date) >= new Date();
+  const isRideActive = (ride) => new Date(ride.departureDate) >= new Date();
 
   return (
     <div className="space-y-6">
@@ -81,7 +81,7 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
               </button>
             </div>
             <button
-              onClick={() => exportToCSV(filteredRides, 'rides', ['pickup', 'destination', 'date', 'time', 'availableSeats', 'creatorName'])}
+              onClick={() => exportToCSV(filteredRides, 'rides', ['pickupLocation', 'destination', 'departureDate', 'departureTime', 'availableSeats', 'name'])}
               className="px-4 py-2 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
             >
               <span>📥</span> Export CSV
@@ -149,7 +149,7 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                     <span className="text-green-600 text-lg">📍</span>
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400">From</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">{ride.pickup}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{ride.pickupLocation}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -164,11 +164,11 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                 <div className="grid grid-cols-3 gap-2 mb-4 text-center">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
                     <p className="text-xs text-gray-500 dark:text-gray-400">Date</p>
-                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{formatDate(ride.date)}</p>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{formatDate(ride.departureDate)}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
                     <p className="text-xs text-gray-500 dark:text-gray-400">Time</p>
-                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{ride.time}</p>
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">{ride.departureTime}</p>
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
                     <p className="text-xs text-gray-500 dark:text-gray-400">Seats</p>
@@ -176,9 +176,9 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                   </div>
                 </div>
 
-                {ride.creatorName && (
+                {ride.name && (
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    <span className="font-semibold">Created by:</span> {ride.creatorName}
+                    <span className="font-semibold">Created by:</span> {ride.name}
                   </p>
                 )}
 
@@ -235,7 +235,7 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-semibold text-gray-900 dark:text-white flex items-center gap-1">
-                            <span className="text-green-600">📍</span> {ride.pickup}
+                            <span className="text-green-600">📍</span> {ride.pickupLocation}
                           </span>
                           <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <span className="text-red-600">🎯</span> {ride.destination}
@@ -244,8 +244,8 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="font-semibold text-gray-900 dark:text-white">{formatDate(ride.date)}</span>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{ride.time}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">{formatDate(ride.departureDate)}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{ride.departureTime}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -253,7 +253,7 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                           {ride.availableSeats} seats
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{ride.creatorName || 'N/A'}</td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{ride.name || 'N/A'}</td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
                           isRideActive(ride)
@@ -300,16 +300,16 @@ export const RidesTab = ({ rides, fetchData, exportToCSV }) => {
             <div className="space-y-4 mb-6">
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Route</p>
-                <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.pickup} → {selectedRide.destination}</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.pickupLocation} → {selectedRide.destination}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Date</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{formatDate(selectedRide.date)}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{formatDate(selectedRide.departureDate)}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Time</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.time}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{selectedRide.departureTime}</p>
                 </div>
               </div>
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
