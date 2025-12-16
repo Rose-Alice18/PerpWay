@@ -17,7 +17,7 @@ const Footer = () => {
           </div>
 
           {/* Center: Navigation Links */}
-          <nav className="flex items-center gap-6 md:gap-8 text-sm">
+          <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm">
             <Link to="/drivers" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
               <span>🚗</span> Drivers
             </Link>
@@ -29,6 +29,12 @@ const Footer = () => {
             </Link>
             <Link to="/rides" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
               <span>🚙</span> Rides
+            </Link>
+            <Link to="/shopping" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <span>🛒</span> Shopping
+            </Link>
+            <Link to="/marketplace" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+              <span>🏪</span> Marketplace
             </Link>
           </nav>
 

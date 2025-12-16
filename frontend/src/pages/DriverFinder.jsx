@@ -9,9 +9,30 @@ const DriverFinder = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
-  const [revealedContacts, setRevealedContacts] = useState(new Set());
   const [filter, setFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
+
+  // Check if contacts were previously revealed (within last 24 hours)
+  const getInitialRevealedState = () => {
+    try {
+      const stored = localStorage.getItem('perpway_contacts_revealed');
+      if (stored) {
+        const { revealed, timestamp } = JSON.parse(stored);
+        const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const now = Date.now();
+
+        // If revealed and within 24 hours, keep them revealed
+        if (revealed && (now - timestamp) < twentyFourHours) {
+          return new Set(['all']);
+        }
+      }
+    } catch (error) {
+      console.error('Error reading revealed contacts from localStorage:', error);
+    }
+    return new Set();
+  };
+
+  const [revealedContacts, setRevealedContacts] = useState(getInitialRevealedState)
 
   // Fetch drivers from backend
   useEffect(() => {
@@ -36,19 +57,43 @@ const DriverFinder = () => {
   }, []);
 
   const handleViewContact = (driver) => {
-    const driverId = driver._id || driver.id;
-    if (revealedContacts.has(driverId)) {
-      // Already paid, show contact
+    // If all contacts are already revealed, do nothing
+    if (revealedContacts.has('all')) {
       return;
     }
     setSelectedDriver(driver);
     setShowPayment(true);
   };
 
-  const handlePaymentSuccess = (driverId) => {
-    setRevealedContacts(new Set([...revealedContacts, driverId]));
+  const saveRevealedToLocalStorage = () => {
+    try {
+      localStorage.setItem('perpway_contacts_revealed', JSON.stringify({
+        revealed: true,
+        timestamp: Date.now()
+      }));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    // Reveal ALL contacts immediately when user tips
+    setRevealedContacts(new Set(['all']));
+    saveRevealedToLocalStorage();
     setShowPayment(false);
     setSelectedDriver(null);
+  };
+
+  const handlePaymentClose = () => {
+    // When user closes without paying, reveal contacts after a delay (like OceanofPDF)
+    setShowPayment(false);
+    setSelectedDriver(null);
+
+    // Reveal all contacts after 3 seconds
+    setTimeout(() => {
+      setRevealedContacts(new Set(['all']));
+      saveRevealedToLocalStorage();
+    }, 3000);
   };
 
   const filteredDrivers = drivers.filter((driver) => {
@@ -66,7 +111,7 @@ const DriverFinder = () => {
             className="text-center mb-12"
           >
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4 dark:text-white">
-              Find Your Driver 🚗
+              Find A Driver 🚗
             </h1>
             <motion.div
               className="inline-block text-6xl mb-4"
@@ -104,7 +149,7 @@ const DriverFinder = () => {
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto mb-8">
             Connect with trusted local drivers for your transport needs.
-            Small tip den you go fit see their number! 😄
+            Small tip den you will see all driver's number! 😄
           </p>
 
           {/* Filter Buttons */}
@@ -164,7 +209,7 @@ const DriverFinder = () => {
           >
             <AnimatePresence mode="popLayout">
               {filteredDrivers.map((driver, index) => {
-                const isRevealed = revealedContacts.has(driver.id);
+                const isRevealed = revealedContacts.has('all');
 
                 return (
                   <motion.div
@@ -331,7 +376,7 @@ const DriverFinder = () => {
             {/* Mobile: Card-like rows */}
             <div className="block md:hidden">
               {filteredDrivers.map((driver, index) => {
-                const isRevealed = revealedContacts.has(driver.id);
+                const isRevealed = revealedContacts.has('all');
                 return (
                   <motion.div
                     key={driver.id}
@@ -426,7 +471,7 @@ const DriverFinder = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredDrivers.map((driver, index) => {
-                    const isRevealed = revealedContacts.has(driver.id);
+                    const isRevealed = revealedContacts.has('all');
                     return (
                       <motion.tr
                         key={driver.id}
@@ -529,11 +574,8 @@ const DriverFinder = () => {
         {showPayment && selectedDriver && (
           <PaymentModal
             driver={selectedDriver}
-            onClose={() => {
-              setShowPayment(false);
-              setSelectedDriver(null);
-            }}
-            onSuccess={() => handlePaymentSuccess(selectedDriver.id)}
+            onClose={handlePaymentClose}
+            onSuccess={handlePaymentSuccess}
           />
         )}
       </AnimatePresence>

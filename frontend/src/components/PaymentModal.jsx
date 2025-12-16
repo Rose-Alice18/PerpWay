@@ -1,30 +1,56 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { PaystackButton } from 'react-paystack';
 
 const PaymentModal = ({ driver, onClose, onSuccess }) => {
   const [paymentMethod, setPaymentMethod] = useState('momo');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [processing, setProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showDisappointed, setShowDisappointed] = useState(false);
 
-  const tipAmount = 2; // GHS 2 tip
+  const [tipAmount, setTipAmount] = useState(2); // Minimum GHS 2 tip
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  const handlePayment = async (e) => {
-    e.preventDefault();
+  // Get user email (you might want to get this from your auth context)
+  const userEmail = localStorage.getItem('userEmail') || 'user@example.com';
+
+  // Paystack configuration
+  const paystackConfig = {
+    reference: new Date().getTime().toString(),
+    email: userEmail,
+    amount: tipAmount * 100, // Amount in pesewas
+    publicKey: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+    currency: 'GHS',
+    metadata: {
+      custom_fields: [
+        {
+          display_name: "Service",
+          variable_name: "service",
+          value: "Perpway - Driver Contact Unlock"
+        },
+        {
+          display_name: "Driver",
+          variable_name: "driver_name",
+          value: driver.name
+        }
+      ]
+    },
+    channels: paymentMethod === 'momo' ? ['mobile_money'] : ['card'],
+    label: 'Perpway',
+  };
+
+  const handlePaystackSuccess = async (reference) => {
     setProcessing(true);
 
     try {
-      // Simulate payment processing
-      const response = await axios.post('http://localhost:5000/api/payments/tip', {
-        driverId: driver.id,
-        amount: tipAmount,
-        method: paymentMethod,
-        phoneNumber,
-      });
+      // Verify payment on backend
+      const response = await axios.get(
+        `${apiUrl}/api/payments/verify/${reference.reference}`
+      );
 
-      // Simulate delay for payment processing
-      setTimeout(() => {
+      if (response.data.success && response.data.data.status === 'success') {
+        console.log('✅ Payment verified successfully');
         setProcessing(false);
         setShowSuccess(true);
 
@@ -32,12 +58,31 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
         setTimeout(() => {
           onSuccess();
         }, 2000);
-      }, 2000);
+      } else {
+        throw new Error('Payment verification failed');
+      }
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error('❌ Payment verification error:', error);
       setProcessing(false);
-      alert('Payment failed. Please try again!');
+      alert('Payment verification failed. Please contact support with reference: ' + reference.reference);
     }
+  };
+
+  const handlePaystackClose = () => {
+    console.log('Payment popup closed');
+    setProcessing(false);
+  };
+
+  const handleMaybeLater = () => {
+    setShowDisappointed(true);
+  };
+
+  const handleReallyClose = () => {
+    onClose();
+  };
+
+  const handleGoBack = () => {
+    setShowDisappointed(false);
   };
 
   return (
@@ -52,7 +97,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
-        className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+        className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {showSuccess ? (
@@ -68,149 +113,196 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
             >
               ✅
             </motion.div>
-            <h3 className="font-display text-2xl font-bold text-green-600 mb-2">
+            <h3 className="font-display text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
               Payment Successful!
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Chale, you fit see the contact now! 🎉
             </p>
+          </motion.div>
+        ) : showDisappointed ? (
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className="text-center"
+          >
+            {/* Disappointed emoji */}
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 1 }}
+              className="text-7xl mb-3"
+            >
+              😭
+            </motion.div>
+
+            <h3 className="font-display text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Ei, Really? 😅
+            </h3>
+
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 leading-relaxed">
+              We totally get it! No pressure at all. But just so you know, even GHS 2 keeps the lights on and helps us serve you better. 💡
+            </p>
+
+            {/* Funny disappointed images using emojis */}
+            <div className="flex justify-center gap-3 mb-4">
+              <motion.div
+                animate={{ rotate: [0, -10, 0] }}
+                transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.5 }}
+                className="text-4xl"
+              >
+                🥺
+              </motion.div>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.5 }}
+                className="text-4xl"
+              >
+                💔
+              </motion.div>
+              <motion.div
+                animate={{ rotate: [0, 10, 0] }}
+                transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.5 }}
+                className="text-4xl"
+              >
+                😔
+              </motion.div>
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 italic">
+              "Maybe next time?" - The Perpway Team, hopefully 🤞
+            </p>
+
+            {/* Buttons */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleGoBack}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-ashesi-primary to-ghana-red text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all"
+              >
+                Ohk, I will tip 💛
+              </button>
+              <button
+                type="button"
+                onClick={handleReallyClose}
+                className="flex-1 px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-gray-700 dark:text-gray-300"
+              >
+                No thanks, skip
+              </button>
+            </div>
           </motion.div>
         ) : (
           <>
             {/* Header */}
-            <div className="text-center mb-6">
-              <div className="text-5xl mb-3">💰</div>
-              <h2 className="font-display text-2xl font-bold mb-2">
-                Small Tip First! 😄
+            <div className="text-center mb-4">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
+                className="text-4xl mb-2"
+              >
+                ✨
+              </motion.div>
+              <h2 className="font-display text-xl font-bold text-gray-900 dark:text-white mb-1">
+                Help Keep Perpway Running! 🚀
               </h2>
-              <p className="text-gray-600">
-                Support the developer and unlock {driver.name}'s contact
+              <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed">
+                Our team works hard to keep this platform <span className="font-semibold">free and accessible</span> for everyone. Please consider tipping to unlock <span className="font-semibold text-ashesi-primary dark:text-ghana-yellow">{driver.name}'s</span> contact.
               </p>
             </div>
 
             {/* Amount */}
-            <div className="bg-gradient-to-r from-ghana-red via-ghana-yellow to-ghana-green p-1 rounded-xl mb-6">
-              <div className="bg-white rounded-lg p-4 text-center">
-                <p className="text-sm text-gray-600 mb-1">Tip Amount</p>
-                <p className="font-display text-3xl font-bold text-ashesi-primary">
-                  GHS {tipAmount}.00
+            <div className="bg-gradient-to-r from-ghana-red via-ghana-yellow to-ghana-green p-0.5 rounded-xl mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Tip Amount (Min. GHS 2)</p>
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTipAmount(Math.max(2, tipAmount - 1))}
+                    className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold text-lg transition-all"
+                  >
+                    −
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <span className="font-display text-3xl font-bold text-ashesi-primary dark:text-ghana-yellow">
+                      GHS {tipAmount}.00
+                    </span>
+                    <span className="text-xl">💛</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setTipAmount(tipAmount + 1)}
+                    className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold text-lg transition-all"
+                  >
+                    +
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Every cedi counts! 🍬
                 </p>
               </div>
             </div>
 
-            {/* Payment Form */}
-            <form onSubmit={handlePayment}>
-              {/* Payment Method */}
-              <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Payment Method
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('momo')}
-                    className={`p-3 rounded-lg border-2 font-semibold transition-all ${
-                      paymentMethod === 'momo'
-                        ? 'border-ghana-yellow bg-ghana-yellow/10 text-ghana-yellow'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    📱 Mobile Money
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-3 rounded-lg border-2 font-semibold transition-all ${
-                      paymentMethod === 'card'
-                        ? 'border-ashesi-primary bg-ashesi-primary/10 text-ashesi-primary'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    💳 Card
-                  </button>
-                </div>
-              </div>
-
-              {/* Phone Number */}
-              {paymentMethod === 'momo' && (
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Mobile Money Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="0XX XXX XXXX"
-                    className="input-field"
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    You will receive a prompt on your phone
-                  </p>
-                </div>
-              )}
-
-              {/* Mock Card Input */}
-              {paymentMethod === 'card' && (
-                <div className="mb-6 space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Card Number"
-                    className="input-field"
-                    required
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      className="input-field"
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="CVV"
-                      className="input-field"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Buttons */}
-              <div className="flex gap-3">
+            {/* Payment Method Selection */}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Payment Method
+              </label>
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={onClose}
-                  className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all"
-                  disabled={processing}
+                  onClick={() => setPaymentMethod('momo')}
+                  className={`p-2.5 rounded-lg border-2 font-medium transition-all text-sm ${
+                    paymentMethod === 'momo'
+                      ? 'border-ghana-yellow bg-ghana-yellow/10 text-ghana-yellow dark:border-ghana-yellow'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                  }`}
                 >
-                  Cancel
+                  📱 Mobile Money
                 </button>
                 <button
-                  type="submit"
-                  className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={processing || (paymentMethod === 'momo' && !phoneNumber)}
+                  type="button"
+                  onClick={() => setPaymentMethod('card')}
+                  className={`p-2.5 rounded-lg border-2 font-medium transition-all text-sm ${
+                    paymentMethod === 'card'
+                      ? 'border-ashesi-primary bg-ashesi-primary/10 text-ashesi-primary dark:border-ashesi-primary'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                  }`}
                 >
-                  {processing ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Processing...
-                    </span>
-                  ) : (
-                    'Pay Now'
-                  )}
+                  💳 Card
                 </button>
               </div>
-            </form>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center font-medium">
+                {paymentMethod === 'momo'
+                  ? '👉 Click "Pay Now" then enter your Mobile Money number'
+                  : '👉 Click "Pay Now" then enter your card details'}
+              </p>
+            </div>
 
-            {/* Fun Note */}
-            <p className="text-center text-sm text-gray-500 mt-4 italic">
-              "E no cost reach! Make we dey support each other!" 💪
-            </p>
+            {/* Buttons */}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleMaybeLater}
+                className="flex-1 px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-medium text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-gray-700 dark:text-gray-300"
+                disabled={processing}
+              >
+                Maybe Later
+              </button>
+              <PaystackButton
+                {...paystackConfig}
+                text={processing ? 'Processing...' : 'Pay Now'}
+                onSuccess={handlePaystackSuccess}
+                onClose={handlePaystackClose}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-ashesi-primary to-ghana-red text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={processing}
+              />
+            </div>
+
+            {/* Support Note */}
+            <div className="mt-4 p-3 bg-gradient-to-r from-ashesi-primary/10 to-ghana-yellow/10 rounded-lg border border-ghana-yellow/20">
+              <p className="text-center text-xs text-gray-600 dark:text-gray-300">
+                <span className="font-semibold">Why tip?</span> Your support keeps Perpway free and running for all students. Thank you! 💛
+              </p>
+            </div>
           </>
         )}
       </motion.div>
