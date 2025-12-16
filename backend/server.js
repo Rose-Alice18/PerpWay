@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const connectDatabase = require('./config/database');
 const passport = require('./config/passport');
 const { startRideReminderService } = require('./services/rideReminders');
