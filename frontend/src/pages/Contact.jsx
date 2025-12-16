@@ -47,24 +47,31 @@ const Contact = () => {
       title: 'Email Us',
       value: contactDetails.email,
       description: 'We dey reply within 24 hours!',
+      link: 'mailto:roselinetsatsu@gmail.com',
+      clickable: true
     },
     {
       icon: '📱',
       title: 'Call Us',
-      value: contactDetails.phone,
+      value: contactDetails.phone || '+233 XX XXX XXXX',
       description: 'Monday - Friday, 8am - 6pm',
+      link: contactDetails.phone ? `tel:${contactDetails.phone}` : null,
+      clickable: !!contactDetails.phone
     },
     {
       icon: '📍',
       title: 'Visit Us',
       value: 'Campus Location',
       description: 'Find us on campus!',
+      clickable: false
     },
     {
       icon: '💬',
       title: 'WhatsApp',
-      value: contactDetails.whatsapp,
+      value: contactDetails.whatsapp || '+233 XX XXX XXXX',
       description: 'Quick responses, all day!',
+      link: contactDetails.whatsapp ? `https://wa.me/${contactDetails.whatsapp.replace(/\D/g, '')}` : null,
+      clickable: !!contactDetails.whatsapp
     },
   ];
 
@@ -166,34 +173,48 @@ const Contact = () => {
       <div className="max-w-7xl mx-auto">
         {/* Contact Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {contactInfo.map((info, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              className="card text-center"
-            >
+          {contactInfo.map((info, index) => {
+            const CardWrapper = info.clickable && info.link ? 'a' : 'div';
+            const cardProps = info.clickable && info.link ? {
+              href: info.link,
+              target: info.link.startsWith('http') ? '_blank' : undefined,
+              rel: info.link.startsWith('http') ? 'noopener noreferrer' : undefined
+            } : {};
+
+            return (
               <motion.div
-                className="text-5xl mb-4"
-                animate={{
-                  y: [0, -5, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: index * 0.3
-                }}
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className={info.clickable ? "cursor-pointer" : ""}
               >
-                {info.icon}
+                <CardWrapper
+                  {...cardProps}
+                  className={`card text-center block h-full ${info.clickable ? 'hover:shadow-lg transition-shadow' : ''}`}
+                >
+                  <motion.div
+                    className="text-5xl mb-4"
+                    animate={{
+                      y: [0, -5, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: index * 0.3
+                    }}
+                  >
+                    {info.icon}
+                  </motion.div>
+                  <h3 className="font-bold text-lg mb-2 dark:text-white">{info.title}</h3>
+                  <p className="text-ashesi-primary font-semibold mb-2">{info.value}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{info.description}</p>
+                </CardWrapper>
               </motion.div>
-              <h3 className="font-bold text-lg mb-2 dark:text-white">{info.title}</h3>
-              <p className="text-ashesi-primary font-semibold mb-2">{info.value}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{info.description}</p>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Contact Form */}
