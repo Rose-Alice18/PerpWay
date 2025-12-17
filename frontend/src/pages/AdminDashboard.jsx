@@ -2089,14 +2089,23 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
   const locations = [...new Set(drivers.map(d => d.location))].filter(Boolean);
 
   const handleAdd = async () => {
+    // Validate required fields
+    if (!formData.name || !formData.contact || !formData.carType || !formData.location) {
+      showError('Please fill in all required fields');
+      return;
+    }
+
     try {
-      await axios.post(`${API_URL}/api/drivers`, formData);
+      console.log('Adding driver with data:', formData);
+      const response = await axios.post(`${API_URL}/api/drivers`, formData);
+      console.log('Driver added successfully:', response.data);
       setShowAddModal(false);
       setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
       fetchData();
       showSuccess('Driver added successfully! 🚗');
     } catch (error) {
       console.error('Error adding driver:', error);
+      console.error('Error response:', error.response?.data);
       showError('Failed to add driver: ' + (error.response?.data?.message || error.message));
     }
   };
