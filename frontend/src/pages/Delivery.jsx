@@ -180,6 +180,46 @@ const Delivery = () => {
           </p>
         </motion.div>
 
+        {/* Payment Notice Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mb-8"
+        >
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-2xl p-6 shadow-lg">
+            <div className="flex items-start gap-4">
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 10, -10, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="text-4xl"
+              >
+                💳
+              </motion.div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg text-blue-900 dark:text-blue-100 mb-2">
+                  Payment Information
+                </h3>
+                <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">
+                  After submitting your request, our admin will review and authorize it. You'll then receive a <span className="font-semibold">payment link via email or WhatsApp</span> to complete your payment securely through our platform. No upfront payment needed!
+                </p>
+              </div>
+              <div className="hidden sm:block">
+                <span className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-full text-xs font-bold shadow-md">
+                  Pay Later
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Delivery Types */}
           <motion.div
