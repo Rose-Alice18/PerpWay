@@ -375,7 +375,7 @@ const AdminDashboard = () => {
               {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'shopping' && <ShoppingTab shoppingRequests={shoppingRequests} fetchData={fetchShoppingRequests} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
               {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
-              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} />}
+              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
               {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} />}
               {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} />}
               {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} />}
@@ -2062,7 +2062,7 @@ Use the link to mark deliveries as:
 };
 
 // Drivers Tab Component
-const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
+const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
