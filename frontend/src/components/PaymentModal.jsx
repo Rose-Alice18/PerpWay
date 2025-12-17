@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { PaystackButton } from 'react-paystack';
@@ -8,6 +8,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
   const [processing, setProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDisappointed, setShowDisappointed] = useState(false);
+  const [countdown, setCountdown] = useState(3);
 
   const [tipAmount, setTipAmount] = useState(2); // Minimum GHS 2 tip
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -75,15 +76,30 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
 
   const handleMaybeLater = () => {
     setShowDisappointed(true);
+    setCountdown(3);
   };
 
   const handleReallyClose = () => {
-    onClose();
+    onSuccess();
   };
 
   const handleGoBack = () => {
     setShowDisappointed(false);
+    setCountdown(3);
   };
+
+  // Countdown timer when disappointed screen is shown
+  useEffect(() => {
+    if (showDisappointed && countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (showDisappointed && countdown === 0) {
+      // Auto close and show contact after 3 seconds
+      onSuccess();
+    }
+  }, [showDisappointed, countdown, onSuccess]);
 
   return (
     <motion.div
@@ -169,7 +185,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
             </div>
 
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 italic">
-              "Maybe next time?" - The Perpway Team, hopefully 🤞
+              The numbers will show regardless in <span className="font-bold text-ashesi-primary">{countdown}</span> sec{countdown !== 1 ? 's' : ''} if you skip still
             </p>
 
             {/* Buttons */}
