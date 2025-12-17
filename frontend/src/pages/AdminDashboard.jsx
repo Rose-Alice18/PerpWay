@@ -2089,9 +2089,10 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
   const locations = [...new Set(drivers.map(d => d.location))].filter(Boolean);
 
   const handleAdd = async () => {
-    // Validate required fields
-    if (!formData.name || !formData.contact || !formData.carType || !formData.location) {
-      showError('Please fill in all required fields');
+    // Validate only essential required fields (name, contact, location)
+    // Car type is optional
+    if (!formData.name || !formData.contact || !formData.location) {
+      showError('Please fill in name, contact, and location');
       return;
     }
 

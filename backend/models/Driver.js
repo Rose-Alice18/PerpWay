@@ -12,7 +12,7 @@ const driverSchema = new mongoose.Schema({
   },
   carType: {
     type: String,
-    required: true,
+    required: false,
   },
   location: {
     type: String,
