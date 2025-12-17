@@ -2074,7 +2074,11 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
     contact: '',
     carType: '',
     location: '',
-    availability: 'available'
+    availability: 'available',
+    workingTime: {
+      start: '06:00',
+      end: '20:00'
+    }
   });
 
   const filteredDrivers = drivers.filter(driver => {
@@ -2101,7 +2105,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
       const response = await axios.post(`${API_URL}/api/drivers`, formData);
       console.log('Driver added successfully:', response.data);
       setShowAddModal(false);
-      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
+      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
       fetchData();
       showSuccess('Driver added successfully! 🚗');
     } catch (error) {
@@ -2116,7 +2120,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
       await axios.put(`${API_URL}/api/drivers/${selectedDriver._id}`, formData);
       setShowEditModal(false);
       setSelectedDriver(null);
-      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
+      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
       fetchData();
       showSuccess('Driver updated successfully! 🎉');
     } catch (error) {
@@ -2359,6 +2363,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Contact</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Car Type</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Location</th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Working Time</th>
                   <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Status</th>
                   <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 dark:text-gray-300">Actions</th>
                 </tr>
@@ -2366,7 +2371,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredDrivers.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                       No drivers found matching your filters
                     </td>
                   </tr>
@@ -2389,6 +2394,12 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{driver.contact}</td>
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{driver.carType}</td>
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{driver.location}</td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">🕐</span>
+                          <span className="text-sm font-medium">{driver.workingTime?.start || '06:00'} - {driver.workingTime?.end || '20:00'}</span>
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         <select
                           value={driver.availability || 'available'}
@@ -2563,6 +2574,29 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                   <option value="offline">⛔ Offline</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Working Time</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Start Time</label>
+                    <input
+                      type="time"
+                      value={formData.workingTime.start}
+                      onChange={(e) => setFormData({ ...formData, workingTime: { ...formData.workingTime, start: e.target.value } })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">End Time</label>
+                    <input
+                      type="time"
+                      value={formData.workingTime.end}
+                      onChange={(e) => setFormData({ ...formData, workingTime: { ...formData.workingTime, end: e.target.value } })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -2575,7 +2609,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
+                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
                 }}
                 className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
               >
@@ -2645,6 +2679,29 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                   <option value="offline">⛔ Offline</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Working Time</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Start Time</label>
+                    <input
+                      type="time"
+                      value={formData.workingTime?.start || '06:00'}
+                      onChange={(e) => setFormData({ ...formData, workingTime: { ...formData.workingTime, start: e.target.value } })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">End Time</label>
+                    <input
+                      type="time"
+                      value={formData.workingTime?.end || '20:00'}
+                      onChange={(e) => setFormData({ ...formData, workingTime: { ...formData.workingTime, end: e.target.value } })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -2658,7 +2715,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                 onClick={() => {
                   setShowEditModal(false);
                   setSelectedDriver(null);
-                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available' });
+                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
                 }}
                 className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
               >

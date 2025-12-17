@@ -43,6 +43,16 @@ const driverSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  workingTime: {
+    start: {
+      type: String,
+      default: '06:00',
+    },
+    end: {
+      type: String,
+      default: '20:00',
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,
