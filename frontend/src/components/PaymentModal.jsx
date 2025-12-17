@@ -8,7 +8,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
   const [processing, setProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDisappointed, setShowDisappointed] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(5);
 
   const [tipAmount, setTipAmount] = useState(2); // Minimum GHS 2 tip
   const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -76,7 +76,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
 
   const handleMaybeLater = () => {
     setShowDisappointed(true);
-    setCountdown(3);
+    setCountdown(5);
   };
 
   const handleReallyClose = () => {
@@ -85,7 +85,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
 
   const handleGoBack = () => {
     setShowDisappointed(false);
-    setCountdown(3);
+    setCountdown(5);
   };
 
   // Countdown timer when disappointed screen is shown
@@ -96,7 +96,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
       }, 1000);
       return () => clearTimeout(timer);
     } else if (showDisappointed && countdown === 0) {
-      // Auto close and show contact after 3 seconds
+      // Auto close and show contact after 5 seconds
       onSuccess();
     }
   }, [showDisappointed, countdown, onSuccess]);
