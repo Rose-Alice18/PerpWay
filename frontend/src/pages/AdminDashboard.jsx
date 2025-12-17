@@ -2492,11 +2492,11 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
       {/* Add/Edit Modals - Keep existing modal code */}
       {/* Add Driver Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
           >
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Add New Driver</h3>
 
@@ -2578,11 +2578,11 @@ const DriversTab = ({ drivers, fetchData, exportToCSV }) => {
 
       {/* Edit Driver Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl my-8 max-h-[90vh] overflow-y-auto"
           >
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Edit Driver</h3>
 
