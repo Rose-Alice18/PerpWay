@@ -459,6 +459,9 @@ const DriverFinder = () => {
                       Location
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Working Time
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                       Rating
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
@@ -491,6 +494,14 @@ const DriverFinder = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
                           {driver.location}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm">🕐</span>
+                            <span className="text-sm font-medium">
+                              {driver.workingTime?.start || '06:00'} - {driver.workingTime?.end || '20:00'}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {driver.rating ? (
