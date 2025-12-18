@@ -202,11 +202,42 @@ const DriverFinder = () => {
 
         {/* Cards View */}
         {viewMode === 'cards' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
+          <>
+            {/* Coming Soon Banner */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{
+                opacity: 1,
+                scale: [1, 1.02, 1]
+              }}
+              transition={{
+                scale: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }
+              }}
+              className="mb-6 bg-gradient-to-r from-ashesi-primary to-red-700 rounded-2xl p-2.5 shadow-lg"
+            >
+              <div className="flex items-center justify-center gap-2 text-white">
+                <motion.span
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-base"
+                >
+                  🚗
+                </motion.span>
+                <p className="text-xs md:text-sm font-bold tracking-tight">
+                  Bolt/Uber/Yango coming soon 🔥
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
             <AnimatePresence mode="popLayout">
               {filteredDrivers.map((driver, index) => {
                 const isRevealed = revealedContacts.has('all');
@@ -367,6 +398,7 @@ const DriverFinder = () => {
             })}
             </AnimatePresence>
           </motion.div>
+          </>
         )}
 
         {/* Table View */}
@@ -374,11 +406,10 @@ const DriverFinder = () => {
           <>
             {/* Coming Soon Banner */}
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{
                 opacity: 1,
-                y: 0,
-                scale: [1, 1.01, 1]
+                scale: [1, 1.02, 1]
               }}
               transition={{
                 scale: {
@@ -387,26 +418,19 @@ const DriverFinder = () => {
                   ease: "easeInOut"
                 }
               }}
-              className="mb-4 bg-gradient-to-r from-ashesi-primary to-red-700 rounded-xl p-3 shadow-md border border-ashesi-primary/20"
+              className="mb-6 bg-gradient-to-r from-ashesi-primary to-red-700 rounded-2xl p-2.5 shadow-lg"
             >
               <div className="flex items-center justify-center gap-2 text-white">
                 <motion.span
-                  animate={{ rotate: [0, 10, -10, 0] }}
+                  animate={{ rotate: [0, 15, -15, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-lg"
+                  className="text-base"
                 >
                   🚗
                 </motion.span>
-                <p className="text-xs md:text-sm font-medium tracking-wide">
-                  Bolt / Uber / Yango drivers coming soon
+                <p className="text-xs md:text-sm font-bold tracking-tight">
+                  Bolt/Uber/Yango coming soon 🔥
                 </p>
-                <motion.span
-                  animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-lg"
-                >
-                  ✨
-                </motion.span>
               </div>
             </motion.div>
 
