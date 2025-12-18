@@ -371,11 +371,27 @@ const DriverFinder = () => {
 
         {/* Table View */}
         {viewMode === 'table' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden"
-          >
+          <>
+            {/* Coming Soon Banner */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-4 shadow-lg"
+            >
+              <div className="flex items-center justify-center gap-2 text-white">
+                <span className="text-2xl">🚗</span>
+                <p className="text-sm md:text-base font-semibold">
+                  Bolt / Uber / Yango drivers coming soon!
+                </p>
+                <span className="text-2xl">✨</span>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden"
+            >
             {/* Mobile: Card-like rows */}
             <div className="block md:hidden">
               {filteredDrivers.map((driver, index) => {
@@ -563,6 +579,7 @@ const DriverFinder = () => {
               </table>
             </div>
           </motion.div>
+          </>
         )}
 
         {/* No Results */}
