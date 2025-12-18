@@ -375,15 +375,38 @@ const DriverFinder = () => {
             {/* Coming Soon Banner */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-4 shadow-lg"
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: [1, 1.01, 1]
+              }}
+              transition={{
+                scale: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }
+              }}
+              className="mb-4 bg-gradient-to-r from-ashesi-primary to-red-700 rounded-xl p-3 shadow-md border border-ashesi-primary/20"
             >
               <div className="flex items-center justify-center gap-2 text-white">
-                <span className="text-2xl">🚗</span>
-                <p className="text-sm md:text-base font-semibold">
-                  Bolt / Uber / Yango drivers coming soon!
+                <motion.span
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-lg"
+                >
+                  🚗
+                </motion.span>
+                <p className="text-xs md:text-sm font-medium tracking-wide">
+                  Bolt / Uber / Yango drivers coming soon
                 </p>
-                <span className="text-2xl">✨</span>
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-lg"
+                >
+                  ✨
+                </motion.span>
               </div>
             </motion.div>
 
