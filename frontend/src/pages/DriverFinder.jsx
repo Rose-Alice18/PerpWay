@@ -296,6 +296,9 @@ const DriverFinder = () => {
                   <p className="text-gray-600 dark:text-gray-300 text-center">
                     <span className="font-semibold">Location:</span> {driver.location}
                   </p>
+                  <p className="text-gray-600 dark:text-gray-300 text-center">
+                    <span className="font-semibold">🕐 Working Time:</span> {driver.workingTime?.start || '06:00'} - {driver.workingTime?.end || '20:00'}
+                  </p>
                   {driver.rating && (
                     <p className="text-center text-yellow-500 font-semibold">
                       ⭐ {driver.rating}/5.0
