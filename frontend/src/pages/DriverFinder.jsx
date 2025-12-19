@@ -12,17 +12,17 @@ const DriverFinder = () => {
   const [filter, setFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
-  // Check if contacts were previously revealed (within last 24 hours)
+  // Check if contacts were previously revealed (within last 6 hours)
   const getInitialRevealedState = () => {
     try {
       const stored = localStorage.getItem('perpway_contacts_revealed');
       if (stored) {
         const { revealed, timestamp } = JSON.parse(stored);
-        const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const sixHours = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
         const now = Date.now();
 
-        // If revealed and within 24 hours, keep them revealed
-        if (revealed && (now - timestamp) < twentyFourHours) {
+        // If revealed and within 6 hours, keep them revealed
+        if (revealed && (now - timestamp) < sixHours) {
           return new Set(['all']);
         }
       }
