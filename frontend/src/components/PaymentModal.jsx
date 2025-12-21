@@ -223,6 +223,10 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
               We totally get it! No pressure at all. But just so you know, even GHS 2 keeps the lights on and helps us serve you better. 💡
             </p>
 
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-4 italic">
+              (You'll still see the contacts in 5 secs if you skip)
+            </p>
+
             {/* Funny disappointed images using emojis */}
             <div className="flex justify-center gap-3 mb-4">
               <motion.div
