@@ -8,6 +8,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
   const [processing, setProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDisappointed, setShowDisappointed] = useState(false);
+  const [showCountdown, setShowCountdown] = useState(false);
   const [countdown, setCountdown] = useState(5);
 
   const [tipAmount, setTipAmount] = useState(2); // Minimum GHS 2 tip
@@ -80,7 +81,10 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
   };
 
   const handleReallyClose = () => {
-    onSuccess();
+    // Start the countdown modal
+    setShowDisappointed(false);
+    setShowCountdown(true);
+    setCountdown(5);
   };
 
   const handleGoBack = () => {
@@ -88,18 +92,18 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
     setCountdown(5);
   };
 
-  // Countdown timer when disappointed screen is shown
+  // Countdown timer - only starts when user confirms skip
   useEffect(() => {
-    if (showDisappointed && countdown > 0) {
+    if (showCountdown && countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (showDisappointed && countdown === 0) {
+    } else if (showCountdown && countdown === 0) {
       // Auto close and show contact after 5 seconds
       onSuccess();
     }
-  }, [showDisappointed, countdown, onSuccess]);
+  }, [showCountdown, countdown, onSuccess]);
 
   return (
     <motion.div
@@ -135,6 +139,66 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
             <p className="text-gray-600 dark:text-gray-300">
               Chale, you fit see the contact now! 🎉
             </p>
+          </motion.div>
+        ) : showCountdown ? (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-center py-8"
+          >
+            {/* Animated countdown circle */}
+            <div className="relative w-40 h-40 mx-auto mb-6">
+              {/* Outer rotating ring */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 5, ease: "linear" }}
+                className="absolute inset-0 rounded-full border-8 border-transparent border-t-ashesi-primary border-r-ghana-red border-b-ghana-yellow border-l-ghana-green"
+              />
+
+              {/* Inner pulsing circle */}
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="absolute inset-4 rounded-full bg-gradient-to-br from-ashesi-primary/20 to-ghana-red/20 flex items-center justify-center"
+              >
+                <motion.div
+                  key={countdown}
+                  initial={{ scale: 1.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="font-display text-6xl font-bold bg-gradient-to-r from-ashesi-primary to-ghana-red bg-clip-text text-transparent"
+                >
+                  {countdown}
+                </motion.div>
+              </motion.div>
+            </div>
+
+            <motion.h3
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="font-display text-xl font-bold text-gray-900 dark:text-white mb-2"
+            >
+              Revealing contact info... ⏱️
+            </motion.h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Thanks for using Perpway! 🚗
+            </p>
+
+            {/* Animated dots */}
+            <div className="flex justify-center gap-2 mt-4">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{
+                    duration: 0.6,
+                    repeat: Infinity,
+                    delay: i * 0.2
+                  }}
+                  className="w-2 h-2 rounded-full bg-ashesi-primary"
+                />
+              ))}
+            </div>
           </motion.div>
         ) : showDisappointed ? (
           <motion.div
@@ -183,10 +247,6 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
                 😔
               </motion.div>
             </div>
-
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 italic">
-              The numbers will show regardless in <span className="font-bold text-ashesi-primary">{countdown}</span> sec{countdown !== 1 ? 's' : ''} if you skip still
-            </p>
 
             {/* Buttons */}
             <div className="flex gap-2">
