@@ -26,7 +26,12 @@ const ServiceHub = () => {
 
         // Fetch categories (only visible ones)
         const categoriesResponse = await axios.get(`${apiUrl}/api/categories`);
-        const visibleCategories = categoriesResponse.data.filter(cat => cat.isVisible);
+        const visibleCategories = categoriesResponse.data
+          .filter(cat => cat.isVisible)
+          .map(cat => ({
+            ...cat,
+            id: cat._id || cat.id // Normalize MongoDB _id to id
+          }));
 
         console.log('Fetched categories:', visibleCategories);
 
