@@ -112,10 +112,11 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
       onClick={(e) => {
-        // Don't allow closing when showing disappointed or countdown modals
-        if (!showDisappointed && !showCountdown) {
-          onClose();
+        // If on initial payment screen, show disappointed modal
+        if (!showDisappointed && !showCountdown && !showSuccess) {
+          handleMaybeLater();
         }
+        // Don't allow closing when showing disappointed or countdown modals
       }}
     >
       <motion.div
