@@ -33,6 +33,12 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
   const { confirmState, showConfirm, hideConfirm } = useConfirm();
+
+  // Debug: Log confirmState changes
+  React.useEffect(() => {
+    console.log('📊 confirmState updated:', confirmState);
+  }, [confirmState]);
+
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default on mobile
 
