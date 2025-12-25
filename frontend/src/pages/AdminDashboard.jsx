@@ -5381,15 +5381,16 @@ const SettingsTab = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Instant Delivery (GH₵)
+                Instant Delivery
               </label>
               <input
-                type="number"
-                value={settings.pricing?.instant || 0}
-                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, instant: parseFloat(e.target.value) } })}
+                type="text"
+                value={settings.pricing?.instant || ''}
+                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, instant: e.target.value } })}
+                placeholder="e.g., 70 or Tentative"
                 className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Delivered within 1-2 hours</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter price (GH₵) or text like "Tentative"</p>
             </div>
 
             <div>

@@ -18,7 +18,7 @@ const Delivery = () => {
   const [focusedField, setFocusedField] = useState(null);
   const [errors, setErrors] = useState({});
   const [pricing, setPricing] = useState({
-    instant: 70,
+    instant: 'Tentative',
     nextDay: 50,
     weeklyStation: 35,
   });
@@ -31,7 +31,7 @@ const Delivery = () => {
         const response = await axios.get(`${apiUrl}/api/settings`);
         if (response.data && response.data.pricing) {
           setPricing({
-            instant: response.data.pricing.instant || 70,
+            instant: response.data.pricing.instant || 'Tentative',
             nextDay: response.data.pricing.nextDay || 50,
             weeklyStation: response.data.pricing.weeklyStation || 35,
           });
@@ -65,7 +65,7 @@ const Delivery = () => {
       name: 'Instant Delivery',
       icon: '⚡',
       description: 'Same day delivery (2-4 hours)',
-      price: `GH₵${pricing.instant}`,
+      price: isNaN(pricing.instant) ? pricing.instant : `GH₵${pricing.instant}`,
     },
   ];
 
