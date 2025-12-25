@@ -9,7 +9,7 @@ const Delivery = () => {
     itemDescription: '',
     pickupPoint: '',
     dropoffPoint: '',
-    deliveryType: 'instant',
+    deliveryType: 'next-day',
     notes: '',
   });
 
@@ -47,13 +47,6 @@ const Delivery = () => {
 
   const deliveryTypes = [
     {
-      id: 'instant',
-      name: 'Instant Delivery',
-      icon: '⚡',
-      description: 'Same day delivery (2-4 hours)',
-      price: `GH₵${pricing.instant}`,
-    },
-    {
       id: 'next-day',
       name: 'Next-Day Delivery',
       icon: '📅',
@@ -66,6 +59,13 @@ const Delivery = () => {
       icon: '📦',
       description: 'Deliver your item to our station at Kwabenya to be stored, we will bring it to campus for you on a selected weekday',
       price: `GH₵${pricing.weeklyStation}`,
+    },
+    {
+      id: 'instant',
+      name: 'Instant Delivery',
+      icon: '⚡',
+      description: 'Same day delivery (2-4 hours)',
+      price: `GH₵${pricing.instant}`,
     },
   ];
 
@@ -135,7 +135,7 @@ const Delivery = () => {
             itemDescription: '',
             pickupPoint: '',
             dropoffPoint: '',
-            deliveryType: 'instant',
+            deliveryType: 'next-day',
             notes: '',
           });
           setFocusedField(null);
