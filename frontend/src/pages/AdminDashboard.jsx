@@ -382,7 +382,7 @@ const AdminDashboard = () => {
               {activeTab === 'shopping' && <ShoppingTab shoppingRequests={shoppingRequests} fetchData={fetchShoppingRequests} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
               {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
-              {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} showConfirm={showConfirm} showSuccess={showSuccess} showError={showError} />}
+              {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
               {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} />}
               {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchCategories} exportToCSV={exportToCSV} />}
@@ -2738,7 +2738,8 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
 // ============================================
 // RIDES TAB - Card & Table Views
 // ============================================
-const RidesTab = ({ rides, fetchData, exportToCSV, showConfirm, showSuccess, showError }) => {
+const RidesTab = ({ rides, fetchData, exportToCSV, showSuccess, showError }) => {
+  const { confirmState, showConfirm, hideConfirm } = useConfirm(); // Add local useConfirm hook
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table');
@@ -3230,6 +3231,18 @@ const RidesTab = ({ rides, fetchData, exportToCSV, showConfirm, showSuccess, sho
           </motion.div>
         </div>
       )}
+
+      {/* Confirm Dialog - Add to RidesTab */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={hideConfirm}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        cancelText={confirmState.cancelText}
+        type={confirmState.type}
+      />
     </div>
   );
 };
