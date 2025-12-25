@@ -85,15 +85,10 @@ const DriverFinder = () => {
   };
 
   const handlePaymentClose = () => {
-    // When user closes without paying, reveal contacts after a delay (like OceanofPDF)
+    // Just close the modal - don't reveal contacts
+    // The PaymentModal handles the countdown and reveals through onSuccess
     setShowPayment(false);
     setSelectedDriver(null);
-
-    // Reveal all contacts after 3 seconds
-    setTimeout(() => {
-      setRevealedContacts(new Set(['all']));
-      saveRevealedToLocalStorage();
-    }, 3000);
   };
 
   const filteredDrivers = drivers.filter((driver) => {
