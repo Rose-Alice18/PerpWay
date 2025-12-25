@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const settingsSchema = new mongoose.Schema({
   // Delivery Pricing
   pricing: {
-    instant: { type: Number, default: 10 }, // GH₵10
+    instant: { type: mongoose.Schema.Types.Mixed, default: 'Tentative' }, // Can be Number or String (e.g., "Tentative")
     nextDay: { type: Number, default: 7 },  // GH₵7
     weeklyStation: { type: Number, default: 5 } // GH₵5
   },
