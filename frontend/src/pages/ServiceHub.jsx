@@ -33,14 +33,11 @@ const ServiceHub = () => {
             id: cat._id || cat.id // Normalize MongoDB _id to id
           }));
 
-        console.log('Fetched categories:', visibleCategories);
-
         // Add "All Services" at the beginning
         const allCategories = [
           { id: 'all', name: 'All Services', icon: '🛍️' },
           ...visibleCategories
         ];
-        console.log('All categories with IDs:', allCategories.map(c => ({ id: c.id, name: c.name })));
         setCategories(allCategories);
 
         setLoading(false);
@@ -127,16 +124,12 @@ const ServiceHub = () => {
           <div className="flex flex-wrap justify-center gap-3">
             {categories.map((category) => {
               const isSelected = selectedCategory === category.id;
-              console.log(`Category ${category.name} (id: ${category.id}): selectedCategory=${selectedCategory}, isSelected=${isSelected}`);
               return (
                 <motion.button
                   key={category.id}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    console.log('Clicked category:', category.id, 'Current selected:', selectedCategory);
-                    setSelectedCategory(category.id);
-                  }}
+                  onClick={() => setSelectedCategory(category.id)}
                   className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                     isSelected
                       ? 'bg-ashesi-primary text-white shadow-lg'
