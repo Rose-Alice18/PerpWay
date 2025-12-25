@@ -2780,23 +2780,14 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
   });
 
   const handleDeleteRide = async (rideId) => {
-    showConfirm({
-      title: 'Delete Ride?',
-      message: 'Are you sure you want to delete this ride?\n\nThis action cannot be undone.',
-      confirmText: 'Yes, delete it!',
-      cancelText: 'Nah, keep it',
-      type: 'danger',
-      onConfirm: async () => {
-        try {
-          await axios.delete(`${API_URL}/api/rides/${rideId}`);
-          fetchData();
-          showSuccess('Ride deleted successfully! 🗑️');
-        } catch (error) {
-          console.error('Error deleting ride:', error);
-          showError('Failed to delete ride');
-        }
-      }
-    });
+    try {
+      await axios.delete(`${API_URL}/api/rides/${rideId}`);
+      await fetchRides(); // Refresh rides list
+      showSuccess('Ride deleted successfully! 🗑️');
+    } catch (error) {
+      console.error('Error deleting ride:', error);
+      showError('Failed to delete ride. Please try again.');
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -2990,18 +2981,16 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                   </button>
                   <button
                     onClick={() => {
-                      if (!isRideActive(ride)) {
-                        showConfirm({
-                          title: 'Delete Expired Ride?',
-                          message: '⚠️ This ride has expired. Do you want to delete it?',
-                          confirmText: 'Yes, delete it!',
-                          cancelText: 'Nah, keep it',
-                          type: 'warning',
-                          onConfirm: () => handleDeleteRide(ride._id)
-                        });
-                      } else {
-                        handleDeleteRide(ride._id);
-                      }
+                      showConfirm({
+                        title: !isRideActive(ride) ? 'Delete Expired Ride?' : 'Delete Ride?',
+                        message: !isRideActive(ride)
+                          ? '⚠️ This ride has expired. Do you want to delete it?'
+                          : 'Are you sure you want to delete this ride?\n\nThis action cannot be undone.',
+                        confirmText: 'Yes, delete it!',
+                        cancelText: 'Nah, keep it',
+                        type: !isRideActive(ride) ? 'warning' : 'danger',
+                        onConfirm: () => handleDeleteRide(ride._id)
+                      });
                     }}
                     className={`flex-1 px-3 py-2 rounded-xl font-semibold transition-all text-sm ${
                       !isRideActive(ride)
@@ -3103,18 +3092,16 @@ const RidesTab = ({ rides, fetchData, exportToCSV }) => {
                           </button>
                           <button
                             onClick={() => {
-                              if (!isRideActive(ride)) {
-                                showConfirm({
-                                  title: 'Delete Expired Ride?',
-                                  message: '⚠️ This ride has expired. Do you want to delete it?',
-                                  confirmText: 'Yes, delete it!',
-                                  cancelText: 'Nah, keep it',
-                                  type: 'warning',
-                                  onConfirm: () => handleDeleteRide(ride._id)
-                                });
-                              } else {
-                                handleDeleteRide(ride._id);
-                              }
+                              showConfirm({
+                                title: !isRideActive(ride) ? 'Delete Expired Ride?' : 'Delete Ride?',
+                                message: !isRideActive(ride)
+                                  ? '⚠️ This ride has expired. Do you want to delete it?'
+                                  : 'Are you sure you want to delete this ride?\n\nThis action cannot be undone.',
+                                confirmText: 'Yes, delete it!',
+                                cancelText: 'Nah, keep it',
+                                type: !isRideActive(ride) ? 'warning' : 'danger',
+                                onConfirm: () => handleDeleteRide(ride._id)
+                              });
                             }}
                             className={`px-3 py-1.5 rounded-lg font-semibold transition-all text-xs ${
                               !isRideActive(ride)
