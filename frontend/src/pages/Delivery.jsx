@@ -65,7 +65,7 @@ const Delivery = () => {
       name: 'Instant Delivery',
       icon: '⚡',
       description: 'Same day delivery (2-4 hours)',
-      price: isNaN(pricing.instant) ? pricing.instant : `GH₵${pricing.instant}`,
+      price: `GH₵ ${pricing.instant}`,
     },
   ];
 
