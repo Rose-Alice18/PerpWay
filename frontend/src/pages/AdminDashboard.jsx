@@ -2780,12 +2780,16 @@ const RidesTab = ({ rides, fetchData, exportToCSV, showConfirm, showSuccess, sho
   });
 
   const handleDeleteRide = async (rideId) => {
+    console.log('🗑️ Delete button clicked for ride:', rideId);
     try {
+      console.log('🔄 Sending delete request to:', `${API_URL}/api/rides/${rideId}`);
       await axios.delete(`${API_URL}/api/rides/${rideId}`);
+      console.log('✅ Ride deleted successfully');
       await fetchData(); // Refresh rides list
+      console.log('🔄 Refreshed ride list');
       showSuccess('Ride deleted successfully! 🗑️');
     } catch (error) {
-      console.error('Error deleting ride:', error);
+      console.error('❌ Error deleting ride:', error);
       showError('Failed to delete ride. Please try again.');
     }
   };
@@ -3092,6 +3096,9 @@ const RidesTab = ({ rides, fetchData, exportToCSV, showConfirm, showSuccess, sho
                           </button>
                           <button
                             onClick={() => {
+                              console.log('🔘 Delete button clicked, showing confirm dialog');
+                              console.log('📝 Ride ID:', ride._id);
+                              console.log('🔍 showConfirm function:', showConfirm);
                               showConfirm({
                                 title: !isRideActive(ride) ? 'Delete Expired Ride?' : 'Delete Ride?',
                                 message: !isRideActive(ride)
