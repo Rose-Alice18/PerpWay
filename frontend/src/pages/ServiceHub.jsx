@@ -116,22 +116,28 @@ const ServiceHub = () => {
 
           {/* Category Filter */}
           <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <motion.button
-                key={category.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
-                  selectedCategory === category.id
-                    ? 'bg-ashesi-primary text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <span className="mr-2">{category.icon}</span>
-                {category.name}
-              </motion.button>
-            ))}
+            {categories.map((category) => {
+              const isSelected = selectedCategory === category.id;
+              return (
+                <motion.button
+                  key={category.id}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    console.log('Clicked category:', category.id);
+                    setSelectedCategory(category.id);
+                  }}
+                  className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+                    isSelected
+                      ? 'bg-ashesi-primary text-white shadow-lg'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <span className="mr-2">{category.icon}</span>
+                  {category.name}
+                </motion.button>
+              );
+            })}
           </div>
         </motion.div>
 
