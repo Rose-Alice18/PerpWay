@@ -2782,7 +2782,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV, showConfirm, showSuccess, sho
   const handleDeleteRide = async (rideId) => {
     try {
       await axios.delete(`${API_URL}/api/rides/${rideId}`);
-      await fetchRides(); // Refresh rides list
+      await fetchData(); // Refresh rides list
       showSuccess('Ride deleted successfully! 🗑️');
     } catch (error) {
       console.error('Error deleting ride:', error);
