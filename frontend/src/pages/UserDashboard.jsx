@@ -1023,10 +1023,10 @@ const UserDashboard = () => {
                         whileHover={{ scale: 1.02, y: -5 }}
                         className="bg-white dark:bg-gray-800 rounded-3xl p-5 shadow-lg hover:shadow-2xl transition-all"
                       >
-                        <div className="flex gap-4 mb-4">
+                        <div className="flex flex-col md:flex-row gap-4 mb-4">
                           {/* Product Image */}
                           <div
-                            className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform border-2 border-gray-200 dark:border-gray-600"
+                            className="w-full md:w-48 lg:w-56 h-48 md:h-48 lg:h-56 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform border-2 border-gray-200 dark:border-gray-600"
                             onClick={() => {
                               const imageUrl = request.productImage || request.image || request.imageUrl;
                               if (imageUrl) {
@@ -1040,7 +1040,7 @@ const UserDashboard = () => {
                                   ? (request.productImage || request.image || request.imageUrl)
                                   : `${API_URL}${request.productImage || request.image || request.imageUrl}`}
                                 alt={request.productName || 'Product'}
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-cover"
                                 onError={(e) => {
                                   console.log('Image failed to load:', e.target.src);
                                   e.target.onerror = null;
@@ -1048,7 +1048,7 @@ const UserDashboard = () => {
                                 }}
                               />
                             ) : (
-                              <div className="text-5xl md:text-6xl">📦</div>
+                              <div className="text-7xl md:text-8xl">📦</div>
                             )}
                           </div>
 
