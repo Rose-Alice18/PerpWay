@@ -1012,7 +1012,9 @@ const UserDashboard = () => {
                       </motion.button>
                     </motion.div>
                   ) : (
-                    Array.isArray(shoppingRequests) && shoppingRequests.map((request, index) => (
+                    Array.isArray(shoppingRequests) && shoppingRequests.map((request, index) => {
+                      console.log('Shopping request data:', request);
+                      return (
                       <motion.div
                         key={request._id}
                         initial={{ opacity: 0, y: 20 }}
@@ -1023,21 +1025,26 @@ const UserDashboard = () => {
                       >
                         <div className="flex gap-4 mb-4">
                           {/* Product Image */}
-                          <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                          <div
+                            className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform border-2 border-gray-200 dark:border-gray-600"
                             onClick={() => {
-                              if (request.productImage) {
-                                window.open(request.productImage.startsWith('http') ? request.productImage : `${API_URL}${request.productImage}`, '_blank');
+                              const imageUrl = request.productImage || request.image || request.imageUrl;
+                              if (imageUrl) {
+                                window.open(imageUrl.startsWith('http') ? imageUrl : `${API_URL}${imageUrl}`, '_blank');
                               }
                             }}
                           >
-                            {request.productImage ? (
+                            {(request.productImage || request.image || request.imageUrl) ? (
                               <img
-                                src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}${request.productImage}`}
-                                alt={request.productName}
-                                className="w-full h-full object-cover"
+                                src={(request.productImage || request.image || request.imageUrl).startsWith('http')
+                                  ? (request.productImage || request.image || request.imageUrl)
+                                  : `${API_URL}${request.productImage || request.image || request.imageUrl}`}
+                                alt={request.productName || 'Product'}
+                                className="w-full h-full object-contain"
                                 onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML = '<div class="text-5xl md:text-6xl">📦</div>';
+                                  console.log('Image failed to load:', e.target.src);
+                                  e.target.onerror = null;
+                                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Ctext x="50%25" y="50%25" font-size="60" text-anchor="middle" dy=".3em"%3E📦%3C/text%3E%3C/svg%3E';
                                 }}
                               />
                             ) : (
@@ -1094,7 +1101,8 @@ const UserDashboard = () => {
                           </div>
                         </div>
                       </motion.div>
-                    ))
+                      );
+                    }))
                   )}
                 </div>
               </div>
