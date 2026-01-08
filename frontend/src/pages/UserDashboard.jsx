@@ -303,26 +303,26 @@ const UserDashboard = () => {
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl px-4 md:px-6 lg:px-8 py-6 shadow-lg sticky top-0 border-b border-purple-200 dark:border-gray-700"
+        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl px-4 md:px-6 lg:px-8 py-3 md:py-4 shadow-lg sticky top-0 border-b border-purple-200 dark:border-gray-700"
         style={{ zIndex: 1000 }}
       >
         <div className="max-w-2xl md:max-w-5xl lg:max-w-7xl mx-auto flex items-center justify-between">
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-4"
+            className="flex items-center gap-3"
           >
             <motion.div
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.5 }}
-              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center text-white text-2xl font-black shadow-xl"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center text-white text-xl md:text-2xl font-black shadow-xl"
             >
               {userInfo.name?.charAt(0).toUpperCase()}
             </motion.div>
             <div>
-              <h1 className="text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-lg md:text-xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 {userInfo.name ? `${userInfo.name}'s Dashboard` : "User's Dashboard"}
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 Online
               </p>
