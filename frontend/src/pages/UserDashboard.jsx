@@ -1102,7 +1102,7 @@ const UserDashboard = () => {
                         </div>
                       </motion.div>
                       );
-                    }))
+                    })
                   )}
                 </div>
               </div>
