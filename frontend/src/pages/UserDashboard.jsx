@@ -495,22 +495,23 @@ const UserDashboard = () => {
                   <span className="text-3xl">🔥</span> Recent Activity
                 </h2>
                 <div className="space-y-3">
-                  {[...deliveries.slice(0, 3), ...createdRides.slice(0, 2)]
+                  {[...deliveries, ...createdRides, ...joinedRides, ...(Array.isArray(shoppingRequests) ? shoppingRequests : [])]
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                    .slice(0, 5)
                     .map((item, index) => (
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ delay: index * 0.05 }}
                         whileHover={{ scale: 1.02, x: 5 }}
                         className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-lg flex items-center gap-4"
                       >
-                        <div className="text-4xl">{item.pickupPoint ? '📦' : '🚗'}</div>
+                        <div className="text-4xl">
+                          {item.productName ? '🛒' : item.pickupPoint ? '📦' : '🚗'}
+                        </div>
                         <div className="flex-1">
                           <p className="font-bold text-gray-900 dark:text-white">
-                            {item.itemDescription || `${item.pickupLocation} → ${item.destination}`}
+                            {item.productName || item.itemDescription || `${item.pickupLocation} → ${item.destination}`}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             {new Date(item.createdAt).toLocaleDateString()}
@@ -521,7 +522,7 @@ const UserDashboard = () => {
                         </span>
                       </motion.div>
                     ))}
-                  {deliveries.length === 0 && createdRides.length === 0 && (
+                  {deliveries.length === 0 && createdRides.length === 0 && joinedRides.length === 0 && (!Array.isArray(shoppingRequests) || shoppingRequests.length === 0) && (
                     <motion.div
                       initial={{ scale: 0.9 }}
                       animate={{ scale: 1 }}
@@ -968,7 +969,13 @@ const UserDashboard = () => {
                       >
                         <div className="flex gap-4 mb-4">
                           {/* Product Image */}
-                          <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                          <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => {
+                              if (request.productImage) {
+                                window.open(request.productImage.startsWith('http') ? request.productImage : `${API_URL}${request.productImage}`, '_blank');
+                              }
+                            }}
+                          >
                             {request.productImage ? (
                               <img
                                 src={request.productImage.startsWith('http') ? request.productImage : `${API_URL}${request.productImage}`}
@@ -976,11 +983,11 @@ const UserDashboard = () => {
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML = '<div class="text-4xl">📦</div>';
+                                  e.target.parentElement.innerHTML = '<div class="text-5xl md:text-6xl">📦</div>';
                                 }}
                               />
                             ) : (
-                              <div className="text-4xl">📦</div>
+                              <div className="text-5xl md:text-6xl">📦</div>
                             )}
                           </div>
 
