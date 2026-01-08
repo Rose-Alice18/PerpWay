@@ -1046,13 +1046,7 @@ const UserDashboard = () => {
                                 className="w-full h-full object-contain p-2"
                                 loading="eager"
                                 onError={(e) => {
-                                  console.log('Image load error:', {
-                                    src: e.target.src,
-                                    productName: request.productName,
-                                    productImage: request.productImage,
-                                    image: request.image,
-                                    imageUrl: request.imageUrl
-                                  });
+                                  // Silently handle old local storage images that no longer exist
                                   e.target.onerror = null;
                                   e.target.style.display = 'none';
                                   const parent = e.target.parentElement;
