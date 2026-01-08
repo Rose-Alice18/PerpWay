@@ -775,12 +775,20 @@ const RidePairing = () => {
                   />
                 </div>
 
-                {/* Sign up information */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-                  <p className="text-sm text-blue-800 dark:text-blue-200 text-center leading-relaxed">
-                    💡 <strong>Tip:</strong> Sign up on the platform to see people who join your ride, manage your dashboard, track all your rides, and contact riders for a seamless experience! But don't worry—you can still go ahead and post a ride without signing up.
-                  </p>
-                </div>
+                {/* Sign up information - Only show to guests */}
+                {!localStorage.getItem('userEmail') ? (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                    <p className="text-sm text-blue-800 dark:text-blue-200 text-center leading-relaxed">
+                      💡 <strong>Tip:</strong> Sign up on the platform to see people who join your ride, manage your dashboard, track all your rides, and contact riders for a seamless experience! But don't worry—you can still go ahead and post a ride without signing up.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4">
+                    <p className="text-sm text-green-800 dark:text-green-200 text-center leading-relaxed">
+                      ✨ <strong>Great!</strong> As a registered user, you can see everyone who joins your ride, manage all your rides from your dashboard, and contact riders directly. Keep posting rides and enjoy the seamless experience!
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex gap-3">
                   <button
