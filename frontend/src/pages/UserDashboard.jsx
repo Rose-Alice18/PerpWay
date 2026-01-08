@@ -303,10 +303,10 @@ const UserDashboard = () => {
       <motion.div
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl px-4 py-6 shadow-lg sticky top-0 border-b border-purple-200 dark:border-gray-700"
+        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl px-4 md:px-6 lg:px-8 py-6 shadow-lg sticky top-0 border-b border-purple-200 dark:border-gray-700"
         style={{ zIndex: 1000 }}
       >
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+        <div className="max-w-2xl md:max-w-5xl lg:max-w-7xl mx-auto flex items-center justify-between">
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="flex items-center gap-4"
@@ -415,7 +415,7 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-3xl">⚡</span> Quick Actions
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6">
                   <motion.button
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
@@ -1545,7 +1545,7 @@ const UserDashboard = () => {
         className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-t-2 border-purple-200 dark:border-gray-700 shadow-2xl"
         style={{ zIndex: 999 }}
       >
-        <div className="max-w-2xl mx-auto px-1 py-3">
+        <div className="max-w-2xl md:max-w-5xl lg:max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-3">
           <div className="flex justify-around items-center">
             {[
               { id: 'home', icon: '🧭', label: 'Explore' },
