@@ -1,37 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const ShoppingRequest = require('../models/ShoppingRequest');
-const multer = require('multer');
-const path = require('path');
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/shopping/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: function (req, file, cb) {
-    const filetypes = /jpeg|jpg|png|webp/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'));
-    }
-  }
-});
+const { uploadShopping } = require('../config/cloudinary');
 
 // Create new shopping request
-router.post('/create', upload.single('productImage'), async (req, res) => {
+router.post('/create', uploadShopping.single('productImage'), async (req, res) => {
   try {
     const { userEmail, userName, userContact, productName, productDescription, shopLocations, estimatedPrice } = req.body;
 
@@ -45,7 +18,7 @@ router.post('/create', upload.single('productImage'), async (req, res) => {
       userContact,
       productName,
       productDescription,
-      productImage: `/uploads/shopping/${req.file.filename}`,
+      productImage: req.file.path, // Cloudinary URL
       shopLocations,
       estimatedPrice: estimatedPrice ? parseFloat(estimatedPrice) : null,
       status: 'pending',
