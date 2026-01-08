@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { useTheme } from '../context/ThemeContext';
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('home');
@@ -28,6 +29,7 @@ const UserDashboard = () => {
     marketingEmails: false
   });
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -340,22 +342,29 @@ const UserDashboard = () => {
               </svg>
             </motion.button>
 
-            {/* Menu Button */}
+            {/* Theme Toggle Button */}
             <motion.button
-              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileHover={{ scale: 1.1, rotate: 180 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => setShowMoreMenu(!showMoreMenu)}
-              className="p-3 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:shadow-lg transition-all"
+              onClick={toggleTheme}
+              className="p-3 rounded-2xl bg-gradient-to-br from-yellow-100 to-orange-200 dark:from-indigo-700 dark:to-purple-800 hover:shadow-lg transition-all"
+              title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
             >
-              <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {theme === 'light' ? (
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              )}
             </motion.button>
           </div>
         </div>
       </motion.div>
 
-      <div className="max-w-2xl md:max-w-4xl lg:max-w-6xl mx-auto px-4 py-6 space-y-6 scroll-smooth">
+      <div className="max-w-2xl md:max-w-5xl lg:max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 space-y-6 md:space-y-8 scroll-smooth">
         <AnimatePresence mode="wait">
           {/* Explore Tab - Navigate to Index */}
           {activeTab === 'home' && (
@@ -369,7 +378,7 @@ const UserDashboard = () => {
               {/* Hero Card */}
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                className="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-3xl p-8 shadow-2xl text-white relative overflow-hidden"
+                className="bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-3xl p-8 md:p-10 lg:p-12 shadow-2xl text-white relative overflow-hidden"
               >
                 <motion.div
                   animate={{
@@ -406,12 +415,12 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-3xl">⚡</span> Quick Actions
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                   <motion.button
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/delivery')}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400"
+                    className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400"
                   >
                     <div className="text-5xl mb-3">📦</div>
                     <p className="font-bold text-gray-900 dark:text-white">Request Delivery</p>
@@ -421,7 +430,7 @@ const UserDashboard = () => {
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/rides')}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-green-400"
+                    className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-green-400"
                   >
                     <div className="text-5xl mb-3">🚗</div>
                     <p className="font-bold text-gray-900 dark:text-white">Find Ride</p>
@@ -431,7 +440,7 @@ const UserDashboard = () => {
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/drivers')}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-orange-400"
+                    className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-orange-400"
                   >
                     <div className="text-5xl mb-3">🚙</div>
                     <p className="font-bold text-gray-900 dark:text-white">Find Driver</p>
@@ -441,7 +450,7 @@ const UserDashboard = () => {
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/services')}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-purple-400"
+                    className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-purple-400"
                   >
                     <div className="text-5xl mb-3">🛍️</div>
                     <p className="font-bold text-gray-900 dark:text-white">Services</p>
@@ -451,7 +460,7 @@ const UserDashboard = () => {
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/marketplace')}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-pink-400"
+                    className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-pink-400"
                   >
                     <div className="text-5xl mb-3">🏪</div>
                     <p className="font-bold text-gray-900 dark:text-white">Marketplace</p>
@@ -461,7 +470,7 @@ const UserDashboard = () => {
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/shopping-request')}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-yellow-400"
+                    className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-yellow-400"
                   >
                     <div className="text-5xl mb-3">🛒</div>
                     <p className="font-bold text-gray-900 dark:text-white">Shopping Service</p>
@@ -537,10 +546,10 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-3xl">📊</span> Account Stats
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 2 }}
-                    className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 shadow-xl text-white"
+                    className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
                   >
                     <div className="text-4xl mb-2">📦</div>
                     <p className="text-3xl font-black">{stats.deliveries.total}</p>
@@ -549,7 +558,7 @@ const UserDashboard = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: -2 }}
-                    className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl p-6 shadow-xl text-white"
+                    className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
                   >
                     <div className="text-4xl mb-2">🚗</div>
                     <p className="text-3xl font-black">{stats.rides.created + stats.rides.joined}</p>
@@ -558,7 +567,7 @@ const UserDashboard = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: -2 }}
-                    className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 shadow-xl text-white"
+                    className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
                   >
                     <div className="text-4xl mb-2">💰</div>
                     <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
@@ -567,7 +576,7 @@ const UserDashboard = () => {
 
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 2 }}
-                    className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 shadow-xl text-white"
+                    className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
                   >
                     <div className="text-4xl mb-2">⚡</div>
                     <p className="text-3xl font-black">{stats.rides.active}</p>
