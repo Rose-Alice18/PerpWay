@@ -355,9 +355,9 @@ const UserDashboard = () => {
         </div>
       </motion.div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 scroll-smooth">
+      <div className="max-w-2xl md:max-w-4xl lg:max-w-6xl mx-auto px-4 py-6 space-y-6 scroll-smooth">
         <AnimatePresence mode="wait">
-          {/* Home Tab - Navigate to Index */}
+          {/* Explore Tab - Navigate to Index */}
           {activeTab === 'home' && (
             <motion.div
               key="home"
@@ -406,7 +406,7 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-3xl">⚡</span> Quick Actions
                 </h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
                   <motion.button
                     whileHover={{ scale: 1.05, y: -5 }}
                     whileTap={{ scale: 0.95 }}
@@ -537,7 +537,7 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-3xl">📊</span> Account Stats
                 </h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 2 }}
                     className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 shadow-xl text-white"
@@ -1539,7 +1539,7 @@ const UserDashboard = () => {
         <div className="max-w-2xl mx-auto px-1 py-3">
           <div className="flex justify-around items-center">
             {[
-              { id: 'home', icon: '🏠', label: 'Home' },
+              { id: 'home', icon: '🧭', label: 'Explore' },
               { id: 'overview', icon: '📊', label: 'Overview' },
               { id: 'deliveries', icon: '📦', label: 'Deliveries' },
               { id: 'rides', icon: '🚗', label: 'Rides' },
