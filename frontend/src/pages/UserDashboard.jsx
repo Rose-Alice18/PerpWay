@@ -1026,7 +1026,7 @@ const UserDashboard = () => {
                         <div className="flex flex-col md:flex-row gap-4 mb-4">
                           {/* Product Image */}
                           <div
-                            className="w-full md:w-48 lg:w-56 h-48 md:h-48 lg:h-56 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform border-2 border-gray-200 dark:border-gray-600"
+                            className="w-full md:w-48 lg:w-56 h-48 md:h-48 lg:h-56 rounded-2xl overflow-hidden bg-white dark:bg-gray-700 flex-shrink-0 flex items-center justify-center cursor-pointer hover:shadow-2xl transition-all border-2 border-gray-300 dark:border-gray-600"
                             onClick={() => {
                               const imageUrl = request.productImage || request.image || request.imageUrl;
                               if (imageUrl) {
@@ -1040,11 +1040,20 @@ const UserDashboard = () => {
                                   ? (request.productImage || request.image || request.imageUrl)
                                   : `${API_URL}${request.productImage || request.image || request.imageUrl}`}
                                 alt={request.productName || 'Product'}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain p-2"
+                                loading="eager"
                                 onError={(e) => {
-                                  console.log('Image failed to load:', e.target.src);
+                                  console.log('Image load error:', {
+                                    src: e.target.src,
+                                    productName: request.productName,
+                                    productImage: request.productImage,
+                                    image: request.image,
+                                    imageUrl: request.imageUrl
+                                  });
                                   e.target.onerror = null;
-                                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Ctext x="50%25" y="50%25" font-size="60" text-anchor="middle" dy=".3em"%3E📦%3C/text%3E%3C/svg%3E';
+                                  e.target.style.display = 'none';
+                                  const parent = e.target.parentElement;
+                                  parent.innerHTML = '<div class="text-7xl md:text-8xl">📦</div>';
                                 }}
                               />
                             ) : (
