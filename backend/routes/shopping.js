@@ -36,7 +36,16 @@ router.post('/create', uploadShopping.single('productImage'), async (req, res) =
     });
   } catch (error) {
     console.error('Create shopping request error:', error);
-    res.status(500).json({ error: 'Failed to create shopping request', message: error.message });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(500).json({
+      error: 'Failed to create shopping request',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
