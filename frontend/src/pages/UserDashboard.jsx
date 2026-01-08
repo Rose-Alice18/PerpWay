@@ -497,6 +497,7 @@ const UserDashboard = () => {
                 <div className="space-y-3">
                   {[...deliveries, ...createdRides, ...joinedRides, ...(Array.isArray(shoppingRequests) ? shoppingRequests : [])]
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .slice(0, 10)
                     .map((item, index) => (
                       <motion.div
                         key={index}
@@ -547,14 +548,14 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="text-3xl">📊</span> Account Stats
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 2 }}
                     className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
                   >
                     <div className="text-4xl mb-2">📦</div>
                     <p className="text-3xl font-black">{stats.deliveries.total}</p>
-                    <p className="text-sm text-blue-100">Total Deliveries</p>
+                    <p className="text-sm text-blue-100">Deliveries</p>
                   </motion.div>
 
                   <motion.div
@@ -563,26 +564,79 @@ const UserDashboard = () => {
                   >
                     <div className="text-4xl mb-2">🚗</div>
                     <p className="text-3xl font-black">{stats.rides.created + stats.rides.joined}</p>
-                    <p className="text-sm text-green-100">Total Rides</p>
-                  </motion.div>
-
-                  <motion.div
-                    whileHover={{ scale: 1.05, rotate: -2 }}
-                    className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
-                  >
-                    <div className="text-4xl mb-2">💰</div>
-                    <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
-                    <p className="text-sm text-orange-100">Total Spent</p>
+                    <p className="text-sm text-green-100">Rides</p>
                   </motion.div>
 
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 2 }}
-                    className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
+                    className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
+                  >
+                    <div className="text-4xl mb-2">🛒</div>
+                    <p className="text-3xl font-black">{stats.shopping.total}</p>
+                    <p className="text-sm text-yellow-100">Shopping</p>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: -2 }}
+                    className="bg-gradient-to-br from-red-500 to-pink-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
+                  >
+                    <div className="text-4xl mb-2">💰</div>
+                    <p className="text-3xl font-black">GH₵{stats.deliveries.totalSpent.toFixed(0)}</p>
+                    <p className="text-sm text-red-100">Spent</p>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    className="bg-gradient-to-br from-purple-500 to-indigo-500 rounded-3xl p-6 md:p-8 shadow-xl text-white"
                   >
                     <div className="text-4xl mb-2">⚡</div>
                     <p className="text-3xl font-black">{stats.rides.active}</p>
-                    <p className="text-sm text-purple-100">Active Rides</p>
+                    <p className="text-sm text-purple-100">Active</p>
                   </motion.div>
+                </div>
+              </div>
+
+              {/* All Activities */}
+              <div>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <span className="text-3xl">📋</span> All Activities
+                </h2>
+                <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl max-h-[600px] overflow-y-auto">
+                  <div className="space-y-3">
+                    {[...deliveries, ...createdRides, ...joinedRides, ...(Array.isArray(shoppingRequests) ? shoppingRequests : [])]
+                      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                      .map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.02 }}
+                          whileHover={{ scale: 1.01, x: 3 }}
+                          className="bg-gray-50 dark:bg-gray-700 rounded-xl p-3 flex items-center gap-3"
+                        >
+                          <div className="text-3xl">
+                            {item.productName ? '🛒' : item.pickupPoint ? '📦' : '🚗'}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-gray-900 dark:text-white">
+                              {item.productName || item.itemDescription || `${item.pickupLocation} → ${item.destination}`}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(item.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <span className={`px-2 py-1 rounded-lg text-xs font-bold shadow-sm ${getStatusColor(item.status)}`}>
+                            {item.status}
+                          </span>
+                        </motion.div>
+                      ))}
+                    {deliveries.length === 0 && createdRides.length === 0 && joinedRides.length === 0 && (!Array.isArray(shoppingRequests) || shoppingRequests.length === 0) && (
+                      <div className="text-center py-12">
+                        <div className="text-6xl mb-4">📭</div>
+                        <p className="text-gray-600 dark:text-gray-400">No activities yet</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
