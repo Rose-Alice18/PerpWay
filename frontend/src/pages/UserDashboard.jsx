@@ -1014,6 +1014,9 @@ const UserDashboard = () => {
                   ) : (
                     Array.isArray(shoppingRequests) && shoppingRequests.map((request, index) => {
                       console.log('Shopping request data:', request);
+                      const imageUrl = request.productImage || request.image || request.imageUrl;
+                      const fullImageUrl = imageUrl ? (imageUrl.startsWith('http') ? imageUrl : `${API_URL}${imageUrl}`) : null;
+                      console.log('Full image URL:', fullImageUrl);
                       return (
                       <motion.div
                         key={request._id}
