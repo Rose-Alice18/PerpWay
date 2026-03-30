@@ -12,40 +12,29 @@ const DriverFinder = () => {
   const [filter, setFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
-  // Check if contacts were previously revealed (within last 6 hours)
-  const getInitialRevealedState = () => {
-    try {
-      const stored = localStorage.getItem('perpway_contacts_revealed');
-      if (stored) {
-        const { revealed, timestamp } = JSON.parse(stored);
-        const sixHours = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
-        const now = Date.now();
+  const [revealedContacts, setRevealedContacts] = useState(new Set())
 
-        // If revealed and within 6 hours, keep them revealed
-        if (revealed && (now - timestamp) < sixHours) {
-          return new Set(['all']);
-        }
-      }
-    } catch (error) {
-      console.error('Error reading revealed contacts from localStorage:', error);
-    }
-    return new Set();
-  };
-
-  const [revealedContacts, setRevealedContacts] = useState(getInitialRevealedState)
-
-  // Fetch drivers from backend
+  // Fetch drivers and check server-side tip access
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
         const response = await axios.get(`${apiUrl}/api/drivers`);
-        // Normalize MongoDB _id to id for frontend compatibility
         const normalizedDrivers = response.data.map(driver => ({
           ...driver,
           id: driver._id || driver.id,
         }));
         setDrivers(normalizedDrivers);
+
+        // Check server-side tip access for logged-in user
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+          const accessRes = await axios.get(`${apiUrl}/api/payments/tip-access?email=${encodeURIComponent(userEmail)}`);
+          if (accessRes.data.hasAccess) {
+            setRevealedContacts(new Set(['all']));
+          }
+        }
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching drivers:', error);
@@ -65,28 +54,13 @@ const DriverFinder = () => {
     setShowPayment(true);
   };
 
-  const saveRevealedToLocalStorage = () => {
-    try {
-      localStorage.setItem('perpway_contacts_revealed', JSON.stringify({
-        revealed: true,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  };
-
   const handlePaymentSuccess = () => {
-    // Reveal ALL contacts immediately when user tips
     setRevealedContacts(new Set(['all']));
-    saveRevealedToLocalStorage();
     setShowPayment(false);
     setSelectedDriver(null);
   };
 
   const handlePaymentClose = () => {
-    // Just close the modal - don't reveal contacts
-    // The PaymentModal handles the countdown and reveals through onSuccess
     setShowPayment(false);
     setSelectedDriver(null);
   };

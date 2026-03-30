@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Driver = require('../models/Driver');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // Get all drivers
 router.get('/', async (req, res) => {
@@ -29,8 +30,41 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Rate a driver (one rating per IP)
+router.post('/:id/rate', async (req, res) => {
+  try {
+    const { rating } = req.body;
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    const driver = await Driver.findById(req.params.id);
+    if (!driver) return res.status(404).json({ error: 'Driver not found' });
+
+    const existingIndex = driver.ratedBy.findIndex(r => r.ip === ip);
+    if (existingIndex !== -1) {
+      driver.ratedBy[existingIndex].rating = rating;
+    } else {
+      driver.ratedBy.push({ ip, rating });
+    }
+
+    // Recalculate average rating
+    const total = driver.ratedBy.reduce((sum, r) => sum + r.rating, 0);
+    driver.rating = Math.round((total / driver.ratedBy.length) * 10) / 10;
+    driver.totalRatings = driver.ratedBy.length;
+
+    await driver.save();
+    res.json({ success: true, rating: driver.rating, totalRatings: driver.totalRatings });
+  } catch (error) {
+    console.error('Error rating driver:', error);
+    res.status(500).json({ error: 'Failed to rate driver', message: error.message });
+  }
+});
+
 // Create new driver (for admin use)
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const driver = new Driver(req.body);
     await driver.save();
@@ -63,7 +97,7 @@ router.patch('/:id/availability', async (req, res) => {
 });
 
 // Update driver (full update for admin)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const driver = await Driver.findByIdAndUpdate(
       req.params.id,
@@ -83,7 +117,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete driver (for admin use)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const driver = await Driver.findByIdAndDelete(req.params.id);
 

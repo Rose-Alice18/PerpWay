@@ -18,12 +18,17 @@ const transporter = nodemailer.createTransport({
 });
 
 // GET user's delivery history
-router.get('/user/:email', async (req, res) => {
+router.get('/user/:email', authenticateToken, async (req, res) => {
   try {
     const { email } = req.params;
 
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Only allow users to view their own history (admins can view any)
+    if (req.user.role !== 'admin' && req.user.email !== email.toLowerCase()) {
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     // Fetch all deliveries for this user
@@ -359,8 +364,21 @@ router.put('/admin/:id/status', authenticateToken, requireAdmin, async (req, res
       return res.status(400).json({ error: 'Invalid status' });
     }
 
+    // Prevent marking as delivered if payment is still unpaid
+    if (status === 'delivered' && delivery.paymentStatus === 'unpaid') {
+      return res.status(400).json({
+        error: 'Cannot mark as delivered — payment is still unpaid. Update payment status first.'
+      });
+    }
+
     delivery.status = status;
     await delivery.save();
+
+    // Reset assigned rider to active when delivery is completed or cancelled
+    if ((status === 'delivered' || status === 'cancelled') && delivery.assignedRider) {
+      await MotorRider.findByIdAndUpdate(delivery.assignedRider, { status: 'active' });
+      console.log(`🏍️ Rider reset to active after delivery ${status}`);
+    }
 
     console.log(`📦 Delivery ${delivery._id} status updated to ${status}`);
 

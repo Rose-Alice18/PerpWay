@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Vendor = require('../models/Vendor');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // Get all vendors
 router.get('/', async (req, res) => {
@@ -24,18 +25,23 @@ router.get('/category/:category', async (req, res) => {
   }
 });
 
-// Update vendor recommendations
+// Update vendor recommendations (one per IP)
 router.post('/:id/recommend', async (req, res) => {
   try {
-    const vendor = await Vendor.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { recommendations: 1 } },
-      { new: true }
-    );
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    const vendor = await Vendor.findById(req.params.id);
 
     if (!vendor) {
       return res.status(404).json({ error: 'Vendor not found' });
     }
+
+    if (vendor.recommendedBy.includes(ip)) {
+      return res.status(400).json({ error: 'You have already recommended this vendor' });
+    }
+
+    vendor.recommendations += 1;
+    vendor.recommendedBy.push(ip);
+    await vendor.save();
 
     res.json(vendor);
   } catch (error) {
@@ -44,8 +50,41 @@ router.post('/:id/recommend', async (req, res) => {
   }
 });
 
+// Rate a vendor (one rating per IP)
+router.post('/:id/rate', async (req, res) => {
+  try {
+    const { rating } = req.body;
+    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+
+    const existingIndex = vendor.ratedBy.findIndex(r => r.ip === ip);
+    if (existingIndex !== -1) {
+      // Update existing rating
+      vendor.ratedBy[existingIndex].rating = rating;
+    } else {
+      vendor.ratedBy.push({ ip, rating });
+    }
+
+    // Recalculate average rating
+    const total = vendor.ratedBy.reduce((sum, r) => sum + r.rating, 0);
+    vendor.rating = Math.round((total / vendor.ratedBy.length) * 10) / 10;
+
+    await vendor.save();
+    res.json({ success: true, rating: vendor.rating, totalRatings: vendor.ratedBy.length });
+  } catch (error) {
+    console.error('Error rating vendor:', error);
+    res.status(500).json({ error: 'Failed to rate vendor', message: error.message });
+  }
+});
+
 // Create new vendor (for admin use)
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const vendor = new Vendor(req.body);
     await vendor.save();
@@ -57,7 +96,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update vendor (for admin use)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const vendor = await Vendor.findByIdAndUpdate(
       req.params.id,
@@ -77,7 +116,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete vendor (for admin use)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const vendor = await Vendor.findByIdAndDelete(req.params.id);
 

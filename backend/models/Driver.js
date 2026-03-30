@@ -43,6 +43,7 @@ const driverSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  ratedBy: [{ ip: String, rating: Number }],
   workingTime: {
     start: {
       type: String,

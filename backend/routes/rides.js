@@ -2,14 +2,31 @@ const express = require('express');
 const router = express.Router();
 const Ride = require('../models/Ride');
 const { sendRideJoinNotification } = require('../config/email');
+const { authenticateToken } = require('../middleware/auth');
+const { sendRideAlert } = require('../services/whatsapp');
 
 // Get all rides
 router.get('/', async (req, res) => {
   try {
-    // Check if request is for all rides (admin) or just active rides (public)
     const includeAll = req.query.all === 'true';
     const query = includeAll ? {} : { status: 'active' };
     const rides = await Ride.find(query).sort({ departureDate: -1, departureTime: -1 });
+
+    // For public (non-admin) requests, hide contact info of users who chose private
+    if (!includeAll) {
+      const sanitized = rides.map(ride => {
+        const r = ride.toObject();
+        r.joinedUsers = r.joinedUsers.map(u => {
+          if (u.contactVisibility === 'private') {
+            return { name: u.name, seatsNeeded: u.seatsNeeded, contactVisibility: 'private' };
+          }
+          return u;
+        });
+        return r;
+      });
+      return res.json(sanitized);
+    }
+
     res.json(rides);
   } catch (error) {
     console.error('Error fetching rides:', error);
@@ -18,12 +35,17 @@ router.get('/', async (req, res) => {
 });
 
 // GET user's ride history
-router.get('/user/:email', async (req, res) => {
+router.get('/user/:email', authenticateToken, async (req, res) => {
   try {
     const { email } = req.params;
 
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Only allow users to view their own history (admins can view any)
+    if (req.user.role !== 'admin' && req.user.email !== email.toLowerCase()) {
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     // Fetch all rides for this user (rides they created or joined)
@@ -82,6 +104,9 @@ router.post('/create', async (req, res) => {
 
     console.log('🚗 New ride posted:', newRide);
 
+    // Notify WhatsApp groups (non-blocking)
+    sendRideAlert(newRide).catch(err => console.error('WhatsApp alert failed:', err.message));
+
     res.json({
       success: true,
       message: 'Ride posted successfully!',
@@ -106,35 +131,37 @@ router.post('/:id/join', async (req, res) => {
     // Parse seatsNeeded as integer
     const seatsRequested = parseInt(seatsNeeded) || 1;
 
-    // Check if there are enough available seats
-    if (ride.availableSeats <= 0) {
-      return res.status(400).json({ error: 'No available seats' });
-    }
-
-    if (ride.availableSeats < seatsRequested) {
-      return res.status(400).json({
-        error: `Not enough seats available. Only ${ride.availableSeats} seat(s) left, but you requested ${seatsRequested} seat(s).`
-      });
-    }
-
     // Check if user already joined (by phone number)
     const alreadyJoined = ride.joinedUsers.some(user => user.phone === phone);
     if (alreadyJoined) {
       return res.status(400).json({ error: 'You have already joined this ride' });
     }
 
-    // Add user with full contact details including seats needed and visibility preference
-    ride.joinedUsers.push({
-      name,
-      phone,
-      whatsapp: whatsapp || phone, // Use phone if WhatsApp not provided
-      email: email || '',
-      seatsNeeded: seatsRequested,
-      contactVisibility: contactVisibility || 'private', // Default to private
-    });
-    ride.availableSeats -= seatsRequested;
+    // Atomically decrement seats and add user — prevents overbooking race condition
+    const updatedRide = await Ride.findOneAndUpdate(
+      { _id: req.params.id, availableSeats: { $gte: seatsRequested }, status: 'active' },
+      {
+        $inc: { availableSeats: -seatsRequested },
+        $push: {
+          joinedUsers: {
+            name,
+            phone,
+            whatsapp: whatsapp || phone,
+            email: email || '',
+            seatsNeeded: seatsRequested,
+            contactVisibility: contactVisibility || 'private',
+          }
+        }
+      },
+      { new: true }
+    );
 
-    await ride.save();
+    if (!updatedRide) {
+      return res.status(400).json({ error: `Not enough seats available. You requested ${seatsRequested} seat(s).` });
+    }
+
+    // Use updatedRide for the rest of the handler
+    Object.assign(ride, updatedRide.toObject());
 
     console.log(`🚙 ${name} (${phone}) joined ride ${ride._id} - took ${seatsRequested} seat(s) [${contactVisibility || 'private'}]`);
 

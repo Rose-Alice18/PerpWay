@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const MotorRider = require('../models/MotorRider');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // Get all motor riders
 router.get('/', async (req, res) => {
@@ -28,7 +29,7 @@ router.get('/default', async (req, res) => {
 });
 
 // Create new motor rider
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const motorRider = new MotorRider(req.body);
     await motorRider.save();
@@ -40,7 +41,7 @@ router.post('/', async (req, res) => {
 });
 
 // Update motor rider
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const motorRider = await MotorRider.findByIdAndUpdate(
       req.params.id,
@@ -60,7 +61,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Set as default delivery rider
-router.put('/:id/set-default', async (req, res) => {
+router.put('/:id/set-default', authenticateToken, requireAdmin, async (req, res) => {
   try {
     // Remove default from all riders
     await MotorRider.updateMany({}, { isDefaultDeliveryRider: false });
@@ -84,7 +85,7 @@ router.put('/:id/set-default', async (req, res) => {
 });
 
 // Delete motor rider
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const motorRider = await MotorRider.findByIdAndDelete(req.params.id);
 
