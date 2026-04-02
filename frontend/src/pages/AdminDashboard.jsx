@@ -20,7 +20,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Helper function to get auth headers - defined at module level
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('adminToken');
   return {
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -2114,7 +2114,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
 
     try {
       console.log('Adding driver with data:', formData);
-      const response = await axios.post(`${API_URL}/api/drivers`, formData);
+      const response = await axios.post(`${API_URL}/api/drivers`, formData, getAuthHeaders());
       console.log('Driver added successfully:', response.data);
       setShowAddModal(false);
       setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
@@ -2129,7 +2129,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
 
   const handleEdit = async () => {
     try {
-      await axios.put(`${API_URL}/api/drivers/${selectedDriver._id}`, formData);
+      await axios.put(`${API_URL}/api/drivers/${selectedDriver._id}`, formData, getAuthHeaders());
       setShowEditModal(false);
       setSelectedDriver(null);
       setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
@@ -2150,7 +2150,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
       type: 'danger',
       onConfirm: async () => {
         try {
-          await axios.delete(`${API_URL}/api/drivers/${driverId}`);
+          await axios.delete(`${API_URL}/api/drivers/${driverId}`, getAuthHeaders());
           fetchData();
           showSuccess('Driver deleted successfully! 🗑️');
         } catch (error) {
@@ -2166,9 +2166,12 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
     setFormData({
       name: driver.name,
       contact: driver.contact,
+      whatsapp: driver.whatsapp || '',
       carType: driver.carType,
       location: driver.location,
-      availability: driver.availability || 'available'
+      availability: driver.availability || 'available',
+      note: driver.note || '',
+      workingTime: driver.workingTime || { start: '06:00', end: '20:00' }
     });
     setShowEditModal(true);
   };
@@ -2177,7 +2180,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
     try {
       // Optimistically update the UI immediately
       // Update the database
-      await axios.put(`${API_URL}/api/drivers/${driverId}`, { availability: newStatus });
+      await axios.put(`${API_URL}/api/drivers/${driverId}`, { availability: newStatus }, getAuthHeaders());
 
       // Silently refresh in the background (no loading spinner)
       fetchData();
@@ -2605,6 +2608,26 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                   </div>
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">WhatsApp Number</label>
+                <input
+                  type="text"
+                  value={formData.whatsapp || ''}
+                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                  placeholder="e.g., 0244123456"
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Note / Extra Info</label>
+                <input
+                  type="text"
+                  value={formData.note || ''}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  placeholder="e.g., AC, Experienced, etc."
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -2654,6 +2677,16 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                   type="text"
                   value={formData.contact}
                   onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">WhatsApp Number</label>
+                <input
+                  type="text"
+                  value={formData.whatsapp || ''}
+                  onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
+                  placeholder="e.g., 0244123456"
                   className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -2709,6 +2742,16 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
                     />
                   </div>
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Note / Extra Info</label>
+                <input
+                  type="text"
+                  value={formData.note || ''}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  placeholder="e.g., AC, Experienced, etc."
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
               </div>
             </div>
 
@@ -3259,25 +3302,33 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [editForm, setEditForm] = useState({
-    businessName: '',
+    name: '',
     category: '',
     contact: '',
-    location: '',
-    hours: ''
-  });
-  const [newVendorForm, setNewVendorForm] = useState({
-    businessName: '',
-    category: '',
-    contact: '',
+    whatsapp: '',
     location: '',
     hours: '',
+    speciality: '',
+    priceRange: '',
+    description: ''
+  });
+  const [newVendorForm, setNewVendorForm] = useState({
+    name: '',
+    category: '',
+    contact: '',
+    whatsapp: '',
+    location: '',
+    hours: '',
+    speciality: '',
+    priceRange: '',
+    description: '',
     rating: 5,
     recommendations: 0
   });
 
   const filteredVendors = vendors.filter(vendor => {
     return !searchTerm ||
-      vendor.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vendor.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vendor.location?.toLowerCase().includes(searchTerm.toLowerCase());
   });
@@ -3291,7 +3342,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
       type: 'danger',
       onConfirm: async () => {
         try {
-          await axios.delete(`${API_URL}/api/vendors/${vendorId}`);
+          await axios.delete(`${API_URL}/api/vendors/${vendorId}`, getAuthHeaders());
           fetchData();
           showSuccess('Vendor deleted successfully! 🗑️');
         } catch (error) {
@@ -3305,11 +3356,15 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const handleEditClick = (vendor) => {
     setSelectedVendor(vendor);
     setEditForm({
-      businessName: vendor.businessName || '',
+      name: vendor.name || '',
       category: vendor.category || '',
       contact: vendor.contact || '',
+      whatsapp: vendor.whatsapp || '',
       location: vendor.location || '',
-      hours: vendor.hours || ''
+      hours: vendor.hours || '',
+      speciality: vendor.speciality || '',
+      priceRange: vendor.priceRange || '',
+      description: vendor.description || ''
     });
     setShowEditModal(true);
   };
@@ -3317,7 +3372,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${API_URL}/api/vendors/${selectedVendor._id}`, editForm);
+      await axios.put(`${API_URL}/api/vendors/${selectedVendor._id}`, editForm, getAuthHeaders());
       fetchData();
       setShowEditModal(false);
       setSelectedVendor(null);
@@ -3331,15 +3386,19 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
   const handleAddVendor = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/vendors`, newVendorForm);
+      await axios.post(`${API_URL}/api/vendors`, newVendorForm, getAuthHeaders());
       fetchData();
       setShowAddModal(false);
       setNewVendorForm({
-        businessName: '',
+        name: '',
         category: '',
         contact: '',
+        whatsapp: '',
         location: '',
         hours: '',
+        speciality: '',
+        priceRange: '',
+        description: '',
         rating: 5,
         recommendations: 0
       });
@@ -3388,7 +3447,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
               </button>
             </div>
             <button
-              onClick={() => exportToCSV(filteredVendors, 'vendors', ['businessName', 'category', 'contact', 'location', 'hours'])}
+              onClick={() => exportToCSV(filteredVendors, 'vendors', ['name', 'category', 'contact', 'location', 'hours'])}
               className="px-4 py-2 bg-gradient-to-r from-ghana-green to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
             >
               <span>📥</span> Export CSV
@@ -3433,7 +3492,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   </span>
                 </div>
 
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{vendor.businessName}</h3>
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{vendor.name}</h3>
 
                 <div className="space-y-2 text-sm mb-4">
                   {vendor.contact && (
@@ -3510,7 +3569,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                           <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
                             <span className="text-lg">🛍️</span>
                           </div>
-                          <span className="font-semibold text-gray-900 dark:text-white">{vendor.businessName}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">{vendor.name}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -3561,8 +3620,8 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                 </label>
                 <input
                   type="text"
-                  value={editForm.businessName}
-                  onChange={(e) => setEditForm({ ...editForm, businessName: e.target.value })}
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
@@ -3576,6 +3635,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   value={editForm.category}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., barber, tailor, food, fruit"
                 />
               </div>
               <div>
@@ -3586,6 +3646,18 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   type="text"
                   value={editForm.contact}
                   onChange={(e) => setEditForm({ ...editForm, contact: e.target.value })}
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  WhatsApp Number
+                </label>
+                <input
+                  type="text"
+                  value={editForm.whatsapp}
+                  onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
+                  placeholder="e.g., 0244123456"
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -3610,6 +3682,42 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   onChange={(e) => setEditForm({ ...editForm, hours: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="e.g., 9AM - 5PM"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Speciality / Services
+                </label>
+                <input
+                  type="text"
+                  value={editForm.speciality}
+                  onChange={(e) => setEditForm({ ...editForm, speciality: e.target.value })}
+                  placeholder="e.g., Fades, Braids, Alterations"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Price Range
+                </label>
+                <input
+                  type="text"
+                  value={editForm.priceRange}
+                  onChange={(e) => setEditForm({ ...editForm, priceRange: e.target.value })}
+                  placeholder="e.g., GH₵20 - GH₵80"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  rows={2}
+                  placeholder="Brief description of the vendor"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
                 />
               </div>
               <div className="flex gap-3 mt-6">
@@ -3648,8 +3756,8 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                 </label>
                 <input
                   type="text"
-                  value={newVendorForm.businessName}
-                  onChange={(e) => setNewVendorForm({ ...newVendorForm, businessName: e.target.value })}
+                  value={newVendorForm.name}
+                  onChange={(e) => setNewVendorForm({ ...newVendorForm, name: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
                 />
@@ -3663,13 +3771,13 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   value={newVendorForm.category}
                   onChange={(e) => setNewVendorForm({ ...newVendorForm, category: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="e.g., Restaurant, Salon, Pharmacy"
+                  placeholder="e.g., barber, tailor, food, fruit"
                   required
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Contact
+                  Contact *
                 </label>
                 <input
                   type="text"
@@ -3677,11 +3785,24 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   onChange={(e) => setNewVendorForm({ ...newVendorForm, contact: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Phone number"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Location
+                  WhatsApp Number
+                </label>
+                <input
+                  type="text"
+                  value={newVendorForm.whatsapp}
+                  onChange={(e) => setNewVendorForm({ ...newVendorForm, whatsapp: e.target.value })}
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., 0244123456"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Location *
                 </label>
                 <input
                   type="text"
@@ -3689,6 +3810,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   onChange={(e) => setNewVendorForm({ ...newVendorForm, location: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Physical address"
+                  required
                 />
               </div>
               <div>
@@ -3703,6 +3825,42 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   placeholder="e.g., 9AM - 5PM"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Speciality / Services
+                </label>
+                <input
+                  type="text"
+                  value={newVendorForm.speciality}
+                  onChange={(e) => setNewVendorForm({ ...newVendorForm, speciality: e.target.value })}
+                  placeholder="e.g., Fades, Braids, Alterations"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Price Range
+                </label>
+                <input
+                  type="text"
+                  value={newVendorForm.priceRange}
+                  onChange={(e) => setNewVendorForm({ ...newVendorForm, priceRange: e.target.value })}
+                  placeholder="e.g., GH₵20 - GH₵80"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={newVendorForm.description}
+                  onChange={(e) => setNewVendorForm({ ...newVendorForm, description: e.target.value })}
+                  rows={2}
+                  placeholder="Brief description of the vendor"
+                  className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                />
+              </div>
               <div className="flex gap-3 mt-6">
                 <button
                   type="submit"
@@ -3715,11 +3873,15 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
                   onClick={() => {
                     setShowAddModal(false);
                     setNewVendorForm({
-                      businessName: '',
+                      name: '',
                       category: '',
                       contact: '',
+                      whatsapp: '',
                       location: '',
                       hours: '',
+                      speciality: '',
+                      priceRange: '',
+                      description: '',
                       rating: 5,
                       recommendations: 0
                     });
@@ -3963,7 +4125,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
   const handleAddRider = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/motor-riders`, newRiderForm);
+      await axios.post(`${API_URL}/api/motor-riders`, newRiderForm, getAuthHeaders());
       fetchData();
       setShowAddModal(false);
       setNewRiderForm({
@@ -3999,7 +4161,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${API_URL}/api/motor-riders/${selectedRider._id}`, editForm);
+      await axios.put(`${API_URL}/api/motor-riders/${selectedRider._id}`, editForm, getAuthHeaders());
       fetchData();
       setShowEditModal(false);
       setSelectedRider(null);
@@ -4019,7 +4181,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
       type: 'info',
       onConfirm: async () => {
         try {
-          await axios.put(`${API_URL}/api/motor-riders/${riderId}/set-default`);
+          await axios.put(`${API_URL}/api/motor-riders/${riderId}/set-default`, {}, getAuthHeaders());
           fetchData();
           showSuccess('Default rider set successfully! ⭐');
         } catch (error) {
@@ -4039,7 +4201,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
       type: 'danger',
       onConfirm: async () => {
         try {
-          await axios.delete(`${API_URL}/api/motor-riders/${riderId}`);
+          await axios.delete(`${API_URL}/api/motor-riders/${riderId}`, getAuthHeaders());
           fetchData();
           showSuccess('Motor rider deleted successfully! 🗑️');
         } catch (error) {

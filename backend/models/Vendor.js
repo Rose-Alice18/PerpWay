@@ -8,7 +8,6 @@ const vendorSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['fruit', 'tailor', 'barber', 'food'],
     required: true,
   },
   location: {
