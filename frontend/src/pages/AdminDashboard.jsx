@@ -31,8 +31,8 @@ const getAuthHeaders = () => {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
-  const { confirmState, showConfirm, hideConfirm } = useConfirm();
+  const { showSuccess, showError, showWarning, showInfo } = useToast(); // eslint-disable-line no-unused-vars
+  const { confirmState, showConfirm } = useConfirm(); // eslint-disable-line no-unused-vars
 
   // Debug: Log confirmState changes
   React.useEffect(() => {
@@ -69,14 +69,8 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
-  // Mock riders
-  const riders = [
-    'Kwame Mensah',
-    'Kofi Asante',
-    'Akosua Boateng',
-    'Yaw Osei',
-    'Ama Serwaa'
-  ];
+  // eslint-disable-next-line no-unused-vars
+  const riders = ['Kwame Mensah', 'Kofi Asante', 'Akosua Boateng', 'Yaw Osei', 'Ama Serwaa'];
 
   // Individual fetch functions for optimized updates
   const fetchDrivers = async () => {
@@ -430,6 +424,7 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors, users }) => {
       setWeeklyData(weeklyChartData);
 
       // Calculate growth metrics (compare this week vs last week)
+      // eslint-disable-next-line no-unused-vars
       const lastWeekRes = await axios.get(`${API_URL}/api/financials/overview?period=week`, getAuthHeaders());
       const twoWeeksAgoRes = await axios.get(`${API_URL}/api/financials/trends?days=14`, getAuthHeaders());
 
@@ -479,7 +474,7 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors, users }) => {
     } finally {
       setLoadingAnalytics(false);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchAnalytics();
