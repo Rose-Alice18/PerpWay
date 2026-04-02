@@ -20,7 +20,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Helper function to get auth headers - defined at module level
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('adminToken');
+  const token = localStorage.getItem('authToken');
   return {
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -61,11 +61,11 @@ const AdminDashboard = () => {
     const userRole = localStorage.getItem('userRole');
     const authTime = localStorage.getItem('authTime');
 
-    const isSessionValid = isAuthenticated && userRole === 'admin' && authTime &&
+    const isSessionValid = isAuthenticated === 'true' && userRole === 'admin' && authTime &&
       (Date.now() - parseInt(authTime)) < 24 * 60 * 60 * 1000;
 
     if (!isSessionValid) {
-      navigate('/signin');
+      navigate('/admin');
     }
   }, [navigate]);
 
@@ -174,7 +174,7 @@ const AdminDashboard = () => {
           console.error('Toast error:', toastError);
           alert('Session expired. Please login again.');
         }
-        setTimeout(() => navigate('/signin'), 2000);
+        setTimeout(() => navigate('/admin'), 2000);
       }
     }
   };
@@ -191,7 +191,8 @@ const AdminDashboard = () => {
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userName');
     localStorage.removeItem('authTime');
-    navigate('/signin');
+    localStorage.removeItem('authToken');
+    navigate('/admin');
   };
 
   const exportToCSV = (data, filename, headers) => {
@@ -4660,7 +4661,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/categories`, newCategoryForm);
+      await axios.post(`${API_URL}/api/categories`, newCategoryForm, getAuthHeaders());
       fetchData();
       setShowAddModal(false);
       setNewCategoryForm({
@@ -4690,7 +4691,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${API_URL}/api/categories/${selectedCategory._id}`, editForm);
+      await axios.put(`${API_URL}/api/categories/${selectedCategory._id}`, editForm, getAuthHeaders());
       fetchData();
       setShowEditModal(false);
       setSelectedCategory(null);
@@ -4703,7 +4704,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
 
   const handleToggleCategoryVisibility = async (category) => {
     try {
-      const response = await axios.patch(`${API_URL}/api/categories/${category._id}/toggle-visibility`);
+      const response = await axios.patch(`${API_URL}/api/categories/${category._id}/toggle-visibility`, {}, getAuthHeaders());
       fetchData();
       const newStatus = response.data.category.isVisible;
       showSuccess(`Category ${newStatus ? 'shown' : 'hidden'} successfully! ${newStatus ? '👁️' : '🙈'}`);
@@ -4722,7 +4723,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
       type: 'danger',
       onConfirm: async () => {
         try {
-          await axios.delete(`${API_URL}/api/categories/${categoryId}`);
+          await axios.delete(`${API_URL}/api/categories/${categoryId}`, getAuthHeaders());
           fetchData();
           showSuccess('Category deleted successfully! 🗑️');
         } catch (error) {
