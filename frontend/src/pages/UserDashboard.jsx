@@ -11,10 +11,10 @@ const UserDashboard = () => {
   const [joinedRides, setJoinedRides] = useState([]);
   const [shoppingRequests, setShoppingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [userInfo, setUserInfo] = useState({});
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [, setShowMoreMenu] = useState(false); // eslint-disable-line no-unused-vars
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPasswordEditMode, setIsPasswordEditMode] = useState(false);
   const [editedInfo, setEditedInfo] = useState({});
@@ -46,7 +46,7 @@ const UserDashboard = () => {
     const userEmail = localStorage.getItem('userEmail');
     setUserInfo({ name: userName, email: userEmail });
     fetchUserData(userEmail);
-  }, [navigate]);
+  }, [navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUserData = async (email) => {
     try {

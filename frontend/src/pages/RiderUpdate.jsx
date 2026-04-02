@@ -15,7 +15,7 @@ const RiderUpdate = () => {
 
   useEffect(() => {
     fetchRiderDeliveries();
-  }, [riderCode]);
+  }, [riderCode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchRiderDeliveries = async () => {
     try {

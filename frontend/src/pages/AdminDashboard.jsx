@@ -31,8 +31,8 @@ const getAuthHeaders = () => {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { toasts, removeToast, showSuccess, showError, showWarning, showInfo } = useToast();
-  const { confirmState, showConfirm, hideConfirm } = useConfirm();
+  const { showSuccess, showError, showWarning, showInfo } = useToast(); // eslint-disable-line no-unused-vars
+  const { confirmState, showConfirm } = useConfirm(); // eslint-disable-line no-unused-vars
 
   // Debug: Log confirmState changes
   React.useEffect(() => {
@@ -69,14 +69,8 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
-  // Mock riders
-  const riders = [
-    'Kwame Mensah',
-    'Kofi Asante',
-    'Akosua Boateng',
-    'Yaw Osei',
-    'Ama Serwaa'
-  ];
+  // eslint-disable-next-line no-unused-vars
+  const riders = ['Kwame Mensah', 'Kofi Asante', 'Akosua Boateng', 'Yaw Osei', 'Ama Serwaa'];
 
   // Individual fetch functions for optimized updates
   const fetchDrivers = async () => {
@@ -377,7 +371,7 @@ const AdminDashboard = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {activeTab === 'overview' && <OverviewTab stats={stats} deliveries={deliveries} drivers={drivers} rides={rides} vendors={vendors} />}
+              {activeTab === 'overview' && <OverviewTab stats={stats} deliveries={deliveries} drivers={drivers} rides={rides} vendors={vendors} users={users} />}
               {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'shopping' && <ShoppingTab shoppingRequests={shoppingRequests} fetchData={fetchShoppingRequests} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
               {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
@@ -397,7 +391,7 @@ const AdminDashboard = () => {
 };
 
 // Overview Tab Component with Analytics
-const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
+const OverviewTab = ({ stats, deliveries, drivers, rides, vendors, users }) => {
   const [weeklyData, setWeeklyData] = useState([]);
   const [financialMetrics, setFinancialMetrics] = useState(null);
   const [growthMetrics, setGrowthMetrics] = useState(null);
@@ -430,6 +424,7 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
       setWeeklyData(weeklyChartData);
 
       // Calculate growth metrics (compare this week vs last week)
+      // eslint-disable-next-line no-unused-vars
       const lastWeekRes = await axios.get(`${API_URL}/api/financials/overview?period=week`, getAuthHeaders());
       const twoWeeksAgoRes = await axios.get(`${API_URL}/api/financials/trends?days=14`, getAuthHeaders());
 
@@ -440,11 +435,22 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
         ? (((thisWeekDeliveries - lastWeekDeliveries) / lastWeekDeliveries) * 100).toFixed(1)
         : 0;
 
+      // Helper: calculate week-on-week growth from an array with createdAt
+      const calcGrowth = (items) => {
+        const now = new Date();
+        const thisWeekStart = new Date(now); thisWeekStart.setDate(now.getDate() - 7);
+        const lastWeekStart = new Date(now); lastWeekStart.setDate(now.getDate() - 14);
+        const thisWeek = items.filter(i => new Date(i.createdAt) >= thisWeekStart).length;
+        const lastWeek = items.filter(i => new Date(i.createdAt) >= lastWeekStart && new Date(i.createdAt) < thisWeekStart).length;
+        if (lastWeek === 0) return thisWeek > 0 ? '+100' : '0';
+        return (((thisWeek - lastWeek) / lastWeek) * 100).toFixed(1);
+      };
+
       setGrowthMetrics({
         deliveryGrowth: deliveryGrowth,
-        ridesGrowth: '+0', // TODO: Calculate when rides data available
-        driversGrowth: '+0', // TODO: Calculate from user registration trends
-        usersGrowth: '+0' // TODO: Calculate from user registration trends
+        ridesGrowth: calcGrowth(rides),
+        driversGrowth: calcGrowth(drivers),
+        usersGrowth: calcGrowth(users),
       });
 
     } catch (error) {
@@ -468,7 +474,7 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors }) => {
     } finally {
       setLoadingAnalytics(false);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchAnalytics();
@@ -984,7 +990,7 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
       type: 'info',
       onConfirm: async () => {
         try {
-          const response = await axios.put(`${API_URL}/api/delivery/admin/${selectedDelivery._id}/assign`, {
+          await axios.put(`${API_URL}/api/delivery/admin/${selectedDelivery._id}/assign`, {
             riderId: selectedRiderId
           }, getAuthHeaders());
 
@@ -1029,7 +1035,7 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
       type: 'info',
       onConfirm: async () => {
         try {
-          const response = await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
+          await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
           await fetchData();
 
           // Ask if they want to send document
@@ -2170,10 +2176,6 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
   const handleQuickStatusChange = async (driverId, newStatus) => {
     try {
       // Optimistically update the UI immediately
-      const updatedDrivers = drivers.map(d =>
-        d._id === driverId ? { ...d, availability: newStatus } : d
-      );
-
       // Update the database
       await axios.put(`${API_URL}/api/drivers/${driverId}`, { availability: newStatus });
 

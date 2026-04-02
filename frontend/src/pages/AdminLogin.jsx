@@ -1,26 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    // Simple password check - you can change this password
-    const ADMIN_PASSWORD = 'ashway2025'; // Change this to your desired password
+    try {
+      const res = await axios.post(`${apiUrl}/api/auth/admin/login`, {
+        email: process.env.REACT_APP_ADMIN_EMAIL || 'admin@perpway.com',
+        password,
+      });
 
-    if (password === ADMIN_PASSWORD) {
-      // Store authentication in localStorage
-      localStorage.setItem('adminAuthenticated', 'true');
-      localStorage.setItem('adminAuthTime', Date.now().toString());
-      navigate('/admin/dashboard');
-    } else {
+      if (res.data.success) {
+        localStorage.setItem('adminAuthenticated', 'true');
+        localStorage.setItem('adminAuthTime', Date.now().toString());
+        localStorage.setItem('adminToken', res.data.token);
+        navigate('/admin/dashboard');
+      }
+    } catch (err) {
       setError('Incorrect password. Access denied.');
       setPassword('');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,9 +123,10 @@ const AdminLogin = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="w-full bg-gradient-to-r from-ghana-green to-ghana-green/90 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-ghana-green to-ghana-green/90 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-60"
           >
-            Access Dashboard 🚀
+            {loading ? 'Verifying...' : 'Access Dashboard 🚀'}
           </motion.button>
         </motion.form>
 

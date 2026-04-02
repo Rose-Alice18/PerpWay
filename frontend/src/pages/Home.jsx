@@ -1,18 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const Home = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const authStatus = localStorage.getItem('userAuthenticated');
-    const role = localStorage.getItem('userRole');
-    setIsAuthenticated(authStatus === 'true');
-    setUserRole(role);
-  }, []);
 
   const features = [
     {

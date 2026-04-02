@@ -47,6 +47,8 @@ const vendorSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  recommendedBy: [{ type: String }], // stores IP addresses to prevent spam
+  ratedBy: [{ ip: String, rating: Number }], // tracks individual ratings
   createdAt: {
     type: Date,
     default: Date.now,

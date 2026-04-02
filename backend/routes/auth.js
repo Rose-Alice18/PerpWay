@@ -5,12 +5,10 @@ const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const User = require('../models/User');
 
-// Admin credentials (in production, store these in database with hashed password)
+// Admin credentials loaded from environment variables
 const ADMIN_CREDENTIALS = {
-  email: 'admin@perpway.com',
-  // This is the hashed version of 'perpway2025'
-  // Generated using: bcrypt.hashSync('perpway2025', 10)
-  passwordHash: '$2a$10$8vN5qJ5YxLJKQxF5YGHKKOXxZ8nN9pJYR7Y5H8wF6vY5N8wF6vY5N',
+  email: process.env.ADMIN_EMAIL || 'admin@perpway.com',
+  passwordHash: process.env.ADMIN_PASSWORD_HASH,
   role: 'admin',
   name: 'Admin Roseline'
 };
@@ -185,9 +183,13 @@ router.post('/admin/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Verify password
-    // For now, do simple comparison until we set up proper bcrypt hashing
-    if (password !== 'perpway2025') {
+    // Verify password using bcrypt
+    if (!ADMIN_CREDENTIALS.passwordHash) {
+      console.error('❌ ADMIN_PASSWORD_HASH not set in environment variables');
+      return res.status(500).json({ message: 'Server misconfiguration' });
+    }
+    const passwordValid = await bcrypt.compare(password, ADMIN_CREDENTIALS.passwordHash);
+    if (!passwordValid) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
