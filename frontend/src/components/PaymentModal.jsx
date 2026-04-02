@@ -226,11 +226,11 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
             </h3>
 
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 leading-relaxed">
-              We totally get it! No pressure at all. But just so you know, even GHS 2 keeps the lights on and helps us serve you better. 💡
+              We totally get it! No pressure at all. But just so you know, even GHS 2 help keep the app running and helps us serve you better.💡
             </p>
 
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-4 italic">
-              (You'll still see the contacts in 5 secs if you skip)
+              (You'll still see all the contacts in 5 secs if you skip)
             </p>
 
             {/* Funny disappointed images using emojis */}
@@ -291,7 +291,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
                 Help Keep Perpway Running! 🚀
               </h2>
               <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed">
-                Our team works hard to keep this platform <span className="font-semibold">free and accessible</span> for everyone. Please consider tipping to unlock <span className="font-semibold text-ashesi-primary dark:text-ghana-yellow">{driver.name}'s</span> contact.
+                Our team works hard to keep this platform <span className="font-semibold">free and accessible</span> for everyone. Please consider tipping to unlock <span className="font-semibold text-ashesi-primary dark:text-ghana-yellow">{driver.name}'s</span> contact all all driver's contacts all at once.
               </p>
             </div>
 
