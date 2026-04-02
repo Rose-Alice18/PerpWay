@@ -995,7 +995,7 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
       type: 'info',
       onConfirm: async () => {
         try {
-          const response = await axios.put(`${API_URL}/api/delivery/admin/${selectedDelivery._id}/assign`, {
+          await axios.put(`${API_URL}/api/delivery/admin/${selectedDelivery._id}/assign`, {
             riderId: selectedRiderId
           }, getAuthHeaders());
 
@@ -1040,7 +1040,7 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
       type: 'info',
       onConfirm: async () => {
         try {
-          const response = await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
+          await axios.put(`${API_URL}/api/delivery/admin/${deliveryId}/assign-default`, {}, getAuthHeaders());
           await fetchData();
 
           // Ask if they want to send document
@@ -2181,10 +2181,6 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError })
   const handleQuickStatusChange = async (driverId, newStatus) => {
     try {
       // Optimistically update the UI immediately
-      const updatedDrivers = drivers.map(d =>
-        d._id === driverId ? { ...d, availability: newStatus } : d
-      );
-
       // Update the database
       await axios.put(`${API_URL}/api/drivers/${driverId}`, { availability: newStatus });
 
