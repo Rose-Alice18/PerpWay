@@ -40,3 +40,6 @@ coverage/
 #some files
 PROJECT_SUMMARY.md
 FEATURES.md
+
+# Nested repo copy (extracted zip - not part of the project)
+PerpWay-main/
