@@ -373,14 +373,14 @@ const AdminDashboard = () => {
               transition={{ duration: 0.3 }}
             >
               {activeTab === 'overview' && <OverviewTab stats={stats} deliveries={deliveries} drivers={drivers} rides={rides} vendors={vendors} users={users} />}
-              {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
-              {activeTab === 'shopping' && <ShoppingTab shoppingRequests={shoppingRequests} fetchData={fetchShoppingRequests} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
+              {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
+              {activeTab === 'shopping' && <ShoppingTab shoppingRequests={shoppingRequests} fetchData={fetchShoppingRequests} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
-              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
-              {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} />}
-              {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} />}
-              {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} />}
-              {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchCategories} exportToCSV={exportToCSV} />}
+              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
+              {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
+              {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
+              {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
+              {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchCategories} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'users' && <UsersTab users={users} fetchData={fetchUsers} exportToCSV={exportToCSV} />}
               {activeTab === 'settings' && <SettingsTab />}
             </motion.div>
@@ -672,7 +672,7 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors, users }) => {
                 <Legend
                   verticalAlign="bottom"
                   height={36}
-                  formatter={(value, entry) => `${entry.payload.name}: ${entry.payload.value}`}
+                  formatter={(_value, entry) => `${entry.payload.name}: ${entry.payload.value}`}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -810,7 +810,7 @@ const OverviewTab = ({ stats, deliveries, drivers, rides, vendors, users }) => {
 };
 
 // Deliveries Tab Component
-const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV }) => {
+const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV, showSuccess, showError, showConfirm }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -2075,7 +2075,7 @@ Use the link to mark deliveries as:
 };
 
 // Drivers Tab Component
-const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError }) => {
+const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, showConfirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -3296,7 +3296,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV, showSuccess, showError }) => 
 // ============================================
 // VENDORS TAB - Card & Table Views
 // ============================================
-const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
+const VendorsTab = ({ vendors, fetchData, exportToCSV, showSuccess, showError, showConfirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
   const [showEditModal, setShowEditModal] = useState(false);
@@ -3903,7 +3903,7 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV }) => {
 // ============================================
 // USERS TAB - Simple List View
 // ============================================
-const UsersTab = ({ users, fetchData, exportToCSV }) => {
+const UsersTab = ({ users, exportToCSV }) => { // eslint-disable-line no-unused-vars
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
@@ -4091,7 +4091,7 @@ const UsersTab = ({ users, fetchData, exportToCSV }) => {
 // ============================================
 // MOTOR RIDERS TAB - Card & Table Views with Default Rider
 // ============================================
-const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
+const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV, showSuccess, showError, showConfirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -4627,7 +4627,7 @@ const MotorRidersTab = ({ motorRiders, fetchData, exportToCSV }) => {
 // ============================================
 // CATEGORIES TAB - List View with Vendor Counts
 // ============================================
-const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
+const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV, showSuccess, showError, showConfirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -5092,7 +5092,7 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV }) => {
 // ============================================
 // REVENUE TAB - Financial Tracking & Analytics
 // ============================================
-const RevenueTab = ({ deliveries, motorRiders, exportToCSV }) => {
+const RevenueTab = ({ exportToCSV }) => { // eslint-disable-line no-unused-vars
   const [period, setPeriod] = useState('month');
   const [viewMode, setViewMode] = useState('table');
   const [financialData, setFinancialData] = useState(null);
@@ -6328,7 +6328,7 @@ const SettingsTab = () => {
 };
 
 // Shopping Tab Component
-const ShoppingTab = ({ shoppingRequests, fetchData, motorRiders, exportToCSV, showSuccess, showError }) => {
+const ShoppingTab = ({ shoppingRequests, fetchData, motorRiders, exportToCSV, showSuccess, showError, showConfirm }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
