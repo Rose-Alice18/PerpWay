@@ -91,7 +91,7 @@ const Terms = () => {
     },
     {
       title: '14. Questions? Let\'s Chat! 💬',
-      content: `Got questions or concerns about these terms? We\'re here to help! Email us at ${contactInfo.email}, call/WhatsApp us at ${contactInfo.phone}, or use our Contact page. We actually read and respond to messages - promise! 😊`,
+      content: `Got questions or concerns about these terms? We're here to help! Email us at ${contactInfo.email}, call/WhatsApp us at ${contactInfo.phone}, or use our Contact page. We actually read and respond to messages - promise! 😊`,
     },
   ];
 
@@ -146,7 +146,7 @@ const Terms = () => {
     },
     {
       title: '13. Got Privacy Questions? 🤔',
-      content: `We\'re totally transparent about data privacy! Have concerns or questions? Email us at ${contactInfo.email}, call/WhatsApp at ${contactInfo.phone}, or use our Contact page. We\'ll explain everything in plain English - no legal jargon! 💙`,
+      content: `We're totally transparent about data privacy! Have concerns or questions? Email us at ${contactInfo.email}, call/WhatsApp at ${contactInfo.phone}, or use our Contact page. We'll explain everything in plain English - no legal jargon! 💙`,
     },
   ];
 
