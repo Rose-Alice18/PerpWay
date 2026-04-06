@@ -1,7 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const nodemailer = require('nodemailer');
 const ShoppingRequest = require('../models/ShoppingRequest');
 const { uploadShopping } = require('../config/cloudinary');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // Create new shopping request
 router.post('/create', uploadShopping.single('productImage'), async (req, res) => {
@@ -28,6 +37,79 @@ router.post('/create', uploadShopping.single('productImage'), async (req, res) =
     await newRequest.save();
 
     console.log('🛒 New shopping request created:', newRequest);
+
+    // Send admin email notification
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.ADMIN_EMAIL || 'roselinetsatsu@gmail.com',
+        subject: `🛒 New Shopping Request from ${userName} - Perpway`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #CE1126 0%, #FCD116 50%, #006B3F 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }
+              .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 10px 10px; }
+              .info-section { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #CE1126; }
+              .info-section h3 { margin-top: 0; color: #CE1126; }
+              ul { list-style: none; padding: 0; }
+              li { padding: 8px 0; border-bottom: 1px solid #eee; }
+              li:last-child { border-bottom: none; }
+              .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+              .btn { display: inline-block; padding: 12px 24px; background: #CE1126; color: white; text-decoration: none; border-radius: 6px; margin-top: 15px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h2>🛒 New Shopping Request</h2>
+                <p>Perpway - Personal Easy Rides & Packages</p>
+              </div>
+              <div class="content">
+                <div class="info-section">
+                  <h3>👤 Customer Information</h3>
+                  <ul>
+                    <li><strong>Name:</strong> ${userName}</li>
+                    <li><strong>Contact:</strong> ${userContact}</li>
+                    <li><strong>Email:</strong> ${userEmail || 'Not provided'}</li>
+                  </ul>
+                </div>
+                <div class="info-section">
+                  <h3>🛍️ Product Details</h3>
+                  <ul>
+                    <li><strong>Product:</strong> ${productName}</li>
+                    <li><strong>Description:</strong> ${productDescription || 'N/A'}</li>
+                    <li><strong>Shop Locations:</strong> ${shopLocations || 'N/A'}</li>
+                    <li><strong>Estimated Price:</strong> ${estimatedPrice ? 'GH₵' + estimatedPrice : 'N/A'}</li>
+                  </ul>
+                </div>
+                <div class="info-section">
+                  <h3>⏰ Request Information</h3>
+                  <ul>
+                    <li><strong>Received at:</strong> ${new Date().toLocaleString()}</li>
+                    <li><strong>Status:</strong> Pending</li>
+                  </ul>
+                </div>
+                <p style="text-align: center; margin-top: 20px;">
+                  <a href="${process.env.FRONTEND_URL || 'https://perpway.vercel.app'}/admin/dashboard" class="btn">View in Dashboard</a>
+                </p>
+              </div>
+              <div class="footer">
+                <p>This is an automated notification from Perpway</p>
+                <p>© ${new Date().getFullYear()} Perpway. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      });
+      console.log('✅ Admin notified of new shopping request');
+    } catch (emailError) {
+      console.log('⚠️ Admin email failed:', emailError.message);
+    }
 
     res.json({
       success: true,

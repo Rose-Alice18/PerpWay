@@ -1,7 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const Ride = require('../models/Ride');
+const nodemailer = require('nodemailer');
 const { sendRideJoinNotification } = require('../config/email');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const sendAdminEmail = async (subject, html) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.ADMIN_EMAIL || 'roselinetsatsu@gmail.com',
+      subject,
+      html,
+    });
+    console.log(`✅ Admin notified: ${subject}`);
+  } catch (err) {
+    console.log('⚠️ Admin email failed:', err.message);
+  }
+};
 const { authenticateToken } = require('../middleware/auth');
 const { sendRideAlert } = require('../services/whatsapp');
 
@@ -107,6 +130,40 @@ router.post('/create', async (req, res) => {
     // Notify WhatsApp groups (non-blocking)
     sendRideAlert(newRide).catch(err => console.error('WhatsApp alert failed:', err.message));
 
+    // Notify admin by email (non-blocking)
+    sendAdminEmail(
+      `🚗 New Ride Posted by ${name} - Perpway`,
+      `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <div style="background:linear-gradient(135deg,#CE1126,#FCD116,#006B3F);color:white;padding:20px;border-radius:10px 10px 0 0;text-align:center">
+          <h2>🚗 New Ride Posted</h2>
+          <p>Perpway - Personal Easy Rides &amp; Packages</p>
+        </div>
+        <div style="background:#f9f9f9;padding:20px;border-radius:0 0 10px 10px">
+          <div style="background:white;padding:15px;margin:10px 0;border-radius:8px;border-left:4px solid #CE1126">
+            <h3 style="margin-top:0;color:#CE1126">👤 Poster</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Contact:</strong> ${contact}</p>
+            <p><strong>Email:</strong> ${userEmail || 'Not provided'}</p>
+          </div>
+          <div style="background:white;padding:15px;margin:10px 0;border-radius:8px;border-left:4px solid #CE1126">
+            <h3 style="margin-top:0;color:#CE1126">📍 Ride Details</h3>
+            <p><strong>From:</strong> ${pickupLocation}</p>
+            <p><strong>To:</strong> ${destination}</p>
+            <p><strong>Date:</strong> ${departureDate}</p>
+            <p><strong>Time:</strong> ${departureTime}</p>
+            <p><strong>Seats Available:</strong> ${4 - (parseInt(seatsNeeded) || 1)}</p>
+            ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
+          </div>
+          <p style="text-align:center">
+            <a href="${process.env.FRONTEND_URL || 'https://perpway.vercel.app'}/admin/dashboard" style="display:inline-block;padding:12px 24px;background:#CE1126;color:white;text-decoration:none;border-radius:6px">View in Dashboard</a>
+          </p>
+        </div>
+        <p style="text-align:center;color:#666;font-size:12px">© ${new Date().getFullYear()} Perpway. All rights reserved.</p>
+      </div>
+      `
+    );
+
     res.json({
       success: true,
       message: 'Ride posted successfully!',
@@ -188,10 +245,50 @@ router.post('/:id/join', async (req, res) => {
       availableSeats: ride.availableSeats,
     };
 
-    // Send notification (don't wait for it - send async)
+    // Send notification to ride creator (don't wait for it - send async)
     sendRideJoinNotification(rideCreator, joiner, rideDetails).catch(err => {
       console.error('Failed to send notification email:', err);
     });
+
+    // Notify admin (non-blocking)
+    sendAdminEmail(
+      `🚗 ${name} joined a ride to ${rideDetails.destination} - Perpway`,
+      `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <div style="background:linear-gradient(135deg,#CE1126,#FCD116,#006B3F);color:white;padding:20px;border-radius:10px 10px 0 0;text-align:center">
+          <h2>🚗 Ride Joined</h2>
+          <p>Perpway - Personal Easy Rides &amp; Packages</p>
+        </div>
+        <div style="background:#f9f9f9;padding:20px;border-radius:0 0 10px 10px">
+          <div style="background:white;padding:15px;margin:10px 0;border-radius:8px;border-left:4px solid #CE1126">
+            <h3 style="margin-top:0;color:#CE1126">👤 New Rider</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>WhatsApp:</strong> ${whatsapp || phone}</p>
+            <p><strong>Email:</strong> ${email || 'Not provided'}</p>
+            <p><strong>Seats Needed:</strong> ${seatsRequested}</p>
+          </div>
+          <div style="background:white;padding:15px;margin:10px 0;border-radius:8px;border-left:4px solid #006B3F">
+            <h3 style="margin-top:0;color:#006B3F">📍 Ride Details</h3>
+            <p><strong>From:</strong> ${rideDetails.pickupLocation}</p>
+            <p><strong>To:</strong> ${rideDetails.destination}</p>
+            <p><strong>Date:</strong> ${rideDetails.departureDate}</p>
+            <p><strong>Time:</strong> ${rideDetails.departureTime}</p>
+            <p><strong>Seats Remaining:</strong> ${updatedRide.availableSeats}</p>
+          </div>
+          <div style="background:white;padding:15px;margin:10px 0;border-radius:8px;border-left:4px solid #FCD116">
+            <h3 style="margin-top:0;color:#856404">🧑 Ride Creator</h3>
+            <p><strong>Name:</strong> ${ride.name}</p>
+            <p><strong>Contact:</strong> ${ride.contact}</p>
+          </div>
+          <p style="text-align:center">
+            <a href="${process.env.FRONTEND_URL || 'https://perpway.vercel.app'}/admin/dashboard" style="display:inline-block;padding:12px 24px;background:#CE1126;color:white;text-decoration:none;border-radius:6px">View in Dashboard</a>
+          </p>
+        </div>
+        <p style="text-align:center;color:#666;font-size:12px">© ${new Date().getFullYear()} Perpway. All rights reserved.</p>
+      </div>
+      `
+    );
 
     res.json({
       success: true,

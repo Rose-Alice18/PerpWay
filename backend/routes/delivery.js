@@ -149,7 +149,7 @@ router.post('/request', async (req, res) => {
             </div>
 
             <p style="text-align: center; margin-top: 20px;">
-              <a href="http://localhost:2000/admin/dashboard" class="btn">View in Dashboard</a>
+              <a href="${process.env.FRONTEND_URL || 'https://perpway.vercel.app'}/admin/dashboard" class="btn">View in Dashboard</a>
             </p>
           </div>
           <div class="footer">
