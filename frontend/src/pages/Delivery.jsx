@@ -482,7 +482,7 @@ const Delivery = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField('pickupPoint')}
                         onBlur={() => setFocusedField(null)}
-                        placeholder="e.g., Madina Market"
+                        placeholder="e.g., Madina Market, in front of Melcom — Make sure to include a landmark"
                         className={`input-field ${
                           errors.pickupPoint ? 'border-red-500 dark:border-red-500' : ''
                         } ${
