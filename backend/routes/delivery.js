@@ -5,16 +5,17 @@ const DeliveryRequest = require('../models/DeliveryRequest');
 const MotorRider = require('../models/MotorRider');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
-// Create a test email transporter
-// In production, use real email credentials
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER || 'your-email@gmail.com',
-    pass: process.env.EMAIL_PASS || 'your-app-password',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
 });
 
 // GET user's delivery history
@@ -51,18 +52,26 @@ router.post('/request', async (req, res) => {
   try {
     const { name, contact, itemDescription, pickupPoint, dropoffPoint, deliveryType, notes, userEmail } = req.body;
 
-    // Fetch pricing from settings
+    // Fetch pricing from settings (with fallback so it never blocks)
     const Settings = require('../models/Settings');
-    const settings = await Settings.getSettings();
-
-    // Get price based on delivery type
     let price = 0;
-    if (deliveryType === 'instant') {
-      price = settings.pricing.instant || 10;
-    } else if (deliveryType === 'next-day') {
-      price = settings.pricing.nextDay || 7;
-    } else if (deliveryType === 'weekly-station') {
-      price = settings.pricing.weeklyStation || 5;
+    try {
+      const settings = await Promise.race([
+        Settings.getSettings(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Settings timeout')), 5000)),
+      ]);
+      if (deliveryType === 'instant') {
+        price = settings.pricing.instant || 10;
+      } else if (deliveryType === 'next-day') {
+        price = settings.pricing.nextDay || 7;
+      } else if (deliveryType === 'weekly-station') {
+        price = settings.pricing.weeklyStation || 5;
+      }
+    } catch (settingsErr) {
+      console.warn('⚠️ Settings fetch failed, using defaults:', settingsErr.message);
+      if (deliveryType === 'instant') price = 10;
+      else if (deliveryType === 'next-day') price = 7;
+      else if (deliveryType === 'weekly-station') price = 5;
     }
 
     // Calculate commission (70% to rider, 30% to platform)
@@ -89,7 +98,14 @@ router.post('/request', async (req, res) => {
     // Log the request
     console.log('📦 New delivery request saved:', deliveryRequest);
 
-    // Prepare email content
+    // Respond immediately — don't wait for email
+    res.json({
+      success: true,
+      message: 'Delivery request received! We will contact you shortly.',
+      requestId: `DEL-${Date.now()}`,
+    });
+
+    // Prepare email content (sent after response, non-blocking)
     const deliveryTypeNames = {
       instant: 'Instant Delivery (2-4 hours)',
       'next-day': 'Next-Day Delivery',
@@ -161,25 +177,16 @@ router.post('/request', async (req, res) => {
       </html>
     `;
 
-    // Try to send email notification to admin
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER || 'noreply@perpway.com',
-        to: 'roselinetsatsu@gmail.com',
-        subject: `🚚 New Delivery Request from ${name} - Perpway`,
-        html: emailContent,
-      });
-      console.log('✅ Email notification sent to roselinetsatsu@gmail.com!');
-    } catch (emailError) {
-      console.log('⚠️  Email sending failed (configure EMAIL_USER and EMAIL_PASS in .env)');
-      console.log('Email error:', emailError.message);
-      console.log('Request data saved to database - check admin dashboard.');
-    }
-
-    res.json({
-      success: true,
-      message: 'Delivery request received! We will contact you shortly.',
-      requestId: `DEL-${Date.now()}`,
+    // Fire-and-forget: send admin email without blocking
+    transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.ADMIN_EMAIL || 'roselinetsatsu@gmail.com',
+      subject: `🚚 New Delivery Request from ${name} - Perpway`,
+      html: emailContent,
+    }).then(() => {
+      console.log('✅ Admin email sent for delivery request');
+    }).catch(emailError => {
+      console.log('⚠️ Admin email failed:', emailError.message);
     });
   } catch (error) {
     console.error('Delivery request error:', error);
