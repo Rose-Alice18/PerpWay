@@ -378,7 +378,7 @@ const AdminDashboard = () => {
               {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
               {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
-              {activeTab === 'vendors' && <VendorsTab vendors={vendors} fetchData={fetchVendors} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
+              {activeTab === 'vendors' && <VendorsTab vendors={vendors} categories={categories} fetchData={fetchVendors} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'categories' && <CategoriesTab categories={categories} vendors={vendors} fetchData={fetchCategories} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'users' && <UsersTab users={users} fetchData={fetchUsers} exportToCSV={exportToCSV} />}
@@ -3366,7 +3366,7 @@ const RidesTab = ({ rides, fetchData, exportToCSV, showSuccess, showError }) => 
 // ============================================
 // VENDORS TAB - Card & Table Views
 // ============================================
-const VendorsTab = ({ vendors, fetchData, exportToCSV, showSuccess, showError, showConfirm }) => {
+const VendorsTab = ({ vendors, categories, fetchData, exportToCSV, showSuccess, showError, showConfirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('table');
   const [showEditModal, setShowEditModal] = useState(false);
@@ -3701,13 +3701,16 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV, showSuccess, showError, s
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Category
                 </label>
-                <input
-                  type="text"
+                <select
                   value={editForm.category}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="e.g., barber, tailor, food, fruit"
-                />
+                >
+                  <option value="">Select a category</option>
+                  {(categories || []).map(cat => (
+                    <option key={cat._id} value={cat.name}>{cat.icon} {cat.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -3837,14 +3840,17 @@ const VendorsTab = ({ vendors, fetchData, exportToCSV, showSuccess, showError, s
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Category *
                 </label>
-                <input
-                  type="text"
+                <select
                   value={newVendorForm.category}
                   onChange={(e) => setNewVendorForm({ ...newVendorForm, category: e.target.value })}
                   className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="e.g., barber, tailor, food, fruit"
                   required
-                />
+                >
+                  <option value="">Select a category</option>
+                  {(categories || []).map(cat => (
+                    <option key={cat._id} value={cat.name}>{cat.icon} {cat.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -4760,12 +4766,22 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV, showSucces
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    const oldName = selectedCategory.name;
+    const newName = editForm.name;
+    const nameChanged = oldName !== newName;
     try {
       await axios.put(`${API_URL}/api/categories/${selectedCategory._id}`, editForm, getAuthHeaders());
+      // If name changed, cascade-update all vendors that used the old name
+      if (nameChanged) {
+        await axios.put(`${API_URL}/api/vendors/bulk/category`, { oldName, newName }, getAuthHeaders());
+      }
       fetchData();
       setShowEditModal(false);
       setSelectedCategory(null);
-      showSuccess('Category updated successfully! 🎉');
+      showSuccess(nameChanged
+        ? `Category renamed to "${newName}" and all vendors updated! 🎉`
+        : 'Category updated successfully! 🎉'
+      );
     } catch (error) {
       console.error('Error updating category:', error);
       showError('Failed to update category');
@@ -4785,14 +4801,23 @@ const CategoriesTab = ({ categories, vendors, fetchData, exportToCSV, showSucces
   };
 
   const handleDeleteCategory = async (categoryId) => {
+    const category = categories.find(c => c._id === categoryId);
+    const affectedVendors = vendors.filter(v => v.category === category?.name).length;
+    const warningLine = affectedVendors > 0
+      ? `\n\n⚠️ ${affectedVendors} vendor${affectedVendors > 1 ? 's' : ''} in this category will be moved to "Uncategorised".`
+      : '';
     showConfirm({
       title: 'Delete Category?',
-      message: 'Are you sure you want to delete this category?\n\nThis action cannot be undone.',
+      message: `Are you sure you want to delete "${category?.name}"?\n\nThis action cannot be undone.${warningLine}`,
       confirmText: 'Yes, delete it!',
       cancelText: 'Nah, keep it',
       type: 'danger',
       onConfirm: async () => {
         try {
+          // Move affected vendors to Uncategorised before deleting
+          if (affectedVendors > 0) {
+            await axios.put(`${API_URL}/api/vendors/bulk/category`, { oldName: category.name }, getAuthHeaders());
+          }
           await axios.delete(`${API_URL}/api/categories/${categoryId}`, getAuthHeaders());
           fetchData();
           showSuccess('Category deleted successfully! 🗑️');

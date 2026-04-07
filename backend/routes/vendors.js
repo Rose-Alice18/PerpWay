@@ -115,6 +115,28 @@ router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
+// Bulk update vendor category name (used when a category is renamed or deleted)
+router.put('/bulk/category', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { oldName, newName } = req.body;
+    if (!oldName) return res.status(400).json({ error: 'oldName is required' });
+
+    const update = newName
+      ? { category: newName }           // rename
+      : { category: 'Uncategorised' };  // deleted — move to fallback
+
+    const result = await require('../models/Vendor').updateMany(
+      { category: oldName },
+      { $set: update }
+    );
+
+    res.json({ success: true, updated: result.modifiedCount });
+  } catch (error) {
+    console.error('Bulk category update error:', error);
+    res.status(500).json({ error: 'Failed to update vendor categories', message: error.message });
+  }
+});
+
 // Delete vendor (for admin use)
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {

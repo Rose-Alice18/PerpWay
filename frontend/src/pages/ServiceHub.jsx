@@ -30,7 +30,7 @@ const ServiceHub = () => {
           .filter(cat => cat.isVisible)
           .map(cat => ({
             ...cat,
-            id: cat._id || cat.id // Normalize MongoDB _id to id
+            id: cat.name, // Use name as the filter key so it matches vendor.category
           }));
 
         // Add "All Services" at the beginning
