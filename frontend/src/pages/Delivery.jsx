@@ -529,7 +529,7 @@ const Delivery = () => {
                         placeholder={
                           formData.deliveryType === 'weekly-station'
                             ? 'Our drop-off: Kwabenya Community Hospital - The Goil Station'
-                            : 'e.g., Ashesi Campus - Volta Hall'
+                            : 'e.g., Ashesi Campus, Volta Hall gate — must include a landmark'
                         }
                         className={`input-field ${
                           errors.dropoffPoint ? 'border-red-500 dark:border-red-500' : ''
@@ -553,6 +553,10 @@ const Delivery = () => {
                     </AnimatePresence>
                   </motion.div>
                 </div>
+                <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1 -mt-1">
+                  <span>⚠️</span>
+                  <span>Exact locations with a clear landmark are required. Orders with vague addresses cannot be processed.</span>
+                </p>
 
                 {/* Additional Notes */}
                 <motion.div
