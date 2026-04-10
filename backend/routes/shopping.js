@@ -39,13 +39,19 @@ router.post('/create', optionalAuth, uploadShopping.single('productImage'), asyn
 
     console.log('🛒 New shopping request created:', newRequest);
 
-    // Send admin email notification
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: process.env.ADMIN_EMAIL || 'roselinetsatsu@gmail.com',
-        subject: `🛒 New Shopping Request from ${userName} - Perpway`,
-        html: `
+    // Respond immediately — don't wait for email
+    res.json({
+      success: true,
+      message: 'Shopping request submitted successfully!',
+      request: newRequest,
+    });
+
+    // Fire-and-forget: send admin email without blocking
+    transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.ADMIN_EMAIL || 'roselinetsatsu@gmail.com',
+      subject: `🛒 New Shopping Request from ${userName} - Perpway`,
+      html: `
           <!DOCTYPE html>
           <html>
           <head>
@@ -106,16 +112,10 @@ router.post('/create', optionalAuth, uploadShopping.single('productImage'), asyn
           </body>
           </html>
         `,
-      });
+    }).then(() => {
       console.log('✅ Admin notified of new shopping request');
-    } catch (emailError) {
+    }).catch(emailError => {
       console.log('⚠️ Admin email failed:', emailError.message);
-    }
-
-    res.json({
-      success: true,
-      message: 'Shopping request submitted successfully!',
-      request: newRequest,
     });
   } catch (error) {
     console.error('Create shopping request error:', error);
