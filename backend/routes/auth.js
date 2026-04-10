@@ -2,9 +2,22 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const passport = require('passport');
 const User = require('../models/User');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
+});
 
 // Admin credentials loaded from environment variables
 const ADMIN_CREDENTIALS = {
@@ -466,6 +479,94 @@ router.get('/users', authenticateToken, requireAdmin, async (req, res) => {
       success: false,
       message: 'Failed to fetch users'
     });
+  }
+});
+
+// Forgot password — send reset email
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Always respond with success to prevent email enumeration
+    if (!user || user.authProvider === 'google') {
+      return res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+    }
+
+    // Generate secure token
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    const resetUrl = `${process.env.FRONTEND_URL || 'https://perpway.vercel.app'}/reset-password?token=${token}`;
+
+    transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: '🔐 Reset your Perpway password',
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:linear-gradient(135deg,#CE1126,#FCD116,#006B3F);color:white;padding:20px;border-radius:10px 10px 0 0;text-align:center">
+            <h2>🔐 Password Reset</h2>
+            <p>Perpway - Personal Easy Rides &amp; Packages</p>
+          </div>
+          <div style="background:#f9f9f9;padding:30px;border-radius:0 0 10px 10px">
+            <p style="font-size:16px">Hi <strong>${user.name}</strong>,</p>
+            <p>We received a request to reset your Perpway password. Click the button below to choose a new one:</p>
+            <p style="text-align:center;margin:30px 0">
+              <a href="${resetUrl}" style="display:inline-block;padding:14px 28px;background:#CE1126;color:white;text-decoration:none;border-radius:8px;font-weight:bold;font-size:16px">Reset My Password</a>
+            </p>
+            <p style="color:#666;font-size:14px">This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email — your password won't change.</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:20px 0"/>
+            <p style="color:#999;font-size:12px;text-align:center">© ${new Date().getFullYear()} Perpway. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    }).catch(err => console.error('Password reset email failed:', err.message));
+
+    res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ success: false, message: 'Server error. Please try again.' });
+  }
+});
+
+// Reset password — verify token and update password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: 'Token and new password are required' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Reset link is invalid or has expired.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({ success: true, message: 'Password updated successfully. You can now sign in.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ success: false, message: 'Server error. Please try again.' });
   }
 });
 

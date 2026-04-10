@@ -16,6 +16,20 @@ const Delivery = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
+
+  const handleSuccessClose = () => {
+    setShowSuccess(false);
+    setFormData({
+      name: '',
+      contact: '',
+      itemDescription: '',
+      pickupPoint: '',
+      dropoffPoint: '',
+      deliveryType: 'next-day',
+      notes: '',
+    });
+    setFocusedField(null);
+  };
   const [errors, setErrors] = useState({});
   const [pricing, setPricing] = useState({
     instant: 'Tentative',
@@ -126,7 +140,7 @@ const Delivery = () => {
         setSubmitting(false);
         setShowSuccess(true);
 
-        // Reset form after 3 seconds
+        // Auto-close after 12 seconds — long enough to read the full message
         setTimeout(() => {
           setShowSuccess(false);
           setFormData({
@@ -139,7 +153,7 @@ const Delivery = () => {
             notes: '',
           });
           setFocusedField(null);
-        }, 3000);
+        }, 12000);
       }, 1500);
     } catch (error) {
       console.error('Delivery request error:', error);
@@ -652,7 +666,7 @@ const Delivery = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={() => setShowSuccess(false)}
+            onClick={handleSuccessClose}
           >
             <motion.div
               initial={{ scale: 0.5, y: 50, opacity: 0, rotateX: -15 }}
@@ -729,15 +743,16 @@ const Delivery = () => {
                 </p>
               </motion.div>
 
-              {/* Close hint */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.6 }}
-                transition={{ delay: 1 }}
-                className="text-xs text-gray-500 dark:text-gray-400 mt-4 relative z-10"
+              {/* Close button */}
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                onClick={handleSuccessClose}
+                className="mt-6 w-full py-3 px-6 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold rounded-xl transition-colors duration-200 relative z-10 text-base"
               >
-                Click anywhere to close
-              </motion.p>
+                Done ✓
+              </motion.button>
             </motion.div>
           </motion.div>
         )}
