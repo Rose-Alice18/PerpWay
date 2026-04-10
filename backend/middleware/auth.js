@@ -1,6 +1,14 @@
 const jwt = require('jsonwebtoken');
 
-// Middleware to verify JWT token
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not set. Set it in your Render environment variables.');
+  }
+  return secret;
+};
+
+// Requires a valid token — blocks request if missing or invalid
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
@@ -9,9 +17,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Access token required' });
   }
 
-  const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
-
-  jwt.verify(token, jwtSecret, (err, user) => {
+  jwt.verify(token, getJwtSecret(), (err, user) => {
     if (err) {
       return res.status(403).json({ message: 'Invalid or expired token' });
     }
@@ -20,7 +26,20 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Middleware to check if user is admin
+// Attaches user to req if a valid token is present, but never blocks the request
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return next();
+
+  jwt.verify(token, getJwtSecret(), (err, user) => {
+    if (!err) req.user = user;
+    next();
+  });
+};
+
+// Must run after authenticateToken — checks role
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access required' });
@@ -28,4 +47,4 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticateToken, requireAdmin };
+module.exports = { authenticateToken, optionalAuth, requireAdmin };

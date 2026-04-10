@@ -25,7 +25,7 @@ const sendAdminEmail = async (subject, html) => {
     console.log('⚠️ Admin email failed:', err.message);
   }
 };
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, optionalAuth } = require('../middleware/auth');
 const { sendRideAlert } = require('../services/whatsapp');
 
 // Get all rides
@@ -94,7 +94,7 @@ router.get('/user/:email', authenticateToken, async (req, res) => {
 });
 
 // Create new ride
-router.post('/create', async (req, res) => {
+router.post('/create', optionalAuth, async (req, res) => {
   try {
     const { name, contact, pickupLocation, destination, departureTime, departureDate, seatsNeeded, notes, userEmail } = req.body;
 
@@ -176,7 +176,7 @@ router.post('/create', async (req, res) => {
 });
 
 // Join a ride
-router.post('/:id/join', async (req, res) => {
+router.post('/:id/join', optionalAuth, async (req, res) => {
   try {
     const { name, phone, whatsapp, email, seatsNeeded, contactVisibility } = req.body;
     const ride = await Ride.findById(req.params.id);

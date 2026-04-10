@@ -11,7 +11,7 @@ const verifyAdmin = (req, res, next) => {
 
   try {
     const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (decoded.role !== 'admin') {
       return res.status(403).json({ error: 'Admin access required' });
@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
     if (token) {
       try {
         const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (decoded.role === 'admin') {
           return res.json(settings);
         }

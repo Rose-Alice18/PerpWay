@@ -3,6 +3,7 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 const ShoppingRequest = require('../models/ShoppingRequest');
 const { uploadShopping } = require('../config/cloudinary');
+const { optionalAuth } = require('../middleware/auth');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -13,7 +14,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Create new shopping request
-router.post('/create', uploadShopping.single('productImage'), async (req, res) => {
+router.post('/create', optionalAuth, uploadShopping.single('productImage'), async (req, res) => {
   try {
     const { userEmail, userName, userContact, productName, productDescription, shopLocations, estimatedPrice } = req.body;
 

@@ -3,7 +3,7 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 const DeliveryRequest = require('../models/DeliveryRequest');
 const MotorRider = require('../models/MotorRider');
-const { authenticateToken, requireAdmin } = require('../middleware/auth');
+const { authenticateToken, optionalAuth, requireAdmin } = require('../middleware/auth');
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -48,7 +48,7 @@ router.get('/user/:email', authenticateToken, async (req, res) => {
 });
 
 // Submit delivery request
-router.post('/request', async (req, res) => {
+router.post('/request', optionalAuth, async (req, res) => {
   try {
     const { name, contact, itemDescription, pickupPoint, dropoffPoint, deliveryType, notes, userEmail } = req.body;
 
@@ -489,7 +489,7 @@ router.post('/rider/:riderCode/update', async (req, res) => {
 // ============================================
 
 // Bulk Authorize Deliveries
-router.post('/admin/bulk/authorize', requireAdmin, async (req, res) => {
+router.post('/admin/bulk/authorize', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { deliveryIds, authorizedBy } = req.body;
 
@@ -536,7 +536,7 @@ router.post('/admin/bulk/authorize', requireAdmin, async (req, res) => {
 });
 
 // Bulk Assign to Rider
-router.post('/admin/bulk/assign', requireAdmin, async (req, res) => {
+router.post('/admin/bulk/assign', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { deliveryIds, riderId } = req.body;
 
@@ -595,7 +595,7 @@ router.post('/admin/bulk/assign', requireAdmin, async (req, res) => {
 });
 
 // Bulk Update Status
-router.post('/admin/bulk/status', requireAdmin, async (req, res) => {
+router.post('/admin/bulk/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { deliveryIds, status } = req.body;
 
@@ -645,7 +645,7 @@ router.post('/admin/bulk/status', requireAdmin, async (req, res) => {
 });
 
 // Bulk Delete/Cancel Deliveries
-router.post('/admin/bulk/cancel', requireAdmin, async (req, res) => {
+router.post('/admin/bulk/cancel', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { deliveryIds } = req.body;
 

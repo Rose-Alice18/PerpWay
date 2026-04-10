@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const User = require('../models/User');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // Admin credentials loaded from environment variables
 const ADMIN_CREDENTIALS = {
@@ -58,7 +59,7 @@ router.post('/signup', async (req, res) => {
     await newUser.save();
 
     // Generate JWT token
-    const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+    const jwtSecret = process.env.JWT_SECRET;
     const token = jwt.sign(
       {
         id: newUser._id,
@@ -134,7 +135,7 @@ router.post('/signin', async (req, res) => {
     await user.save();
 
     // Generate JWT token
-    const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+    const jwtSecret = process.env.JWT_SECRET;
     const token = jwt.sign(
       {
         id: user._id,
@@ -194,11 +195,7 @@ router.post('/admin/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
-
-    if (!process.env.JWT_SECRET) {
-      console.warn('⚠️ WARNING: JWT_SECRET not found in environment variables, using fallback');
-    }
+    const jwtSecret = process.env.JWT_SECRET;
 
     const token = jwt.sign(
       {
@@ -234,7 +231,7 @@ router.get('/verify', (req, res) => {
     return res.status(401).json({ valid: false, message: 'No token provided' });
   }
 
-  const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+  const jwtSecret = process.env.JWT_SECRET;
 
   jwt.verify(token, jwtSecret, (err, user) => {
     if (err) {
@@ -259,7 +256,7 @@ router.get('/google/callback',
   }),
   (req, res) => {
     try {
-      const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+      const jwtSecret = process.env.JWT_SECRET;
 
       // Generate JWT token for the authenticated user
       const token = jwt.sign(
@@ -298,7 +295,7 @@ router.get('/me', async (req, res) => {
       return res.status(401).json({ message: 'No token provided' });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || 'perpway-fallback-secret-key-2025';
+    const jwtSecret = process.env.JWT_SECRET;
 
     jwt.verify(token, jwtSecret, async (err, decoded) => {
       if (err) {
@@ -335,7 +332,7 @@ router.get('/me', async (req, res) => {
 });
 
 // Update user profile
-router.put('/users/profile', async (req, res) => {
+router.put('/users/profile', authenticateToken, async (req, res) => {
   try {
     const { email, name, phone, address, newPassword } = req.body;
 
@@ -398,7 +395,7 @@ router.put('/users/profile', async (req, res) => {
 });
 
 // Update user settings
-router.put('/users/settings', async (req, res) => {
+router.put('/users/settings', authenticateToken, async (req, res) => {
   try {
     const { email, settings } = req.body;
 
@@ -441,7 +438,7 @@ router.put('/users/settings', async (req, res) => {
 });
 
 // Get all users (Admin only)
-router.get('/users', async (req, res) => {
+router.get('/users', authenticateToken, requireAdmin, async (req, res) => {
   try {
     // Fetch all users from database
     const users = await User.find({}, {
