@@ -7,7 +7,7 @@ const Home = () => {
   const features = [
     {
       title: 'Driver Finder',
-      description: 'Get access to all our trusted drivers\' numbers! Small tip den you go fit get at least 5 drivers contact to choose from. 🚗',
+      description: 'Get access to all our trusted drivers\' contacts. Pay a small tip and get at least 5 drivers to choose from. 🚗',
       icon: '🚗',
       path: '/drivers',
       color: 'from-red-500 to-red-600',
@@ -129,8 +129,8 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              E be like say you dey find driver? You need delivery? Want local services? We dey here for you!
-              Everything wey you need, all for one place. Make we help you! 💪
+              Looking for a driver? Need a delivery? Want local services?
+              Everything you need, all in one place. We got you. 💪
             </motion.p>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -168,7 +168,7 @@ const Home = () => {
               What We Offer
             </h2>
             <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-              All the services wey go make your campus life sweet pass! Choose what you need below 👇
+              Everything you need to make campus life easier. Pick what you're looking for 👇
             </p>
           </motion.div>
 
@@ -275,8 +275,8 @@ const Home = () => {
               Join the Perpway Community! 🎉
             </h2>
             <p className="text-lg mb-8 opacity-90">
-              Whether you dey look for ride, need delivery, or want connect with local vendors,
-              we get you covered. Make we help you navigate campus life with ease!
+              Whether you need a ride, a delivery, or want to connect with local vendors —
+              we've got you. Let's make campus life a little easier.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
