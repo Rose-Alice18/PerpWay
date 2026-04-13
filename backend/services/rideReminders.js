@@ -4,6 +4,22 @@ const { sendRideReminder } = require('../config/email');
 
 // Run every day at 6:00 PM to send reminders for next-day rides
 const startRideReminderService = () => {
+  // Run at midnight daily: mark past rides as cancelled
+  cron.schedule('0 0 * * *', async () => {
+    try {
+      const todayStr = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+      const result = await Ride.updateMany(
+        { status: 'active', departureDate: { $lt: todayStr } },
+        { $set: { status: 'cancelled' } }
+      );
+      if (result.modifiedCount > 0) {
+        console.log(`🧹 Cleaned up ${result.modifiedCount} expired ride(s)`);
+      }
+    } catch (error) {
+      console.error('❌ Error cleaning up expired rides:', error);
+    }
+  });
+
   // Schedule: Every day at 18:00 (6:00 PM)
   cron.schedule('0 18 * * *', async () => {
     console.log('🔔 Checking for rides that need reminders...');

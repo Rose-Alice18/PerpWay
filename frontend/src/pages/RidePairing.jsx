@@ -134,6 +134,7 @@ const RidePairing = () => {
   };
 
   const handleJoinRide = (ride) => {
+    if (isRideExpired(ride) || isRideTimePassed(ride)) return;
     setSelectedRide(ride);
     setShowJoinModal(true);
   };
@@ -506,20 +507,20 @@ const RidePairing = () => {
               {/* Action Buttons */}
               <div className="space-y-2">
                 <motion.button
-                  whileHover={{ scale: (ride.availableSeats === 0 || isRideExpired(ride)) ? 1 : 1.02 }}
-                  whileTap={{ scale: (ride.availableSeats === 0 || isRideExpired(ride)) ? 1 : 0.98 }}
+                  whileHover={{ scale: (ride.availableSeats === 0 || isRideExpired(ride) || isRideTimePassed(ride)) ? 1 : 1.02 }}
+                  whileTap={{ scale: (ride.availableSeats === 0 || isRideExpired(ride) || isRideTimePassed(ride)) ? 1 : 0.98 }}
                   onClick={() => handleJoinRide(ride)}
                   className={`w-full px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                    isRideExpired(ride)
+                    isRideExpired(ride) || isRideTimePassed(ride)
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                       : ride.availableSeats === 0
                       ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                       : 'bg-ghana-red hover:bg-ghana-red/90 text-white hover:shadow-lg'
                   }`}
-                  disabled={ride.availableSeats === 0 || isRideExpired(ride)}
+                  disabled={ride.availableSeats === 0 || isRideExpired(ride) || isRideTimePassed(ride)}
                 >
-                  {isRideExpired(ride)
-                    ? 'Ride Expired ⏰'
+                  {isRideExpired(ride) || isRideTimePassed(ride)
+                    ? 'Ride Departed ⏰'
                     : ride.availableSeats === 0
                     ? 'Ride Full 😔'
                     : 'Join This Ride 🚗'}

@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -24,9 +25,35 @@ import ResetPassword from './pages/ResetPassword';
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isAdminRoute = location.pathname.startsWith('/admin/dashboard');
   const isUserDashboardRoute = location.pathname.startsWith('/dashboard');
   const isRiderUpdateRoute = location.pathname.startsWith('/rider-update');
+
+  // Global 401/403 handler — redirect to sign in when session expires
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          const userRole = localStorage.getItem('userRole');
+          // Don't redirect if already on a sign-in page
+          const currentPath = window.location.pathname;
+          if (!currentPath.includes('/signin') && !currentPath.includes('/admin') && !currentPath.includes('/reset-password')) {
+            localStorage.removeItem('userAuthenticated');
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('authTime');
+            navigate(userRole === 'admin' ? '/admin' : '/signin');
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, [navigate]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0f172a] transition-colors duration-300">

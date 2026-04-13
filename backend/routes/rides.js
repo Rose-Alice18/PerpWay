@@ -185,6 +185,12 @@ router.post('/:id/join', optionalAuth, async (req, res) => {
       return res.status(404).json({ error: 'Ride not found' });
     }
 
+    // Check if ride has already departed
+    const rideDateTime = new Date(`${ride.departureDate}T${ride.departureTime}`);
+    if (rideDateTime < new Date()) {
+      return res.status(400).json({ error: 'This ride has already departed.' });
+    }
+
     // Parse seatsNeeded as integer
     const seatsRequested = parseInt(seatsNeeded) || 1;
 
