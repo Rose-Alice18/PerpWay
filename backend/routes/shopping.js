@@ -3,7 +3,7 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 const ShoppingRequest = require('../models/ShoppingRequest');
 const { uploadShopping } = require('../config/cloudinary');
-const { optionalAuth } = require('../middleware/auth');
+const { optionalAuth, authenticateToken, requireAdmin } = require('../middleware/auth');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -124,16 +124,12 @@ router.post('/create', optionalAuth, uploadShopping.single('productImage'), asyn
       stack: error.stack,
       name: error.name
     });
-    res.status(500).json({
-      error: 'Failed to create shopping request',
-      message: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    res.status(500).json({ error: 'Failed to create shopping request' });
   }
 });
 
 // Get all shopping requests (admin)
-router.get('/admin/all', async (req, res) => {
+router.get('/admin/all', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const requests = await ShoppingRequest.find().sort({ createdAt: -1 });
     res.json(requests);
@@ -167,7 +163,7 @@ router.get('/user/:email', async (req, res) => {
 });
 
 // Update shopping request status (admin)
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, adminNotes, actualPrice, assignedTo } = req.body;
@@ -208,7 +204,7 @@ router.put('/:id/status', async (req, res) => {
 });
 
 // Update payment status
-router.put('/:id/payment', async (req, res) => {
+router.put('/:id/payment', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { paymentStatus } = req.body;
@@ -235,7 +231,7 @@ router.put('/:id/payment', async (req, res) => {
 });
 
 // Delete shopping request
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await ShoppingRequest.findByIdAndDelete(req.params.id);
     res.json({

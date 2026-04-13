@@ -25,7 +25,7 @@ const sendAdminEmail = async (subject, html) => {
     console.log('⚠️ Admin email failed:', err.message);
   }
 };
-const { authenticateToken, optionalAuth } = require('../middleware/auth');
+const { authenticateToken, optionalAuth, requireAdmin } = require('../middleware/auth');
 const { sendRideAlert } = require('../services/whatsapp');
 
 // Get all rides
@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
     res.json(rides);
   } catch (error) {
     console.error('Error fetching rides:', error);
-    res.status(500).json({ error: 'Failed to fetch rides', message: error.message });
+    res.status(500).json({ error: 'Failed to fetch rides' });
   }
 });
 
@@ -171,7 +171,7 @@ router.post('/create', optionalAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Create ride error:', error);
-    res.status(500).json({ error: 'Failed to create ride', message: error.message });
+    res.status(500).json({ error: 'Failed to create ride' });
   }
 });
 
@@ -297,12 +297,12 @@ router.post('/:id/join', optionalAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Join ride error:', error);
-    res.status(500).json({ error: 'Failed to join ride', message: error.message });
+    res.status(500).json({ error: 'Failed to join ride' });
   }
 });
 
-// Delete a ride
-router.delete('/:id', async (req, res) => {
+// Delete a ride (admin only)
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await Ride.findByIdAndDelete(req.params.id);
 
@@ -312,7 +312,7 @@ router.delete('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Delete ride error:', error);
-    res.status(500).json({ error: 'Failed to delete ride', message: error.message });
+    res.status(500).json({ error: 'Failed to delete ride' });
   }
 });
 

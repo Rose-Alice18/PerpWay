@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
@@ -73,6 +74,27 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Rate limiting
+// Strict limit for auth and submission endpoints (prevents spam/brute force)
+const strictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again in 15 minutes.' },
+});
+
+// General limit for all other API routes
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again in 15 minutes.' },
+});
+
+app.use('/api/', generalLimiter);
+
 // API Routes (must come BEFORE static files)
 const authRoutes = require('./routes/auth');
 const driverRoutes = require('./routes/drivers');
@@ -88,7 +110,8 @@ const shoppingRoutes = require('./routes/shopping');
 const contactRoutes = require('./routes/contact');
 const whatsappRoutes = require('./routes/whatsapp');
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', strictLimiter, authRoutes);
+app.use('/api/contact', strictLimiter, contactRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/delivery', deliveryRoutes);
@@ -99,7 +122,6 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/financials', financialRoutes);
 app.use('/api/shopping', shoppingRoutes);
-app.use('/api/contact', contactRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 
 // Serve uploaded files
@@ -127,10 +149,7 @@ app.get('/', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
-    error: 'Something went wrong!',
-    message: err.message,
-  });
+  res.status(500).json({ error: 'Something went wrong. Please try again.' });
 });
 
 const PORT = process.env.PORT || 5000;

@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 
+const escapeHtml = (str) => String(str)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 // Create reusable transporter
 const createTransporter = () => {
   return nodemailer.createTransport({
@@ -37,6 +44,12 @@ router.post('/submit', async (req, res) => {
       return res.status(400).json({ error: 'Invalid email address' });
     }
 
+    // Sanitize all user inputs before embedding in HTML
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeSubject = escapeHtml(subject);
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
+
     const transporter = createTransporter();
 
     // Email to admin (roselinetsatsu@gmail.com)
@@ -67,18 +80,18 @@ router.post('/submit', async (req, res) => {
             <div class="content">
               <div class="info-box">
                 <h3>👤 Sender Information</h3>
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-                <p><strong>Subject:</strong> ${subject}</p>
+                <p><strong>Name:</strong> ${safeName}</p>
+                <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+                <p><strong>Subject:</strong> ${safeSubject}</p>
               </div>
 
               <div class="message-box">
                 <h3>💬 Message</h3>
-                <p>${message.replace(/\n/g, '<br>')}</p>
+                <p>${safeMessage}</p>
               </div>
 
               <p style="color: #666; font-size: 14px; margin-top: 20px;">
-                <strong>Reply to this email directly</strong> to respond to ${name}. The reply will go to ${email}.
+                <strong>Reply to this email directly</strong> to respond to ${safeName}. The reply will go to ${safeEmail}.
               </p>
 
               <div class="footer">
@@ -116,12 +129,12 @@ router.post('/submit', async (req, res) => {
               <h1>✅ Message Received!</h1>
             </div>
             <div class="content">
-              <p>Hi ${name},</p>
+              <p>Hi ${safeName},</p>
               <p>Thank you for reaching out to Perpway! We've received your message and will get back to you as soon as possible.</p>
 
               <div class="info-box">
                 <h3>📝 Your Message Details</h3>
-                <p><strong>Subject:</strong> ${subject}</p>
+                <p><strong>Subject:</strong> ${safeSubject}</p>
                 <p><strong>Sent on:</strong> ${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} at ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</p>
               </div>
 
@@ -129,7 +142,7 @@ router.post('/submit', async (req, res) => {
               <ul>
                 <li>Our team will review your message</li>
                 <li>We typically respond within 24 hours</li>
-                <li>You'll receive a reply at this email address: ${email}</li>
+                <li>You'll receive a reply at this email address: ${safeEmail}</li>
               </ul>
 
               <p>If you have any urgent matters, feel free to reach out to us directly via WhatsApp or phone!</p>
@@ -152,7 +165,7 @@ router.post('/submit', async (req, res) => {
       transporter.sendMail(userMailOptions)
     ]);
 
-    console.log(`✅ Contact form submitted by ${name} (${email})`);
+    console.log(`✅ Contact form submitted by ${safeName} (${safeEmail})`);
 
     res.status(200).json({
       success: true,
