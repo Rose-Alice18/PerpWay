@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Vendor = require('../models/Vendor');
-const { authenticateToken, requireAdmin } = require('../middleware/auth');
+const { authenticateToken, requireAdmin, optionalAuth } = require('../middleware/auth');
 
 // Get all vendors
 router.get('/', async (req, res) => {
@@ -25,22 +25,22 @@ router.get('/category/:category', async (req, res) => {
   }
 });
 
-// Update vendor recommendations (one per IP)
-router.post('/:id/recommend', async (req, res) => {
+// Update vendor recommendations (one per user or IP)
+router.post('/:id/recommend', optionalAuth, async (req, res) => {
   try {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    const identifier = req.user?.id || req.ip || req.headers['x-forwarded-for'] || 'unknown';
     const vendor = await Vendor.findById(req.params.id);
 
     if (!vendor) {
       return res.status(404).json({ error: 'Vendor not found' });
     }
 
-    if (vendor.recommendedBy.includes(ip)) {
+    if (vendor.recommendedBy.includes(identifier)) {
       return res.status(400).json({ error: 'You have already recommended this vendor' });
     }
 
     vendor.recommendations += 1;
-    vendor.recommendedBy.push(ip);
+    vendor.recommendedBy.push(identifier);
     await vendor.save();
 
     res.json(vendor);
@@ -50,11 +50,11 @@ router.post('/:id/recommend', async (req, res) => {
   }
 });
 
-// Rate a vendor (one rating per IP)
-router.post('/:id/rate', async (req, res) => {
+// Rate a vendor (one rating per user or IP)
+router.post('/:id/rate', optionalAuth, async (req, res) => {
   try {
     const { rating } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    const identifier = req.user?.id || req.ip || req.headers['x-forwarded-for'] || 'unknown';
 
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
@@ -63,12 +63,11 @@ router.post('/:id/rate', async (req, res) => {
     const vendor = await Vendor.findById(req.params.id);
     if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 
-    const existingIndex = vendor.ratedBy.findIndex(r => r.ip === ip);
+    const existingIndex = vendor.ratedBy.findIndex(r => r.ip === identifier);
     if (existingIndex !== -1) {
-      // Update existing rating
       vendor.ratedBy[existingIndex].rating = rating;
     } else {
-      vendor.ratedBy.push({ ip, rating });
+      vendor.ratedBy.push({ ip: identifier, rating });
     }
 
     // Recalculate average rating

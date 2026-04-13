@@ -50,12 +50,21 @@ const motorRiderSchema = new mongoose.Schema({
 });
 
 // Generate unique rider code before saving
-motorRiderSchema.pre('save', function(next) {
+motorRiderSchema.pre('save', async function(next) {
   if (!this.riderCode) {
-    // Generate code: First 3 letters of name + last 4 digits of phone
     const namePrefix = this.name.replace(/\s/g, '').substring(0, 3).toUpperCase();
     const phoneDigits = this.phone.replace(/\D/g, '').slice(-4);
-    this.riderCode = `${namePrefix}${phoneDigits}`;
+    let code = `${namePrefix}${phoneDigits}`;
+
+    // Ensure uniqueness — append random suffix on collision
+    let exists = await mongoose.model('MotorRider').exists({ riderCode: code, _id: { $ne: this._id } });
+    while (exists) {
+      const suffix = Math.random().toString(36).substring(2, 4).toUpperCase();
+      code = `${namePrefix}${phoneDigits}${suffix}`;
+      exists = await mongoose.model('MotorRider').exists({ riderCode: code, _id: { $ne: this._id } });
+    }
+
+    this.riderCode = code;
   }
   next();
 });

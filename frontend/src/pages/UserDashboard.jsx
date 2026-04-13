@@ -49,31 +49,35 @@ const UserDashboard = () => {
   }, [navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUserData = async (email) => {
-    try {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      const deliveryResponse = await axios.get(`${API_URL}/api/delivery/user/${email}`);
-      if (deliveryResponse.data.success) {
-        setDeliveries(deliveryResponse.data.deliveries);
-      }
+    const token = localStorage.getItem('authToken');
+    const headers = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-      const ridesResponse = await axios.get(`${API_URL}/api/rides/user/${email}`);
-      if (ridesResponse.data.success) {
-        setCreatedRides(ridesResponse.data.createdRides);
-        setJoinedRides(ridesResponse.data.joinedRides);
-      }
+    const [deliveryResult, ridesResult, shoppingResult] = await Promise.allSettled([
+      axios.get(`${API_URL}/api/delivery/user/${email}`, headers),
+      axios.get(`${API_URL}/api/rides/user/${email}`, headers),
+      axios.get(`${API_URL}/api/shopping/user/${email}`, headers),
+    ]);
 
-      const shoppingResponse = await axios.get(`${API_URL}/api/shopping/user/${email}`);
-      if (shoppingResponse.data.success) {
-        setShoppingRequests(shoppingResponse.data.requests);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError('Failed to load your data. Please try again.');
-    } finally {
-      setLoading(false);
+    if (deliveryResult.status === 'fulfilled' && deliveryResult.value.data.success) {
+      setDeliveries(deliveryResult.value.data.deliveries);
     }
+    if (ridesResult.status === 'fulfilled' && ridesResult.value.data.success) {
+      setCreatedRides(ridesResult.value.data.createdRides);
+      setJoinedRides(ridesResult.value.data.joinedRides);
+    }
+    if (shoppingResult.status === 'fulfilled' && shoppingResult.value.data.success) {
+      setShoppingRequests(shoppingResult.value.data.requests);
+    }
+
+    const anyFailed = [deliveryResult, ridesResult, shoppingResult].some(r => r.status === 'rejected');
+    if (anyFailed) {
+      console.error('Some dashboard data failed to load');
+    }
+
+    setLoading(false);
   };
 
   const handleLogout = () => {

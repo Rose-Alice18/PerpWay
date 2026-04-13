@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Driver = require('../models/Driver');
-const { authenticateToken, requireAdmin } = require('../middleware/auth');
+const { authenticateToken, requireAdmin, optionalAuth } = require('../middleware/auth');
 
 // Get all drivers
 router.get('/', async (req, res) => {
@@ -30,11 +30,11 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Rate a driver (one rating per IP)
-router.post('/:id/rate', async (req, res) => {
+// Rate a driver (one rating per user or IP)
+router.post('/:id/rate', optionalAuth, async (req, res) => {
   try {
     const { rating } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+    const identifier = req.user?.id || req.ip || req.headers['x-forwarded-for'] || 'unknown';
 
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
@@ -43,11 +43,11 @@ router.post('/:id/rate', async (req, res) => {
     const driver = await Driver.findById(req.params.id);
     if (!driver) return res.status(404).json({ error: 'Driver not found' });
 
-    const existingIndex = driver.ratedBy.findIndex(r => r.ip === ip);
+    const existingIndex = driver.ratedBy.findIndex(r => r.ip === identifier);
     if (existingIndex !== -1) {
       driver.ratedBy[existingIndex].rating = rating;
     } else {
-      driver.ratedBy.push({ ip, rating });
+      driver.ratedBy.push({ ip: identifier, rating });
     }
 
     // Recalculate average rating

@@ -5,6 +5,25 @@ const DeliveryRequest = require('../models/DeliveryRequest');
 const MotorRider = require('../models/MotorRider');
 const { authenticateToken, optionalAuth, requireAdmin } = require('../middleware/auth');
 
+// In-memory settings cache (5-minute TTL)
+let settingsCache = null;
+let settingsCacheTime = 0;
+const SETTINGS_TTL = 5 * 60 * 1000;
+
+const getCachedSettings = async () => {
+  if (settingsCache && Date.now() - settingsCacheTime < SETTINGS_TTL) {
+    return settingsCache;
+  }
+  const Settings = require('../models/Settings');
+  const settings = await Promise.race([
+    Settings.getSettings(),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Settings timeout')), 5000)),
+  ]);
+  settingsCache = settings;
+  settingsCacheTime = Date.now();
+  return settings;
+};
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
@@ -52,14 +71,10 @@ router.post('/request', optionalAuth, async (req, res) => {
   try {
     const { name, contact, itemDescription, pickupPoint, dropoffPoint, deliveryType, notes, userEmail } = req.body;
 
-    // Fetch pricing from settings (with fallback so it never blocks)
-    const Settings = require('../models/Settings');
+    // Fetch pricing from settings (cached, 5-min TTL)
     let price = 0;
     try {
-      const settings = await Promise.race([
-        Settings.getSettings(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Settings timeout')), 5000)),
-      ]);
+      const settings = await getCachedSettings();
       if (deliveryType === 'instant') {
         price = settings.pricing.instant || 10;
       } else if (deliveryType === 'next-day') {

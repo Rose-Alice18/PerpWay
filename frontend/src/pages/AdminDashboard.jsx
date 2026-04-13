@@ -6423,7 +6423,8 @@ const SettingsTab = () => {
 };
 
 // Shopping Tab Component
-const ShoppingTab = ({ shoppingRequests, fetchData, motorRiders, exportToCSV, showSuccess, showError, showConfirm }) => {
+const ShoppingTab = ({ shoppingRequests, fetchData, motorRiders, exportToCSV, showSuccess, showError }) => {
+  const { confirmState: deleteConfirmState, showConfirm: confirmDelete, hideConfirm: cancelDelete } = useConfirm();
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -6520,15 +6521,22 @@ const ShoppingTab = ({ shoppingRequests, fetchData, motorRiders, exportToCSV, sh
     }
   };
 
-  const handleDeleteRequest = async (requestId) => {
-    try {
-      await axios.delete(`${API_URL}/api/shopping/${requestId}`, getAuthHeaders());
-      showSuccess('Shopping request deleted!');
-      fetchData();
-    } catch (error) {
-      console.error('Error deleting request:', error);
-      showError('Failed to delete request: ' + (error.response?.data?.error || error.message));
-    }
+  const handleDeleteRequest = (requestId) => {
+    confirmDelete({
+      title: 'Delete Shopping Request?',
+      message: 'Are you sure you want to delete this shopping request?\n\nThis action cannot be undone.',
+      confirmText: 'Yes, delete it',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/shopping/${requestId}`, getAuthHeaders());
+          showSuccess('Shopping request deleted!');
+          fetchData();
+        } catch (error) {
+          console.error('Error deleting request:', error);
+          showError('Failed to delete request: ' + (error.response?.data?.error || error.message));
+        }
+      }
+    });
   };
 
   const stats = {
@@ -6995,6 +7003,18 @@ const ShoppingTab = ({ shoppingRequests, fetchData, motorRiders, exportToCSV, sh
           </div>
         )}
       </AnimatePresence>
+
+      {/* Delete Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmState.isOpen}
+        onClose={cancelDelete}
+        onConfirm={deleteConfirmState.onConfirm}
+        title={deleteConfirmState.title}
+        message={deleteConfirmState.message}
+        confirmText={deleteConfirmState.confirmText}
+        cancelText={deleteConfirmState.cancelText}
+        type={deleteConfirmState.type}
+      />
     </div>
   );
 };
