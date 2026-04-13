@@ -143,7 +143,7 @@ const PaymentModal = ({ driver, onClose, onSuccess }) => {
               Payment Successful!
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Chale, you fit see the contact now! 🎉
+              You can now see the contact! 🎉
             </p>
           </motion.div>
         ) : showCountdown ? (

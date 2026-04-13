@@ -320,8 +320,8 @@ const Delivery = () => {
                 <span className="mr-2">💡</span> Pro Tip
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Weekly station pickup dey save money pass! If e no dey urgent,
-                e fit wait small. Your parcel go dey safe! 📦
+                Weekly station pickup is the most affordable option! If it's not urgent,
+                it's worth the wait. Your parcel is in safe hands! 📦
               </p>
             </div>
           </motion.div>
@@ -720,7 +720,7 @@ const Delivery = () => {
                 transition={{ delay: 0.4 }}
                 className="text-lg text-gray-700 dark:text-gray-300 mb-2 relative z-10"
               >
-                Your parcel dey on road already! 🚚💨
+                Your parcel is on its way! 🚚💨
               </motion.p>
 
               <motion.p

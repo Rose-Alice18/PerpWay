@@ -118,7 +118,7 @@ const DriverFinder = () => {
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto mb-8">
             Connect with trusted local drivers for your transport needs.
-            Small tip den you will see all drivers' number! 😄
+            Pay a small tip and get access to all drivers' contacts! 😄
           </p>
 
           {/* Filter Buttons */}
@@ -351,7 +351,7 @@ const DriverFinder = () => {
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                     />
                     <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded py-2 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none z-20 shadow-lg">
-                      Small tip den you go fit see number! 💰
+                      Pay a small tip to unlock this number! 💰
                     </div>
                   </motion.button>
                 )}

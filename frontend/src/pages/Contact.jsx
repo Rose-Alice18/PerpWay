@@ -46,7 +46,7 @@ const Contact = () => {
       icon: '📧',
       title: 'Email Us',
       value: contactDetails.email,
-      description: 'We dey reply within 24 hours!',
+      description: 'We reply within 24 hours!',
       link: 'mailto:roselinetsatsu@gmail.com',
       clickable: true
     },
@@ -165,8 +165,8 @@ const Contact = () => {
           Get In Touch
         </h1>
         <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-          We dey here to help you! Whether you get question, feedback, or just want to say hello,
-          feel free to reach out. We go respond quick! 💬
+          We're here for you! Whether you have a question, feedback, or just want to say hello,
+          feel free to reach out. We respond fast! 💬
         </p>
       </motion.div>
 
@@ -467,7 +467,7 @@ const Contact = () => {
               </motion.div>
               <h3 className="font-display text-2xl font-bold mb-3">Quick Response</h3>
               <p className="opacity-90">
-                We dey usually respond within 24 hours! For urgent matters, call or WhatsApp us directly.
+                We usually respond within 24 hours! For urgent matters, call or WhatsApp us directly.
               </p>
             </div>
 

@@ -284,7 +284,7 @@ const Terms = () => {
             Questions About Our Policies?
           </h2>
           <p className="text-lg opacity-90 mb-6">
-            If you need clarification or have concerns about these policies, we dey here to help!
+            If you need clarification or have concerns about these policies, we're here to help!
           </p>
           <motion.a
             href="/contact"

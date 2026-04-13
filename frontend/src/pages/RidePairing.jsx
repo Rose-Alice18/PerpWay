@@ -213,7 +213,7 @@ const RidePairing = () => {
           </h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto mb-6">
             Going somewhere? Find others heading the same way!
-            Hop in, make we go campus together chale! 🚗💨
+            Hop in and ride together — split the cost, make the trip! 🚗💨
           </p>
 
           {/* Action Buttons */}
