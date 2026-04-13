@@ -425,6 +425,7 @@ const ServiceHub = () => {
         {showPayment && selectedVendor && (
           <PaymentModal
             driver={selectedVendor}
+            contactType="vendor"
             onClose={() => {
               setShowPayment(false);
               setSelectedVendor(null);
