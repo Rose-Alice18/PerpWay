@@ -186,7 +186,7 @@ const ShoppingRequest = () => {
                 name="productName"
                 value={formData.productName}
                 onChange={handleChange}
-                placeholder="e.g., iPhone Charger, Body Lotion, Perfume"
+                placeholder="e.g., 'iPhone 20W USB-C charger' or 'Nivea body lotion 400ml' — be as specific as possible"
                 className={`w-full px-4 py-3 rounded-xl border-2 ${
                   errors.productName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                 } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary transition-all duration-200`}
@@ -252,7 +252,7 @@ const ShoppingRequest = () => {
                 value={formData.productDescription}
                 onChange={handleChange}
                 rows="4"
-                placeholder="Describe the product in detail (color, size, brand, specific features, etc.)"
+                placeholder="Include color, size, brand, and any specific features! e.g., 'Black Nike slides, size 42' or 'Dove Men+Care body wash, the blue one, 400ml' — if you have a photo, upload it below too"
                 className={`w-full px-4 py-3 rounded-xl border-2 ${
                   errors.productDescription ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                 } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary transition-all duration-200`}
@@ -275,7 +275,7 @@ const ShoppingRequest = () => {
                 name="shopLocations"
                 value={formData.shopLocations}
                 onChange={handleChange}
-                placeholder="e.g., Madina Market, Melcom, Game Store at Accra Mall"
+                placeholder="Tell us exactly where to find it! e.g., 'Madina Market — the cosmetics stalls near the entrance' or 'Melcom Accra Mall, ground floor electronics section' or 'any pharmacy in Madina'"
                 className={`w-full px-4 py-3 rounded-xl border-2 ${
                   errors.shopLocations ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                 } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary transition-all duration-200`}
@@ -298,7 +298,7 @@ const ShoppingRequest = () => {
                 name="estimatedPrice"
                 value={formData.estimatedPrice}
                 onChange={handleChange}
-                placeholder="e.g., 50"
+                placeholder="e.g., 80 (your best guess — helps us know what budget to work with)"
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary transition-all duration-200"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
