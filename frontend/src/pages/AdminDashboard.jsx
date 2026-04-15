@@ -5858,28 +5858,30 @@ const SettingsTab = () => {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Next-Day Delivery (GH₵)
+                Next-Day Delivery
               </label>
               <input
-                type="number"
-                value={settings.pricing?.nextDay || 0}
-                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, nextDay: parseFloat(e.target.value) } })}
+                type="text"
+                value={settings.pricing?.nextDay ?? ''}
+                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, nextDay: e.target.value } })}
+                placeholder='e.g., 7 or "Tentative"'
                 className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Delivered within 24 hours</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter price (GH₵) or text like "Tentative"</p>
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Weekly Station (GH₵)
+                Weekly Station
               </label>
               <input
-                type="number"
-                value={settings.pricing?.weeklyStation || 0}
-                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, weeklyStation: parseFloat(e.target.value) } })}
+                type="text"
+                value={settings.pricing?.weeklyStation ?? ''}
+                onChange={(e) => setSettings({ ...settings, pricing: { ...settings.pricing, weeklyStation: e.target.value } })}
+                placeholder='e.g., 5 or "Tentative"'
                 className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Weekly collection points</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter price (GH₵) or text like "Tentative"</p>
             </div>
           </div>
 

@@ -4,8 +4,8 @@ const settingsSchema = new mongoose.Schema({
   // Delivery Pricing
   pricing: {
     instant: { type: mongoose.Schema.Types.Mixed, default: 'Tentative' }, // Can be Number or String (e.g., "Tentative")
-    nextDay: { type: Number, default: 7 },  // GH₵7
-    weeklyStation: { type: Number, default: 5 } // GH₵5
+    nextDay: { type: mongoose.Schema.Types.Mixed, default: 7 },          // Can be Number or String (e.g., "Tentative")
+    weeklyStation: { type: mongoose.Schema.Types.Mixed, default: 5 },    // Can be Number or String (e.g., "Tentative")
   },
 
   // Auto-Assignment Rules
