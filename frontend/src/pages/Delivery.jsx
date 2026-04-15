@@ -499,6 +499,9 @@ const Delivery = () => {
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Pickup Point *
                     </label>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1">
+                      <span>📍</span> Use the exact name as it appears on Google Maps
+                    </p>
                     <motion.div
                       animate={{
                         scale: focusedField === 'pickupPoint' ? 1.02 : 1,
@@ -512,8 +515,8 @@ const Delivery = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField('pickupPoint')}
                         onBlur={() => setFocusedField(null)}
-                        placeholder="e.g., Madina Market, in front of Melcom"
-                        className={`input-field ${
+                        placeholder="e.g., Atomic Junction Total Filling Station, Haatso"
+                        className={`input-field placeholder:text-xs placeholder:tracking-tight ${
                           errors.pickupPoint ? 'border-red-500 dark:border-red-500' : ''
                         } ${
                           focusedField === 'pickupPoint' ? 'ring-2 ring-ashesi-primary/50' : ''
@@ -543,6 +546,9 @@ const Delivery = () => {
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Drop-off Point *
                     </label>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1">
+                      <span>📍</span> Use the exact name as it appears on Google Maps
+                    </p>
                     <motion.div
                       animate={{
                         scale: focusedField === 'dropoffPoint' ? 1.02 : 1,
@@ -558,10 +564,10 @@ const Delivery = () => {
                         onBlur={() => setFocusedField(null)}
                         placeholder={
                           formData.deliveryType === 'weekly-station'
-                            ? 'Fixed: Kwabenya Goil Filling Station near Community Hospital'
-                            : 'e.g., Ashesi Campus, Volta Hall Room 204'
+                            ? 'Fixed: Kwabenya Goil Station, near Community Hospital'
+                            : 'e.g., Ashesi University College, Berekuso'
                         }
-                        className={`input-field ${
+                        className={`input-field placeholder:text-xs placeholder:tracking-tight ${
                           errors.dropoffPoint ? 'border-red-500 dark:border-red-500' : ''
                         } ${
                           focusedField === 'dropoffPoint' ? 'ring-2 ring-ashesi-primary/50' : ''
@@ -585,7 +591,7 @@ const Delivery = () => {
                 </div>
                 <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1 -mt-1">
                   <span>⚠️</span>
-                  <span>Exact locations with a clear landmark are required. Orders with vague addresses cannot be processed.</span>
+                  <span>Use Google Maps names for accuracy. Vague or unverifiable addresses will not be processed.</span>
                 </p>
 
                 {/* Additional Notes */}
