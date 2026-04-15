@@ -32,7 +32,7 @@ const getAuthHeaders = () => {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { showSuccess, showError, showWarning, showInfo } = useToast(); // eslint-disable-line no-unused-vars
-  const { confirmState, showConfirm } = useConfirm(); // eslint-disable-line no-unused-vars
+  const { confirmState, showConfirm, hideConfirm } = useConfirm(); // eslint-disable-line no-unused-vars
 
   // Debug: Log confirmState changes
   React.useEffect(() => {
@@ -398,6 +398,18 @@ const AdminDashboard = () => {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Global confirm dialog — used by VendorsTab, DriversTab, MotorRidersTab, CategoriesTab, ShoppingTab */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={hideConfirm}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        cancelText={confirmState.cancelText}
+        type={confirmState.type}
+      />
     </div>
   );
 };
