@@ -186,7 +186,7 @@ const ShoppingRequest = () => {
                 name="productName"
                 value={formData.productName}
                 onChange={handleChange}
-                placeholder="e.g., 'iPhone 20W USB-C charger' or 'Nivea body lotion 400ml' — be as specific as possible"
+                placeholder="e.g., iPhone 20W USB-C charger or Nivea body lotion 400ml"
                 className={`w-full px-4 py-3 rounded-xl border-2 ${
                   errors.productName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                 } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary transition-all duration-200`}
@@ -275,7 +275,7 @@ const ShoppingRequest = () => {
                 name="shopLocations"
                 value={formData.shopLocations}
                 onChange={handleChange}
-                placeholder="Tell us exactly where to find it! e.g., 'Madina Market — the cosmetics stalls near the entrance' or 'Melcom Accra Mall, ground floor electronics section' or 'any pharmacy in Madina'"
+                placeholder="e.g., Madina Market, cosmetics stalls near entrance or Melcom Accra Mall ground floor"
                 className={`w-full px-4 py-3 rounded-xl border-2 ${
                   errors.shopLocations ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                 } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary transition-all duration-200`}
@@ -298,7 +298,7 @@ const ShoppingRequest = () => {
                 name="estimatedPrice"
                 value={formData.estimatedPrice}
                 onChange={handleChange}
-                placeholder="e.g., 80 (your best guess — helps us know what budget to work with)"
+                placeholder="e.g., 80"
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary transition-all duration-200"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

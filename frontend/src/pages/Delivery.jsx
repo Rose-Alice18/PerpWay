@@ -369,7 +369,7 @@ const Delivery = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField('name')}
                         onBlur={() => setFocusedField(null)}
-                        placeholder="e.g., Kwame Mensah (your full name)"
+                        placeholder="e.g., Kwame Mensah"
                         className={`input-field ${
                           errors.name ? 'border-red-500 dark:border-red-500' : ''
                         } ${
@@ -413,7 +413,7 @@ const Delivery = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField('contact')}
                         onBlur={() => setFocusedField(null)}
-                        placeholder="e.g., 0244123456 (active number we can call/WhatsApp)"
+                        placeholder="e.g., 0244123456"
                         className={`input-field ${
                           errors.contact ? 'border-red-500 dark:border-red-500' : ''
                         } ${
@@ -458,7 +458,7 @@ const Delivery = () => {
                       onChange={handleChange}
                       onFocus={() => setFocusedField('itemDescription')}
                       onBlur={() => setFocusedField(null)}
-                      placeholder="Be specific! e.g., '1 loaf of Sunshine bread + Milo 500g tin from Ashesi Junction shop' or '2 jollof rice + chicken from Papaye, East Legon'. The more detail, the better!"
+                      placeholder="Be specific! e.g., 'iPhone USB-C 20W charger (white)' or 'Nike slides size 42, black' or 'iPad case for iPad 10th gen, any colour' or 'Nivea men body lotion 400ml'. The more detail, the better!"
                       className={`input-field min-h-[100px] resize-none ${
                         errors.itemDescription ? 'border-red-500 dark:border-red-500' : ''
                       } ${
@@ -504,7 +504,7 @@ const Delivery = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField('pickupPoint')}
                         onBlur={() => setFocusedField(null)}
-                        placeholder="Be very specific! e.g., 'Madina Market, in front of Melcom — opposite the MTN office' or 'Ashesi Junction, the Papaye restaurant on the right side'"
+                        placeholder="e.g., Madina Market, in front of Melcom"
                         className={`input-field ${
                           errors.pickupPoint ? 'border-red-500 dark:border-red-500' : ''
                         } ${
@@ -550,8 +550,8 @@ const Delivery = () => {
                         onBlur={() => setFocusedField(null)}
                         placeholder={
                           formData.deliveryType === 'weekly-station'
-                            ? 'Fixed drop-off: Kwabenya — Goil Filling Station near Community Hospital (we bring it to campus on your selected weekday)'
-                            : 'Be specific! e.g., "Ashesi Campus — Volta Hall, Room 204" or "Berekuso — house behind the blue church, ask for Kwame"'
+                            ? 'Fixed: Kwabenya Goil Filling Station near Community Hospital'
+                            : 'e.g., Ashesi Campus, Volta Hall Room 204'
                         }
                         className={`input-field ${
                           errors.dropoffPoint ? 'border-red-500 dark:border-red-500' : ''
@@ -601,7 +601,7 @@ const Delivery = () => {
                       onChange={handleChange}
                       onFocus={() => setFocusedField('notes')}
                       onBlur={() => setFocusedField(null)}
-                      placeholder="e.g., 'Call me when you reach the gate, I'll come out' or 'Leave with the security guard if I'm not around' or 'Buy the cheapest brand if the one I listed is out of stock'"
+                      placeholder="e.g., 'Call me when you reach the gate' or 'Leave with security if I'm not around' or 'Buy cheapest brand if mine is out of stock'"
                       className={`input-field min-h-[80px] resize-none ${
                         focusedField === 'notes' ? 'ring-2 ring-ashesi-primary/50' : ''
                       }`}
