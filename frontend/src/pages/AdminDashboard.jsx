@@ -1617,7 +1617,7 @@ Use the link to mark deliveries as:
                           {delivery.contact && (
                             <>
                               <a
-                                href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}`}
+                                href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}?text=${encodeURIComponent(`Hi ${delivery.name}! 👋 This is the Perpway team. We received your delivery request for *${delivery.itemDescription}* but the location details seem a bit vague.\n\nCould you please clarify:\n📍 Pickup: ${delivery.pickupPoint}\n📍 Drop-off: ${delivery.dropoffPoint}\n\nA more specific location (landmark, building name, room number) will help us deliver faster. Thanks! 🚚`)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title={`WhatsApp ${delivery.name}`}
@@ -1816,7 +1816,7 @@ Use the link to mark deliveries as:
                         {delivery.contact && (
                           <>
                             <a
-                              href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}`}
+                              href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}?text=${encodeURIComponent(`Hi ${delivery.name}! 👋 This is the Perpway team. We received your delivery request for *${delivery.itemDescription}* but the location details seem a bit vague.\n\nCould you please clarify:\n📍 Pickup: ${delivery.pickupPoint}\n📍 Drop-off: ${delivery.dropoffPoint}\n\nA more specific location (landmark, building name, room number) will help us deliver faster. Thanks! 🚚`)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               title={`WhatsApp ${delivery.name}`}
