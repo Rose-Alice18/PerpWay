@@ -51,6 +51,7 @@ const AdminDashboard = () => {
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [shoppingRequests, setShoppingRequests] = useState([]);
+  const [driverTypes, setDriverTypes] = useState([]);
 
   // Filter states
   const [loading, setLoading] = useState(true);
@@ -147,6 +148,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchDriverTypes = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/settings`);
+      if (res.data.driverTypes?.length) setDriverTypes(res.data.driverTypes);
+    } catch (error) {
+      console.error('Error fetching driver types:', error);
+    }
+  };
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -160,7 +170,8 @@ const AdminDashboard = () => {
         fetchMotorRiders(),
         fetchCategories(),
         fetchShoppingRequests(),
-        fetchUsers()
+        fetchUsers(),
+        fetchDriverTypes(),
       ]);
 
       setLoading(false);
@@ -376,7 +387,7 @@ const AdminDashboard = () => {
               {activeTab === 'deliveries' && <DeliveriesTab deliveries={deliveries} fetchData={fetchDeliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'shopping' && <ShoppingTab shoppingRequests={shoppingRequests} fetchData={fetchShoppingRequests} motorRiders={motorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'revenue' && <RevenueTab deliveries={deliveries} motorRiders={motorRiders} exportToCSV={exportToCSV} />}
-              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
+              {activeTab === 'drivers' && <DriversTab drivers={drivers} fetchData={fetchDrivers} driverTypes={driverTypes} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'rides' && <RidesTab rides={rides} fetchData={fetchRides} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'vendors' && <VendorsTab vendors={vendors} categories={categories} fetchData={fetchVendors} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
               {activeTab === 'motor-riders' && <MotorRidersTab motorRiders={motorRiders} fetchData={fetchMotorRiders} exportToCSV={exportToCSV} showSuccess={showSuccess} showError={showError} showConfirm={showConfirm} />}
@@ -2280,7 +2291,7 @@ Use the link to mark deliveries as:
 };
 
 // Drivers Tab Component
-const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, showConfirm }) => {
+const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuccess, showError, showConfirm }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -2292,6 +2303,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
     contact: '',
     carType: '',
     location: '',
+    driverType: 'berekuso',
     availability: 'available',
     workingTime: {
       start: '06:00',
@@ -2323,7 +2335,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
       const response = await axios.post(`${API_URL}/api/drivers`, formData, getAuthHeaders());
       console.log('Driver added successfully:', response.data);
       setShowAddModal(false);
-      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
+      setFormData({ name: '', contact: '', carType: '', location: '', driverType: 'berekuso', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
       fetchData();
       showSuccess('Driver added successfully! 🚗');
     } catch (error) {
@@ -2338,7 +2350,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
       await axios.put(`${API_URL}/api/drivers/${selectedDriver._id}`, formData, getAuthHeaders());
       setShowEditModal(false);
       setSelectedDriver(null);
-      setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
+      setFormData({ name: '', contact: '', carType: '', location: '', driverType: 'berekuso', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
       fetchData();
       showSuccess('Driver updated successfully! 🎉');
     } catch (error) {
@@ -2375,6 +2387,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
       whatsapp: driver.whatsapp || '',
       carType: driver.carType,
       location: driver.location,
+      driverType: driver.driverType || 'berekuso',
       availability: driver.availability || 'available',
       note: driver.note || '',
       workingTime: driver.workingTime || { start: '06:00', end: '20:00' }
@@ -2760,6 +2773,27 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
                 />
               </div>
               <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Driver Type</label>
+                <select
+                  value={formData.driverType || 'berekuso'}
+                  onChange={(e) => setFormData({ ...formData, driverType: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
+                >
+                  {driverTypes.length > 0
+                    ? driverTypes.map(({ value, label, emoji }) => (
+                        <option key={value} value={value}>{emoji} {label}</option>
+                      ))
+                    : <>
+                        <option value="berekuso">🏘️ Berekuso Town Driver</option>
+                        <option value="bolt">⚡ Bolt Driver</option>
+                        <option value="yango">🚖 Yango Driver</option>
+                        <option value="uber">🚗 Uber Driver</option>
+                        <option value="other">🚕 Other</option>
+                      </>
+                  }
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Car Type</label>
                 <input
                   type="text"
@@ -2846,7 +2880,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
               <button
                 onClick={() => {
                   setShowAddModal(false);
-                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
+                  setFormData({ name: '', contact: '', carType: '', location: '', driverType: 'berekuso', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
                 }}
                 className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
               >
@@ -2895,6 +2929,27 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
                   placeholder="e.g., 0244123456"
                   className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Driver Type</label>
+                <select
+                  value={formData.driverType || 'berekuso'}
+                  onChange={(e) => setFormData({ ...formData, driverType: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-semibold"
+                >
+                  {driverTypes.length > 0
+                    ? driverTypes.map(({ value, label, emoji }) => (
+                        <option key={value} value={value}>{emoji} {label}</option>
+                      ))
+                    : <>
+                        <option value="berekuso">🏘️ Berekuso Town Driver</option>
+                        <option value="bolt">⚡ Bolt Driver</option>
+                        <option value="yango">🚖 Yango Driver</option>
+                        <option value="uber">🚗 Uber Driver</option>
+                        <option value="other">🚕 Other</option>
+                      </>
+                  }
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Car Type</label>
@@ -2972,7 +3027,7 @@ const DriversTab = ({ drivers, fetchData, exportToCSV, showSuccess, showError, s
                 onClick={() => {
                   setShowEditModal(false);
                   setSelectedDriver(null);
-                  setFormData({ name: '', contact: '', carType: '', location: '', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
+                  setFormData({ name: '', contact: '', carType: '', location: '', driverType: 'berekuso', availability: 'available', workingTime: { start: '06:00', end: '20:00' } });
                 }}
                 className="flex-1 px-4 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-400 dark:hover:bg-gray-500 transition-all"
               >

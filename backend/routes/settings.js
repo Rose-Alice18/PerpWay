@@ -49,6 +49,7 @@ router.get('/', async (req, res) => {
       businessHours: settings.businessHours,
       announcements: settings.announcements.filter(a => a.active &&
         (!a.endDate || new Date(a.endDate) >= new Date())),
+      driverTypes: settings.driverTypes,
       general: {
         platformName: settings.general.platformName,
         supportEmail: settings.general.supportEmail,
@@ -151,6 +152,49 @@ router.delete('/announcements/:id', verifyAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error deleting announcement:', error);
     res.status(500).json({ error: 'Failed to delete announcement' });
+  }
+});
+
+// ADD driver type (admin only)
+router.post('/driver-types', verifyAdmin, async (req, res) => {
+  try {
+    const { value, label, emoji } = req.body;
+    if (!value || !label) {
+      return res.status(400).json({ error: 'value and label are required' });
+    }
+
+    const settings = await Settings.getSettings();
+
+    if (settings.driverTypes.some(t => t.value === value)) {
+      return res.status(409).json({ error: 'Driver type with this value already exists' });
+    }
+
+    settings.driverTypes.push({ value, label, emoji: emoji || '🚗' });
+    await settings.save();
+
+    res.json({ message: 'Driver type added', driverTypes: settings.driverTypes });
+  } catch (error) {
+    console.error('Error adding driver type:', error);
+    res.status(500).json({ error: 'Failed to add driver type' });
+  }
+});
+
+// DELETE driver type (admin only)
+router.delete('/driver-types/:value', verifyAdmin, async (req, res) => {
+  try {
+    const settings = await Settings.getSettings();
+    const before = settings.driverTypes.length;
+    settings.driverTypes = settings.driverTypes.filter(t => t.value !== req.params.value);
+
+    if (settings.driverTypes.length === before) {
+      return res.status(404).json({ error: 'Driver type not found' });
+    }
+
+    await settings.save();
+    res.json({ message: 'Driver type removed', driverTypes: settings.driverTypes });
+  } catch (error) {
+    console.error('Error deleting driver type:', error);
+    res.status(500).json({ error: 'Failed to delete driver type' });
   }
 });
 

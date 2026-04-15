@@ -12,8 +12,18 @@ const DriverFinder = () => {
   const [filter, setFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [driverTypes, setDriverTypes] = useState([]);
   const [revealedContacts, setRevealedContacts] = useState(new Set())
   const [announcements, setAnnouncements] = useState([]);
+
+  const getDriverTypeBadge = (typeValue) => {
+    const match = driverTypes.find(t => t.value === typeValue);
+    if (match) {
+      return { label: `${match.emoji} ${match.label}`, cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' };
+    }
+    return { label: '🚗 Driver', cls: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' };
+  };
 
   // Fetch drivers and check server-side tip access
   useEffect(() => {
@@ -27,8 +37,10 @@ const DriverFinder = () => {
         ]);
 
         if (settingsRes.status === 'fulfilled') {
-          const all = settingsRes.value.data.announcements || [];
+          const data = settingsRes.value.data;
+          const all = data.announcements || [];
           setAnnouncements(all.filter(a => a.targetAudience === 'all' || a.targetAudience === 'drivers'));
+          if (data.driverTypes?.length) setDriverTypes(data.driverTypes);
         }
 
         const response = driversRes.status === 'fulfilled' ? driversRes.value : { data: [] };
@@ -78,8 +90,9 @@ const DriverFinder = () => {
   };
 
   const filteredDrivers = drivers.filter((driver) => {
-    if (filter === 'all') return true;
-    return driver.availability === filter;
+    const availabilityMatch = filter === 'all' || driver.availability === filter;
+    const typeMatch = typeFilter === 'all' || (driver.driverType || 'berekuso') === typeFilter;
+    return availabilityMatch && typeMatch;
   });
 
   if (loading) {
@@ -133,8 +146,8 @@ const DriverFinder = () => {
             Pay a small tip and get access to all drivers' contacts! 😄
           </p>
 
-          {/* Filter Buttons */}
-          <div className="flex flex-wrap justify-center gap-3 mb-6">
+          {/* Availability Filter Buttons */}
+          <div className="flex flex-wrap justify-center gap-3 mb-3">
             {['all', 'available', 'busy', 'offline'].map((status) => (
               <motion.button
                 key={status}
@@ -151,6 +164,40 @@ const DriverFinder = () => {
               </motion.button>
             ))}
           </div>
+
+          {/* Driver Type Filter Buttons — populated from backend */}
+          {driverTypes.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              <motion.button
+                key="all"
+                onClick={() => setTypeFilter('all')}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 ${
+                  typeFilter === 'all'
+                    ? 'bg-ghana-green text-white shadow-lg'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                }`}
+              >
+                🚘 All Types
+              </motion.button>
+              {driverTypes.map(({ value, label, emoji }) => (
+                <motion.button
+                  key={value}
+                  onClick={() => setTypeFilter(value)}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 ${
+                    typeFilter === value
+                      ? 'bg-ghana-green text-white shadow-lg'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                  }`}
+                >
+                  {emoji} {label}
+                </motion.button>
+              ))}
+            </div>
+          )}
 
           {/* View Toggle */}
           <div className="flex justify-center gap-2 bg-white dark:bg-gray-800 rounded-full p-1 w-fit mx-auto shadow-md">
@@ -305,6 +352,16 @@ const DriverFinder = () => {
                 <h3 className="font-display text-xl font-bold text-center mb-2 dark:text-white">
                   {driver.name}
                 </h3>
+                <div className="flex justify-center mb-3">
+                  {(() => {
+                    const badge = getDriverTypeBadge(driver.driverType);
+                    return (
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${badge.cls}`}>
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
+                </div>
                 <div className="space-y-2 mb-4">
                   <p className="text-gray-600 dark:text-gray-300 text-center">
                     <span className="font-semibold">Car:</span> {driver.carType}
@@ -446,6 +503,14 @@ const DriverFinder = () => {
                         <div>
                           <h3 className="font-bold text-gray-900 dark:text-white">{driver.name}</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{driver.carType}</p>
+                          {(() => {
+                            const badge = getDriverTypeBadge(driver.driverType);
+                            return (
+                              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold ${badge.cls}`}>
+                                {badge.label}
+                              </span>
+                            );
+                          })()}
                         </div>
                       </div>
                       <span
@@ -508,6 +573,9 @@ const DriverFinder = () => {
                       Driver
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                       Car Type
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
@@ -543,6 +611,16 @@ const DriverFinder = () => {
                             <div className="text-2xl">{driver.photo || '👨‍✈️'}</div>
                             <div className="font-semibold text-gray-900 dark:text-white">{driver.name}</div>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {(() => {
+                            const badge = getDriverTypeBadge(driver.driverType);
+                            return (
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${badge.cls}`}>
+                                {badge.label}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
                           {driver.carType}

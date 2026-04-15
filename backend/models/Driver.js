@@ -36,6 +36,11 @@ const driverSchema = new mongoose.Schema({
     min: 0,
     max: 5,
   },
+  driverType: {
+    type: String,
+    default: 'berekuso',
+    // Valid values are managed via Settings.driverTypes — no hardcoded enum here
+  },
   note: {
     type: String,
   },

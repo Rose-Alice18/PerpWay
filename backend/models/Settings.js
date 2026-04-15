@@ -68,6 +68,22 @@ const settingsSchema = new mongoose.Schema({
     }]
   },
 
+  // Driver Types (admin-configurable)
+  driverTypes: {
+    type: [{
+      value: { type: String, required: true },  // e.g. 'bolt'
+      label: { type: String, required: true },  // e.g. 'Bolt Driver'
+      emoji: { type: String, default: '🚗' },
+    }],
+    default: [
+      { value: 'berekuso', label: 'Berekuso Town Driver', emoji: '🏘️' },
+      { value: 'bolt',     label: 'Bolt Driver',          emoji: '⚡' },
+      { value: 'yango',    label: 'Yango Driver',         emoji: '🚖' },
+      { value: 'uber',     label: 'Uber Driver',          emoji: '🚗' },
+      { value: 'other',    label: 'Other',                emoji: '🚕' },
+    ],
+  },
+
   // Platform Announcements
   announcements: [{
     title: { type: String, required: true },
