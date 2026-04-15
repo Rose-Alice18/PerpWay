@@ -2291,7 +2291,27 @@ Use the link to mark deliveries as:
 };
 
 // Drivers Tab Component
+// Color palette for driver type badges — cycles for custom types
+const TYPE_COLORS = [
+  'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+  'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+  'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+  'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
+  'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+  'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
+  'bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300',
+  'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
+];
+
 const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuccess, showError, showConfirm }) => {
+
+  const getTypeBadge = (typeValue) => {
+    const idx = driverTypes.findIndex(t => t.value === typeValue);
+    const type = driverTypes[idx];
+    const cls = TYPE_COLORS[idx >= 0 ? idx % TYPE_COLORS.length : 0];
+    const label = type ? `${type.emoji} ${type.label}` : (typeValue || 'Unknown');
+    return { label, cls };
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -2530,7 +2550,10 @@ const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuc
                   {getAvailabilityBadge(driver.availability || 'available')}
                 </div>
 
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{driver.name}</h3>
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1">{driver.name}</h3>
+                {(() => { const b = getTypeBadge(driver.driverType); return (
+                  <span className={`inline-block mb-2 px-2 py-0.5 rounded-full text-xs font-bold ${b.cls}`}>{b.label}</span>
+                ); })()}
 
                 <div className="space-y-2 text-sm mb-4">
                   <p className="flex items-center gap-2">
@@ -2618,7 +2641,12 @@ const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuc
                           <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                             <span className="text-lg">🚗</span>
                           </div>
-                          <span className="font-semibold text-gray-900 dark:text-white">{driver.name}</span>
+                          <div>
+                            <span className="font-semibold text-gray-900 dark:text-white block">{driver.name}</span>
+                            {(() => { const b = getTypeBadge(driver.driverType); return (
+                              <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-bold ${b.cls}`}>{b.label}</span>
+                            ); })()}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{driver.contact}</td>
@@ -2686,6 +2714,9 @@ const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuc
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm">{driver.name}</h4>
+                        {(() => { const b = getTypeBadge(driver.driverType); return (
+                          <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-bold ${b.cls}`}>{b.label}</span>
+                        ); })()}
                         <p className="text-xs text-gray-600 dark:text-gray-400">{driver.contact}</p>
                       </div>
                     </div>
@@ -5765,8 +5796,47 @@ const SettingsTab = () => {
     });
   };
 
+  const [driverTypeForm, setDriverTypeForm] = useState({ value: '', label: '', emoji: '🚗' });
+  const [showAddDriverTypeModal, setShowAddDriverTypeModal] = useState(false);
+
+  const handleAddDriverType = async () => {
+    if (!driverTypeForm.value.trim() || !driverTypeForm.label.trim()) {
+      showError('Value and label are both required.');
+      return;
+    }
+    try {
+      await axios.post(`${API_URL}/api/settings/driver-types`, driverTypeForm, getAuthHeaders());
+      setShowAddDriverTypeModal(false);
+      setDriverTypeForm({ value: '', label: '', emoji: '🚗' });
+      fetchSettings();
+      showSuccess('Driver type added! It will appear in dropdowns and filters now 🚘');
+    } catch (error) {
+      showError(error.response?.data?.error || 'Failed to add driver type.');
+    }
+  };
+
+  const handleDeleteDriverType = async (value) => {
+    showConfirm({
+      title: 'Remove Driver Type?',
+      message: `Remove "${value}" from the list? Existing drivers with this type won't be affected.`,
+      confirmText: 'Yes, remove it',
+      cancelText: 'Cancel',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/settings/driver-types/${value}`, getAuthHeaders());
+          fetchSettings();
+          showSuccess('Driver type removed.');
+        } catch (error) {
+          showError('Failed to remove driver type.');
+        }
+      }
+    });
+  };
+
   const sections = [
     { id: 'pricing', name: 'Pricing', icon: '💰' },
+    { id: 'driver-types', name: 'Driver Types', icon: '🚘' },
     { id: 'auto-assignment', name: 'Auto-Assignment', icon: '🤖' },
     { id: 'notifications', name: 'Notifications', icon: '📬' },
     { id: 'business-hours', name: 'Business Hours', icon: '🕐' },
@@ -5892,6 +5962,123 @@ const SettingsTab = () => {
           >
             {saving ? 'Saving...' : 'Save Pricing'}
           </button>
+        </div>
+      )}
+
+      {/* Driver Types Section */}
+      {activeSection === 'driver-types' && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span>🚘</span> Driver Types
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Manage the list of driver categories shown in dropdowns and filter buttons.
+                Changes take effect immediately across the platform.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAddDriverTypeModal(true)}
+              className="px-4 py-2 bg-ashesi-primary text-white rounded-xl font-semibold hover:bg-ashesi-primary/90 transition-all text-sm shrink-0"
+            >
+              + Add Type
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {(settings.driverTypes || []).map((type, idx) => (
+              <div key={type.value} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${TYPE_COLORS[idx % TYPE_COLORS.length]}`}>
+                    {type.emoji} {type.label}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">value: "{type.value}"</span>
+                </div>
+                <button
+                  onClick={() => handleDeleteDriverType(type.value)}
+                  className="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-xs font-semibold hover:bg-red-200 dark:hover:bg-red-900/50 transition-all"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            {(settings.driverTypes || []).length === 0 && (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No driver types configured yet. Add one above!
+              </div>
+            )}
+          </div>
+
+          {/* Add Driver Type Modal */}
+          <AnimatePresence>
+            {showAddDriverTypeModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                onClick={() => setShowAddDriverTypeModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Add Driver Type</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Emoji</label>
+                      <input
+                        type="text"
+                        value={driverTypeForm.emoji}
+                        onChange={(e) => setDriverTypeForm({ ...driverTypeForm, emoji: e.target.value })}
+                        placeholder="🚗"
+                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Label <span className="text-gray-400 font-normal">(shown to users)</span></label>
+                      <input
+                        type="text"
+                        value={driverTypeForm.label}
+                        onChange={(e) => setDriverTypeForm({ ...driverTypeForm, label: e.target.value })}
+                        placeholder="e.g. InDrive Driver"
+                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Value <span className="text-gray-400 font-normal">(internal key, no spaces)</span></label>
+                      <input
+                        type="text"
+                        value={driverTypeForm.value}
+                        onChange={(e) => setDriverTypeForm({ ...driverTypeForm, value: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                        placeholder="e.g. indrive"
+                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Lowercase only, spaces become hyphens automatically</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={handleAddDriverType}
+                      className="flex-1 py-2.5 bg-ashesi-primary text-white rounded-xl font-semibold hover:bg-ashesi-primary/90 transition-all"
+                    >
+                      Add Type
+                    </button>
+                    <button
+                      onClick={() => setShowAddDriverTypeModal(false)}
+                      className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-500 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 
