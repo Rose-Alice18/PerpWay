@@ -41,7 +41,9 @@ const { sendRideAlert } = require('../services/whatsapp');
 router.get('/', async (req, res) => {
   try {
     const includeAll = req.query.all === 'true';
-    const query = includeAll ? {} : { status: 'active' };
+    // For public view: show active rides AND recently-expired ones (status: cancelled due to date passing)
+    // so students can still see past rides with the expired badge. Excludes manually-cancelled rides.
+    const query = includeAll ? {} : { status: { $in: ['active', 'cancelled'] } };
     const rides = await Ride.find(query).sort({ departureDate: -1, departureTime: -1 });
 
     // For public (non-admin) requests, hide contact info of users who chose private
