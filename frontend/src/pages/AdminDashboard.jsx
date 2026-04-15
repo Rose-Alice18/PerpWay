@@ -822,6 +822,7 @@ const DeliveriesTab = ({ deliveries, fetchData, motorRiders, exportToCSV, showSu
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [selectedRiderId, setSelectedRiderId] = useState('');
   const [viewMode, setViewMode] = useState('table'); // 'card' or 'table'
+  const [whatsappMenuId, setWhatsappMenuId] = useState(null); // delivery id with open template menu
 
   // Bulk operations state
   const [selectedDeliveries, setSelectedDeliveries] = useState([]);
@@ -1087,6 +1088,33 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
       }
     });
   };
+
+  const getWhatsappTemplates = (delivery) => [
+    {
+      label: '📍 Vague location',
+      text: `Hi ${delivery.name}! 👋 This is the Perpway team. We received your delivery request for *${delivery.itemDescription}* but the location details seem a bit vague.\n\nCould you please clarify:\n📍 Pickup: ${delivery.pickupPoint}\n📍 Drop-off: ${delivery.dropoffPoint}\n\nA more specific location (landmark, building name, room number) will help us deliver faster. Thanks! 🚚`,
+    },
+    {
+      label: '⏳ Delivery delay',
+      text: `Hi ${delivery.name}! 👋 Perpway here. Just a heads-up — your delivery of *${delivery.itemDescription}* is running a bit behind schedule. We're on it and will get it to you as soon as possible. Sorry for the wait! 🙏`,
+    },
+    {
+      label: '💰 Payment reminder',
+      text: `Hi ${delivery.name}! 👋 Perpway here. We noticed the payment for your delivery of *${delivery.itemDescription}* is still pending. Kindly sort it out so we can process your order. Thanks! 💛`,
+    },
+    {
+      label: '❓ Item clarification',
+      text: `Hi ${delivery.name}! 👋 Perpway here. We have a quick question about your delivery request for *${delivery.itemDescription}*. Could you provide a bit more detail about the item so we can get it right? Thanks! 😊`,
+    },
+    {
+      label: '✅ Ready for pickup',
+      text: `Hi ${delivery.name}! 👋 Great news from Perpway — your *${delivery.itemDescription}* is ready and on its way! Please be available at your drop-off location: ${delivery.dropoffPoint}. 🚚💨`,
+    },
+    {
+      label: '💬 General follow-up',
+      text: `Hi ${delivery.name}! 👋 This is the Perpway team following up on your delivery request for *${delivery.itemDescription}*. Please let us know if you have any questions or concerns. We're happy to help! 😊`,
+    },
+  ];
 
   const handleDeleteDelivery = (deliveryId) => {
     showConfirm({
@@ -1616,15 +1644,32 @@ Use the link to mark deliveries as:
                           <p className="text-sm text-gray-600 dark:text-gray-400">{delivery.contact}</p>
                           {delivery.contact && (
                             <>
-                              <a
-                                href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}?text=${encodeURIComponent(`Hi ${delivery.name}! 👋 This is the Perpway team. We received your delivery request for *${delivery.itemDescription}* but the location details seem a bit vague.\n\nCould you please clarify:\n📍 Pickup: ${delivery.pickupPoint}\n📍 Drop-off: ${delivery.dropoffPoint}\n\nA more specific location (landmark, building name, room number) will help us deliver faster. Thanks! 🚚`)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title={`WhatsApp ${delivery.name}`}
-                                className="flex-shrink-0 w-6 h-6 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
-                              >
-                                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                              </a>
+                              <div className="relative flex-shrink-0">
+                                <button
+                                  onClick={() => setWhatsappMenuId(whatsappMenuId === delivery._id ? null : delivery._id)}
+                                  title={`WhatsApp ${delivery.name}`}
+                                  className="w-6 h-6 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
+                                >
+                                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                </button>
+                                {whatsappMenuId === delivery._id && (
+                                  <div className="absolute left-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1 w-52">
+                                    <p className="px-3 py-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Send message</p>
+                                    {getWhatsappTemplates(delivery).map((tpl, i) => (
+                                      <a
+                                        key={i}
+                                        href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}?text=${encodeURIComponent(tpl.text)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={() => setWhatsappMenuId(null)}
+                                        className="block px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-400 transition-colors"
+                                      >
+                                        {tpl.label}
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                               <a
                                 href={`tel:${delivery.contact}`}
                                 title={`Call ${delivery.name}`}
@@ -1815,15 +1860,32 @@ Use the link to mark deliveries as:
                         <p className="text-sm text-gray-600 dark:text-gray-400">{delivery.contact}</p>
                         {delivery.contact && (
                           <>
-                            <a
-                              href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}?text=${encodeURIComponent(`Hi ${delivery.name}! 👋 This is the Perpway team. We received your delivery request for *${delivery.itemDescription}* but the location details seem a bit vague.\n\nCould you please clarify:\n📍 Pickup: ${delivery.pickupPoint}\n📍 Drop-off: ${delivery.dropoffPoint}\n\nA more specific location (landmark, building name, room number) will help us deliver faster. Thanks! 🚚`)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              title={`WhatsApp ${delivery.name}`}
-                              className="flex-shrink-0 w-6 h-6 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
-                            >
-                              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                            </a>
+                            <div className="relative flex-shrink-0">
+                              <button
+                                onClick={() => setWhatsappMenuId(whatsappMenuId === delivery._id ? null : delivery._id)}
+                                title={`WhatsApp ${delivery.name}`}
+                                className="w-6 h-6 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-colors"
+                              >
+                                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                              </button>
+                              {whatsappMenuId === delivery._id && (
+                                <div className="absolute left-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1 w-52">
+                                  <p className="px-3 py-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Send message</p>
+                                  {getWhatsappTemplates(delivery).map((tpl, i) => (
+                                    <a
+                                      key={i}
+                                      href={`https://wa.me/${delivery.contact.replace(/\D/g, '').replace(/^0/, '233')}?text=${encodeURIComponent(tpl.text)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={() => setWhatsappMenuId(null)}
+                                      className="block px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-400 transition-colors"
+                                    >
+                                      {tpl.label}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                             <a
                               href={`tel:${delivery.contact}`}
                               title={`Call ${delivery.name}`}
