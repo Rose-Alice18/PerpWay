@@ -705,4 +705,22 @@ router.post('/admin/bulk/cancel', authenticateToken, requireAdmin, async (req, r
   }
 });
 
+// Delete a cancelled delivery (admin only)
+router.delete('/admin/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const delivery = await DeliveryRequest.findById(req.params.id);
+    if (!delivery) return res.status(404).json({ error: 'Delivery not found' });
+
+    if (delivery.status !== 'cancelled') {
+      return res.status(400).json({ error: 'Only cancelled deliveries can be deleted' });
+    }
+
+    await DeliveryRequest.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Delivery deleted' });
+  } catch (error) {
+    console.error('Delete delivery error:', error);
+    res.status(500).json({ error: 'Failed to delete delivery' });
+  }
+});
+
 module.exports = router;

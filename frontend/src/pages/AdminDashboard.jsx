@@ -1088,6 +1088,25 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
     });
   };
 
+  const handleDeleteDelivery = (deliveryId) => {
+    showConfirm({
+      title: 'Delete Cancelled Order?',
+      message: 'This will permanently remove the order. Cannot be undone.',
+      confirmText: 'Yes, delete it',
+      cancelText: 'Keep it',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/api/delivery/admin/${deliveryId}`, getAuthHeaders());
+          fetchDeliveries();
+          showSuccess('Delivery deleted 🗑️');
+        } catch (error) {
+          showError('Could not delete delivery');
+        }
+      }
+    });
+  };
+
   // Bulk send deliveries to a specific rider
   const sendBulkDeliveriesToRider = (riderId) => {
     const riderDeliveries = filteredDeliveries.filter(d =>
@@ -1740,6 +1759,14 @@ Use the link to mark deliveries as:
                       ❌ Cancel
                     </button>
                   )}
+                  {delivery.status === 'cancelled' && (
+                    <button
+                      onClick={() => handleDeleteDelivery(delivery._id)}
+                      className="px-4 py-2 bg-gray-700 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all text-sm"
+                    >
+                      🗑️ Delete
+                    </button>
+                  )}
                   </div>
                 </div>
               </div>
@@ -1908,6 +1935,14 @@ Use the link to mark deliveries as:
                           className="px-3 py-1 bg-ghana-red text-white rounded-lg font-semibold hover:bg-ghana-red/90 transition-all text-xs"
                         >
                           ❌
+                        </button>
+                      )}
+                      {delivery.status === 'cancelled' && (
+                        <button
+                          onClick={() => handleDeleteDelivery(delivery._id)}
+                          className="px-3 py-1 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-800 transition-all text-xs"
+                        >
+                          🗑️
                         </button>
                       )}
                     </div>
