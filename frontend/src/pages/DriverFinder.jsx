@@ -146,8 +146,8 @@ const DriverFinder = () => {
             Pay a small tip and get access to all drivers' contacts! 😄
           </p>
 
-          {/* Availability Filter Buttons */}
-          <div className="flex flex-wrap justify-center gap-3 mb-3">
+          {/* Filters row: availability pills + type dropdown */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
             {['all', 'available', 'busy', 'offline'].map((status) => (
               <motion.button
                 key={status}
@@ -163,41 +163,20 @@ const DriverFinder = () => {
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </motion.button>
             ))}
-          </div>
 
-          {/* Driver Type Filter Buttons — populated from backend */}
-          {driverTypes.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
-              <motion.button
-                key="all"
-                onClick={() => setTypeFilter('all')}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  typeFilter === 'all'
-                    ? 'bg-ghana-green text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-                }`}
+            {driverTypes.length > 0 && (
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="px-4 py-2 rounded-full font-semibold bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-ashesi-primary transition-all duration-300 text-sm"
               >
-                🚘 All Types
-              </motion.button>
-              {driverTypes.map(({ value, label, emoji }) => (
-                <motion.button
-                  key={value}
-                  onClick={() => setTypeFilter(value)}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 ${
-                    typeFilter === value
-                      ? 'bg-ghana-green text-white shadow-lg'
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-                  }`}
-                >
-                  {emoji} {label}
-                </motion.button>
-              ))}
-            </div>
-          )}
+                <option value="all">🚘 All Types</option>
+                {driverTypes.map(({ value, label, emoji }) => (
+                  <option key={value} value={value}>{emoji} {label}</option>
+                ))}
+              </select>
+            )}
+          </div>
 
           {/* View Toggle */}
           <div className="flex justify-center gap-2 bg-white dark:bg-gray-800 rounded-full p-1 w-fit mx-auto shadow-md">
