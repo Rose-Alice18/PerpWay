@@ -2303,11 +2303,16 @@ Use the link to mark deliveries as:
 };
 
 // Drivers Tab Component
-// Color palette for driver type badges — cycles for custom types
+// Brand colors for known platforms; fallback palette cycles for custom types
+const BRAND_CLS = {
+  bolt:     'bg-[#1DBF73] text-white',
+  uber:     'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900',
+  yango:    'bg-[#FF4433] text-white',
+  berekuso: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+};
+
 const TYPE_COLORS = [
   'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-  'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-  'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
   'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
   'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
   'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
@@ -2320,7 +2325,7 @@ const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuc
   const getTypeBadge = (typeValue) => {
     const idx = driverTypes.findIndex(t => t.value === typeValue);
     const type = driverTypes[idx];
-    const cls = TYPE_COLORS[idx >= 0 ? idx % TYPE_COLORS.length : 0];
+    const cls = BRAND_CLS[typeValue] || TYPE_COLORS[idx >= 0 ? idx % TYPE_COLORS.length : 0];
     const label = type ? `${type.emoji} ${type.label}` : (typeValue || 'Unknown');
     return { label, cls };
   };

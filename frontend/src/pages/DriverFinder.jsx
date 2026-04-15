@@ -17,12 +17,19 @@ const DriverFinder = () => {
   const [revealedContacts, setRevealedContacts] = useState(new Set())
   const [announcements, setAnnouncements] = useState([]);
 
+  // Brand-specific colors for known platforms; fallback to neutral for custom types
+  const BRAND_CLS = {
+    bolt:     'bg-[#1DBF73] text-white',
+    uber:     'bg-black text-white dark:bg-white dark:text-gray-900',
+    yango:    'bg-[#FF4433] text-white',
+    berekuso: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+  };
+
   const getDriverTypeBadge = (typeValue) => {
     const match = driverTypes.find(t => t.value === typeValue);
-    if (match) {
-      return { label: `${match.emoji} ${match.label}`, cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' };
-    }
-    return { label: '🚗 Driver', cls: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' };
+    const cls = BRAND_CLS[typeValue] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+    const label = match ? `${match.emoji} ${match.label}` : '🚗 Driver';
+    return { label, cls };
   };
 
   // Fetch drivers and check server-side tip access
