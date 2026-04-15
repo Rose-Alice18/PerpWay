@@ -12,6 +12,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify((error) => {
+  if (error) {
+    console.error('❌ SMTP connection failed (rides):', error.code, error.message);
+    console.error('   EMAIL_USER set:', !!process.env.EMAIL_USER, '| EMAIL_PASS set:', !!process.env.EMAIL_PASS);
+  } else {
+    console.log('✅ SMTP ready (rides) — using:', process.env.EMAIL_USER);
+  }
+});
+
 const sendAdminEmail = async (subject, html) => {
   try {
     await transporter.sendMail({

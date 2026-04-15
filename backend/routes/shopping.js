@@ -13,6 +13,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify((error) => {
+  if (error) {
+    console.error('❌ SMTP connection failed (shopping):', error.code, error.message);
+    console.error('   EMAIL_USER set:', !!process.env.EMAIL_USER, '| EMAIL_PASS set:', !!process.env.EMAIL_PASS);
+  } else {
+    console.log('✅ SMTP ready (shopping) — using:', process.env.EMAIL_USER);
+  }
+});
+
 // Create new shopping request
 router.post('/create', optionalAuth, uploadShopping.single('productImage'), async (req, res) => {
   try {

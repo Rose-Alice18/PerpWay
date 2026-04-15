@@ -32,9 +32,19 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 5000,
-  greetingTimeout: 5000,
-  socketTimeout: 10000,
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
+});
+
+// Verify SMTP on startup so Render logs show connection status
+transporter.verify((error) => {
+  if (error) {
+    console.error('❌ SMTP connection failed (delivery):', error.code, error.message);
+    console.error('   EMAIL_USER set:', !!process.env.EMAIL_USER, '| EMAIL_PASS set:', !!process.env.EMAIL_PASS);
+  } else {
+    console.log('✅ SMTP ready (delivery) — using:', process.env.EMAIL_USER);
+  }
 });
 
 // GET user's delivery history
@@ -201,7 +211,7 @@ router.post('/request', optionalAuth, async (req, res) => {
     }).then(() => {
       console.log('✅ Admin email sent for delivery request');
     }).catch(emailError => {
-      console.log('⚠️ Admin email failed:', emailError.message);
+      console.error('❌ Admin email failed:', emailError.code, emailError.message);
     });
   } catch (error) {
     console.error('Delivery request error:', error);
