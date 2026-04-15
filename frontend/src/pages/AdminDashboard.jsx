@@ -6024,7 +6024,7 @@ const SettingsTab = () => {
             {(settings.driverTypes || []).map((type, idx) => (
               <div key={type.value} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${TYPE_COLORS[idx % TYPE_COLORS.length]}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${BRAND_CLS[type.value] || TYPE_COLORS[idx % TYPE_COLORS.length]}`}>
                     {type.emoji} {type.label}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">value: "{type.value}"</span>
