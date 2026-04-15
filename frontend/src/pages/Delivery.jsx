@@ -140,26 +140,9 @@ const Delivery = () => {
         userEmail: userEmail || null, // Include user email if logged in
       });
 
-      // Show success animation
-      setTimeout(() => {
-        setSubmitting(false);
-        setShowSuccess(true);
-
-        // Auto-close after 12 seconds — long enough to read the full message
-        setTimeout(() => {
-          setShowSuccess(false);
-          setFormData({
-            name: '',
-            contact: '',
-            itemDescription: '',
-            pickupPoint: '',
-            dropoffPoint: '',
-            deliveryType: 'next-day',
-            notes: '',
-          });
-          setFocusedField(null);
-        }, 12000);
-      }, 1500);
+      // Show success immediately — no artificial delay
+      setSubmitting(false);
+      setShowSuccess(true);
     } catch (error) {
       console.error('Delivery request error:', error);
       setSubmitting(false);
@@ -669,7 +652,7 @@ const Delivery = () => {
                           animate={{ opacity: [0.5, 1, 0.5] }}
                           transition={{ duration: 1.5, repeat: Infinity }}
                         >
-                          Submitting Request...
+                          Submitting... (may take a few seconds)
                         </motion.span>
                       </span>
                     ) : (
@@ -691,7 +674,6 @@ const Delivery = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={handleSuccessClose}
           >
             <motion.div
               initial={{ scale: 0.5, y: 50, opacity: 0, rotateX: -15 }}
