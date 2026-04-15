@@ -2303,31 +2303,14 @@ Use the link to mark deliveries as:
 };
 
 // Drivers Tab Component
-// Brand colors for known platforms; fallback palette cycles for custom types
-const BRAND_CLS = {
-  bolt:     'bg-[#1DBF73] text-white',
-  uber:     'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900',
-  yango:    'bg-[#FF4433] text-white',
-  berekuso: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-};
-
-const TYPE_COLORS = [
-  'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-  'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
-  'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-  'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
-  'bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300',
-  'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
-];
-
 const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuccess, showError, showConfirm }) => {
 
+  // Returns label + inline style using the type's stored color
   const getTypeBadge = (typeValue) => {
-    const idx = driverTypes.findIndex(t => t.value === typeValue);
-    const type = driverTypes[idx];
-    const cls = BRAND_CLS[typeValue] || TYPE_COLORS[idx >= 0 ? idx % TYPE_COLORS.length : 0];
+    const type = driverTypes.find(t => t.value === typeValue);
     const label = type ? `${type.emoji} ${type.label}` : (typeValue || 'Unknown');
-    return { label, cls };
+    const bg = type?.color || '#6B7280';
+    return { label, style: { backgroundColor: bg, color: '#fff' } };
   };
   const [searchTerm, setSearchTerm] = useState('');
   const [locationFilter, setLocationFilter] = useState('all');
@@ -2569,7 +2552,7 @@ const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuc
 
                 <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1">{driver.name}</h3>
                 {(() => { const b = getTypeBadge(driver.driverType); return (
-                  <span className={`inline-block mb-2 px-2 py-0.5 rounded-full text-xs font-bold ${b.cls}`}>{b.label}</span>
+                  <span className={`inline-block mb-2 px-2 py-0.5 rounded-full text-xs font-bold`} style={b.style}>{b.label}</span>
                 ); })()}
 
                 <div className="space-y-2 text-sm mb-4">
@@ -2661,7 +2644,7 @@ const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuc
                           <div>
                             <span className="font-semibold text-gray-900 dark:text-white block">{driver.name}</span>
                             {(() => { const b = getTypeBadge(driver.driverType); return (
-                              <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-bold ${b.cls}`}>{b.label}</span>
+                              <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-bold`} style={b.style}>{b.label}</span>
                             ); })()}
                           </div>
                         </div>
@@ -2732,7 +2715,7 @@ const DriversTab = ({ drivers, fetchData, driverTypes = [], exportToCSV, showSuc
                       <div>
                         <h4 className="font-bold text-gray-900 dark:text-white text-sm">{driver.name}</h4>
                         {(() => { const b = getTypeBadge(driver.driverType); return (
-                          <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-bold ${b.cls}`}>{b.label}</span>
+                          <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-xs font-bold`} style={b.style}>{b.label}</span>
                         ); })()}
                         <p className="text-xs text-gray-600 dark:text-gray-400">{driver.contact}</p>
                       </div>
@@ -5813,10 +5796,10 @@ const SettingsTab = () => {
     });
   };
 
-  const [driverTypeForm, setDriverTypeForm] = useState({ value: '', label: '', emoji: '🚗' });
+  const [driverTypeForm, setDriverTypeForm] = useState({ value: '', label: '', emoji: '🚗', color: '#6B7280' });
   const [showAddDriverTypeModal, setShowAddDriverTypeModal] = useState(false);
-  const [editingDriverType, setEditingDriverType] = useState(null); // { value, label, emoji }
-  const [editDriverTypeForm, setEditDriverTypeForm] = useState({ label: '', emoji: '' });
+  const [editingDriverType, setEditingDriverType] = useState(null);
+  const [editDriverTypeForm, setEditDriverTypeForm] = useState({ label: '', emoji: '', color: '#6B7280' });
 
   const handleAddDriverType = async () => {
     if (!driverTypeForm.value.trim() || !driverTypeForm.label.trim()) {
@@ -5826,7 +5809,7 @@ const SettingsTab = () => {
     try {
       await axios.post(`${API_URL}/api/settings/driver-types`, driverTypeForm, getAuthHeaders());
       setShowAddDriverTypeModal(false);
-      setDriverTypeForm({ value: '', label: '', emoji: '🚗' });
+      setDriverTypeForm({ value: '', label: '', emoji: '🚗', color: '#6B7280' });
       fetchSettings();
       showSuccess('Driver type added! It will appear in dropdowns and filters now 🚘');
     } catch (error) {
@@ -6024,14 +6007,14 @@ const SettingsTab = () => {
             {(settings.driverTypes || []).map((type, idx) => (
               <div key={type.value} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${BRAND_CLS[type.value] || TYPE_COLORS[idx % TYPE_COLORS.length]}`}>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: type.color || '#6B7280', color: '#fff' }}>
                     {type.emoji} {type.label}
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">value: "{type.value}"</span>
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setEditingDriverType(type); setEditDriverTypeForm({ label: type.label, emoji: type.emoji }); }}
+                    onClick={() => { setEditingDriverType(type); setEditDriverTypeForm({ label: type.label, emoji: type.emoji, color: type.color || '#6B7280' }); }}
                     className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-semibold hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all"
                   >
                     Edit
@@ -6089,6 +6072,20 @@ const SettingsTab = () => {
                         onChange={(e) => setEditDriverTypeForm({ ...editDriverTypeForm, label: e.target.value })}
                         className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Badge Color</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={editDriverTypeForm.color}
+                          onChange={(e) => setEditDriverTypeForm({ ...editDriverTypeForm, color: e.target.value })}
+                          className="w-12 h-10 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer"
+                        />
+                        <span className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ backgroundColor: editDriverTypeForm.color }}>
+                          {editDriverTypeForm.emoji || '🚗'} {editDriverTypeForm.label || 'Preview'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-3 mt-6">
@@ -6159,6 +6156,20 @@ const SettingsTab = () => {
                         className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary"
                       />
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Lowercase only, spaces become hyphens automatically</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Badge Color</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={driverTypeForm.color}
+                          onChange={(e) => setDriverTypeForm({ ...driverTypeForm, color: e.target.value })}
+                          className="w-12 h-10 rounded-lg border-2 border-gray-300 dark:border-gray-600 cursor-pointer"
+                        />
+                        <span className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ backgroundColor: driverTypeForm.color }}>
+                          {driverTypeForm.emoji || '🚗'} {driverTypeForm.label || 'Preview'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-3 mt-6">

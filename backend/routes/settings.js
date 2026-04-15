@@ -158,7 +158,7 @@ router.delete('/announcements/:id', verifyAdmin, async (req, res) => {
 // ADD driver type (admin only)
 router.post('/driver-types', verifyAdmin, async (req, res) => {
   try {
-    const { value, label, emoji } = req.body;
+    const { value, label, emoji, color } = req.body;
     if (!value || !label) {
       return res.status(400).json({ error: 'value and label are required' });
     }
@@ -169,7 +169,7 @@ router.post('/driver-types', verifyAdmin, async (req, res) => {
       return res.status(409).json({ error: 'Driver type with this value already exists' });
     }
 
-    settings.driverTypes.push({ value, label, emoji: emoji || '🚗' });
+    settings.driverTypes.push({ value, label, emoji: emoji || '🚗', color: color || '#6B7280' });
     await settings.save();
 
     res.json({ message: 'Driver type added', driverTypes: settings.driverTypes });
@@ -191,6 +191,7 @@ router.put('/driver-types/:value', verifyAdmin, async (req, res) => {
 
     if (req.body.label) type.label = req.body.label;
     if (req.body.emoji) type.emoji = req.body.emoji;
+    if (req.body.color) type.color = req.body.color;
 
     await settings.save();
     res.json({ message: 'Driver type updated', driverTypes: settings.driverTypes });

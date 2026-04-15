@@ -17,19 +17,11 @@ const DriverFinder = () => {
   const [revealedContacts, setRevealedContacts] = useState(new Set())
   const [announcements, setAnnouncements] = useState([]);
 
-  // Brand-specific colors for known platforms; fallback to neutral for custom types
-  const BRAND_CLS = {
-    bolt:     'bg-[#1DBF73] text-white',
-    uber:     'bg-black text-white dark:bg-white dark:text-gray-900',
-    yango:    'bg-[#FF4433] text-white',
-    berekuso: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-  };
-
   const getDriverTypeBadge = (typeValue) => {
     const match = driverTypes.find(t => t.value === typeValue);
-    const cls = BRAND_CLS[typeValue] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
     const label = match ? `${match.emoji} ${match.label}` : '🚗 Driver';
-    return { label, cls };
+    const bg = match?.color || '#6B7280';
+    return { label, style: { backgroundColor: bg, color: '#fff' } };
   };
 
   // Fetch drivers and check server-side tip access
@@ -342,7 +334,7 @@ const DriverFinder = () => {
                   {(() => {
                     const badge = getDriverTypeBadge(driver.driverType);
                     return (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${badge.cls}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold`} style={badge.style}>
                         {badge.label}
                       </span>
                     );
@@ -492,7 +484,7 @@ const DriverFinder = () => {
                           {(() => {
                             const badge = getDriverTypeBadge(driver.driverType);
                             return (
-                              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold ${badge.cls}`}>
+                              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold`} style={badge.style}>
                                 {badge.label}
                               </span>
                             );
@@ -602,7 +594,7 @@ const DriverFinder = () => {
                           {(() => {
                             const badge = getDriverTypeBadge(driver.driverType);
                             return (
-                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${badge.cls}`}>
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold`} style={badge.style}>
                                 {badge.label}
                               </span>
                             );

@@ -74,13 +74,14 @@ const settingsSchema = new mongoose.Schema({
       value: { type: String, required: true },  // e.g. 'bolt'
       label: { type: String, required: true },  // e.g. 'Bolt Driver'
       emoji: { type: String, default: '🚗' },
+      color: { type: String, default: '#6B7280' }, // hex badge background color
     }],
     default: [
-      { value: 'berekuso', label: 'Berekuso Town Driver', emoji: '🏘️' },
-      { value: 'bolt',     label: 'Bolt Driver',          emoji: '⚡' },
-      { value: 'yango',    label: 'Yango Driver',         emoji: '🚖' },
-      { value: 'uber',     label: 'Uber Driver',          emoji: '🚗' },
-      { value: 'other',    label: 'Other',                emoji: '🚕' },
+      { value: 'berekuso', label: 'Berekuso Town Driver', emoji: '🏘️', color: '#3B82F6' },
+      { value: 'bolt',     label: 'Bolt Driver',          emoji: '⚡',  color: '#1DBF73' },
+      { value: 'yango',    label: 'Yango Driver',         emoji: '🚖',  color: '#FF4433' },
+      { value: 'uber',     label: 'Uber Driver',          emoji: '🚗',  color: '#000000' },
+      { value: 'other',    label: 'Other',                emoji: '🚕',  color: '#6B7280' },
     ],
   },
 
