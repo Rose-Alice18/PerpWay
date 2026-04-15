@@ -20,6 +20,7 @@ const RidePairing = () => {
     startDate: '',
     endDate: '',
   });
+  const [announcements, setAnnouncements] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
@@ -75,6 +76,11 @@ const RidePairing = () => {
 
   useEffect(() => {
     fetchRides();
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    axios.get(`${apiUrl}/api/settings`).then(res => {
+      const all = res.data.announcements || [];
+      setAnnouncements(all.filter(a => a.targetAudience === 'all' || a.targetAudience === 'riders'));
+    }).catch(() => {});
   }, []);
 
   const fetchRides = async () => {
@@ -333,6 +339,26 @@ const RidePairing = () => {
             )}
           </AnimatePresence>
         </motion.div>
+
+        {/* Announcements */}
+        {announcements.length > 0 && (
+          <div className="mb-6 space-y-2">
+            {announcements.map((a) => {
+              const colors =
+                a.type === 'info' ? 'from-blue-600 to-blue-800' :
+                a.type === 'warning' ? 'from-amber-500 to-orange-600' :
+                a.type === 'success' ? 'from-green-600 to-emerald-700' :
+                'from-ashesi-primary to-red-700';
+              return (
+                <div key={a._id} className={`bg-gradient-to-r ${colors} rounded-2xl p-2.5 shadow-lg`}>
+                  <p className="text-xs md:text-sm font-bold tracking-tight text-white text-center">
+                    {a.title}{a.message ? ` — ${a.message}` : ''}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Rides List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

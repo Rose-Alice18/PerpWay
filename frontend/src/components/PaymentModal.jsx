@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { PaystackButton } from 'react-paystack';
 
-const PaymentModal = ({ driver, onClose, onSuccess, contactType = 'driver' }) => {
+const PaymentModal = ({ contact, onClose, onSuccess, contactType = 'driver' }) => {
   const [paymentMethod, setPaymentMethod] = useState('momo');
   const [processing, setProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -34,7 +34,7 @@ const PaymentModal = ({ driver, onClose, onSuccess, contactType = 'driver' }) =>
         {
           display_name: contactType === 'vendor' ? 'Vendor' : 'Driver',
           variable_name: `${contactType}_name`,
-          value: driver.name
+          value: contact.name
         }
       ]
     },
@@ -291,7 +291,7 @@ const PaymentModal = ({ driver, onClose, onSuccess, contactType = 'driver' }) =>
                 Help Keep Perpway Running! 🚀
               </h2>
               <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed">
-                Our team works hard to keep this platform <span className="font-semibold">free and accessible</span> for everyone. Please consider tipping to unlock <span className="font-semibold text-ashesi-primary dark:text-ghana-yellow">{driver.name}'s</span> contact and all {contactType === 'vendor' ? 'vendor' : 'driver'} contacts at once.
+                Our team works hard to keep this platform <span className="font-semibold">free and accessible</span> for everyone. Please consider tipping to unlock <span className="font-semibold text-ashesi-primary dark:text-ghana-yellow">{contact.name}'s</span> contact and all {contactType === 'vendor' ? 'vendor' : 'driver'} contacts at once.
               </p>
             </div>
 

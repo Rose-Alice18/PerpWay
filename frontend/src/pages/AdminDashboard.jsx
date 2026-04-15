@@ -6300,10 +6300,12 @@ const SettingsTab = () => {
                   onChange={(e) => setAnnouncementForm({ ...announcementForm, targetAudience: e.target.value })}
                   className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-ashesi-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  <option value="all">All Users</option>
-                  <option value="users">Users Only</option>
-                  <option value="riders">Riders Only</option>
-                  <option value="drivers">Drivers Only</option>
+                  <option value="all">All Pages</option>
+                  <option value="drivers">Drivers Page</option>
+                  <option value="riders">Ride Pairing Page</option>
+                  <option value="vendors">Services Page</option>
+                  <option value="delivery">Delivery Page</option>
+                  <option value="users">Logged-in Users Only</option>
                 </select>
               </div>
 

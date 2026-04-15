@@ -20,8 +20,10 @@ const transporter = nodemailer.createTransport({
 });
 
 // Admin credentials loaded from environment variables
+// ADMIN_LOGIN_EMAIL = what you type to log in (e.g. admin@perpway.com)
+// ADMIN_EMAIL       = where notification emails are sent (your real Gmail)
 const ADMIN_CREDENTIALS = {
-  email: process.env.ADMIN_EMAIL || 'admin@perpway.com',
+  email: process.env.ADMIN_LOGIN_EMAIL || process.env.ADMIN_EMAIL || 'admin@perpway.com',
   passwordHash: process.env.ADMIN_PASSWORD_HASH,
   role: 'admin',
   name: 'Admin Roseline'

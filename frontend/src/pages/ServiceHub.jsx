@@ -14,19 +14,30 @@ const ServiceHub = () => {
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [revealedContacts, setRevealedContacts] = useState(new Set());
+  const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-        // Fetch vendors
-        const vendorsResponse = await axios.get(`${apiUrl}/api/vendors`);
-        setVendors(vendorsResponse.data);
+        // Fetch vendors, categories, and announcements in parallel
+        const [vendorsResponse, categoriesResponse, settingsResponse] = await Promise.allSettled([
+          axios.get(`${apiUrl}/api/vendors`),
+          axios.get(`${apiUrl}/api/categories`),
+          axios.get(`${apiUrl}/api/settings`),
+        ]);
 
-        // Fetch categories (only visible ones)
-        const categoriesResponse = await axios.get(`${apiUrl}/api/categories`);
-        const visibleCategories = categoriesResponse.data
+        if (settingsResponse.status === 'fulfilled') {
+          const all = settingsResponse.value.data.announcements || [];
+          setAnnouncements(all.filter(a => a.targetAudience === 'all' || a.targetAudience === 'vendors'));
+        }
+
+        if (vendorsResponse.status !== 'fulfilled') throw new Error('Failed to fetch vendors');
+        setVendors(vendorsResponse.value.data);
+
+        if (categoriesResponse.status !== 'fulfilled') throw new Error('Failed to fetch categories');
+        const visibleCategories = categoriesResponse.value.data
           .filter(cat => cat.isVisible)
           .map(cat => ({
             ...cat,
@@ -220,6 +231,26 @@ const ServiceHub = () => {
             </div>
           </motion.div>
         </motion.div>
+
+        {/* Announcements */}
+        {announcements.length > 0 && (
+          <div className="mb-6 space-y-2">
+            {announcements.map((a) => {
+              const colors =
+                a.type === 'info' ? 'from-blue-600 to-blue-800' :
+                a.type === 'warning' ? 'from-amber-500 to-orange-600' :
+                a.type === 'success' ? 'from-green-600 to-emerald-700' :
+                'from-ashesi-primary to-red-700';
+              return (
+                <div key={a._id} className={`bg-gradient-to-r ${colors} rounded-2xl p-2.5 shadow-lg`}>
+                  <p className="text-xs md:text-sm font-bold tracking-tight text-white text-center">
+                    {a.title}{a.message ? ` — ${a.message}` : ''}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Vendors Grid */}
         <motion.div
@@ -424,7 +455,7 @@ const ServiceHub = () => {
       <AnimatePresence>
         {showPayment && selectedVendor && (
           <PaymentModal
-            driver={selectedVendor}
+            contact={selectedVendor}
             contactType="vendor"
             onClose={() => {
               setShowPayment(false);

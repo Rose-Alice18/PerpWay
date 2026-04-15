@@ -13,13 +13,25 @@ const DriverFinder = () => {
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
 
   const [revealedContacts, setRevealedContacts] = useState(new Set())
+  const [announcements, setAnnouncements] = useState([]);
 
   // Fetch drivers and check server-side tip access
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${apiUrl}/api/drivers`);
+
+        const [driversRes, settingsRes] = await Promise.allSettled([
+          axios.get(`${apiUrl}/api/drivers`),
+          axios.get(`${apiUrl}/api/settings`),
+        ]);
+
+        if (settingsRes.status === 'fulfilled') {
+          const all = settingsRes.value.data.announcements || [];
+          setAnnouncements(all.filter(a => a.targetAudience === 'all' || a.targetAudience === 'drivers'));
+        }
+
+        const response = driversRes.status === 'fulfilled' ? driversRes.value : { data: [] };
         const normalizedDrivers = response.data.map(driver => ({
           ...driver,
           id: driver._id || driver.id,
@@ -186,20 +198,24 @@ const DriverFinder = () => {
                   ease: "easeInOut"
                 }
               }}
-              className="mb-6 bg-gradient-to-r from-ashesi-primary to-red-700 rounded-2xl p-2.5 shadow-lg"
+              className="mb-6 space-y-2"
             >
-              <div className="flex items-center justify-center gap-2 text-white">
-                <motion.span
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-base"
-                >
-                  🚗
-                </motion.span>
-                <p className="text-xs md:text-sm font-bold tracking-tight">
-                  Bolt/Uber/Yango coming soon 🔥
-                </p>
-              </div>
+              {announcements.map((a) => {
+                const colors =
+                  a.type === 'info' ? 'from-blue-600 to-blue-800' :
+                  a.type === 'warning' ? 'from-amber-500 to-orange-600' :
+                  a.type === 'success' ? 'from-green-600 to-emerald-700' :
+                  'from-ashesi-primary to-red-700';
+                return (
+                  <div key={a._id} className={`bg-gradient-to-r ${colors} rounded-2xl p-2.5 shadow-lg`}>
+                    <div className="flex items-center justify-center gap-2 text-white">
+                      <p className="text-xs md:text-sm font-bold tracking-tight text-center">
+                        {a.title} {a.message ? `— ${a.message}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </motion.div>
 
             <motion.div
@@ -387,20 +403,24 @@ const DriverFinder = () => {
                   ease: "easeInOut"
                 }
               }}
-              className="mb-6 bg-gradient-to-r from-ashesi-primary to-red-700 rounded-2xl p-2.5 shadow-lg"
+              className="mb-6 space-y-2"
             >
-              <div className="flex items-center justify-center gap-2 text-white">
-                <motion.span
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-base"
-                >
-                  🚗
-                </motion.span>
-                <p className="text-xs md:text-sm font-bold tracking-tight">
-                  Bolt/Uber/Yango coming soon 🔥
-                </p>
-              </div>
+              {announcements.map((a) => {
+                const colors =
+                  a.type === 'info' ? 'from-blue-600 to-blue-800' :
+                  a.type === 'warning' ? 'from-amber-500 to-orange-600' :
+                  a.type === 'success' ? 'from-green-600 to-emerald-700' :
+                  'from-ashesi-primary to-red-700';
+                return (
+                  <div key={a._id} className={`bg-gradient-to-r ${colors} rounded-2xl p-2.5 shadow-lg`}>
+                    <div className="flex items-center justify-center gap-2 text-white">
+                      <p className="text-xs md:text-sm font-bold tracking-tight text-center">
+                        {a.title} {a.message ? `— ${a.message}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </motion.div>
 
             <motion.div
@@ -620,7 +640,7 @@ const DriverFinder = () => {
       <AnimatePresence>
         {showPayment && selectedDriver && (
           <PaymentModal
-            driver={selectedDriver}
+            contact={selectedDriver}
             onClose={handlePaymentClose}
             onSuccess={handlePaymentSuccess}
           />

@@ -31,6 +31,7 @@ const Delivery = () => {
     setFocusedField(null);
   };
   const [errors, setErrors] = useState({});
+  const [announcements, setAnnouncements] = useState([]);
   const [pricing, setPricing] = useState({
     instant: 'Tentative',
     nextDay: 50,
@@ -49,6 +50,10 @@ const Delivery = () => {
             nextDay: response.data.pricing.nextDay || 50,
             weeklyStation: response.data.pricing.weeklyStation || 35,
           });
+        }
+        if (response.data && response.data.announcements) {
+          const all = response.data.announcements;
+          setAnnouncements(all.filter(a => a.targetAudience === 'all' || a.targetAudience === 'delivery'));
         }
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -193,6 +198,26 @@ const Delivery = () => {
             and we go sort you out! 🚚
           </p>
         </motion.div>
+
+        {/* Announcements */}
+        {announcements.length > 0 && (
+          <div className="mb-6 space-y-2">
+            {announcements.map((a) => {
+              const colors =
+                a.type === 'info' ? 'from-blue-600 to-blue-800' :
+                a.type === 'warning' ? 'from-amber-500 to-orange-600' :
+                a.type === 'success' ? 'from-green-600 to-emerald-700' :
+                'from-ashesi-primary to-red-700';
+              return (
+                <div key={a._id} className={`bg-gradient-to-r ${colors} rounded-2xl p-2.5 shadow-lg`}>
+                  <p className="text-xs md:text-sm font-bold tracking-tight text-white text-center">
+                    {a.title}{a.message ? ` — ${a.message}` : ''}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Payment Notice Banner */}
         <motion.div
