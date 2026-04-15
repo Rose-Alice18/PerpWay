@@ -124,6 +124,14 @@ const Delivery = () => {
     e.preventDefault();
 
     if (!validateForm()) {
+      // Scroll to the first error so the user can see it
+      setTimeout(() => {
+        const firstError = document.querySelector('.border-red-500');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstError.focus();
+        }
+      }, 50);
       return;
     }
 
