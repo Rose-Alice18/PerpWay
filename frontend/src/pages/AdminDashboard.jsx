@@ -1126,7 +1126,7 @@ Assigned: ${delivery.assignedAt ? new Date(delivery.assignedAt).toLocaleString()
       onConfirm: async () => {
         try {
           await axios.delete(`${API_URL}/api/delivery/admin/${deliveryId}`, getAuthHeaders());
-          fetchDeliveries();
+          fetchData();
           showSuccess('Delivery deleted 🗑️');
         } catch (error) {
           showError('Could not delete delivery');
@@ -1379,6 +1379,38 @@ Use the link to mark deliveries as:
     });
   };
 
+  // Bulk Delete Cancelled
+  const handleBulkDelete = async () => {
+    const cancelledIds = selectedDeliveries.filter(id =>
+      deliveries.find(d => d._id === id && d.status === 'cancelled')
+    );
+    if (cancelledIds.length === 0) {
+      showWarning('No cancelled orders in your selection to delete');
+      return;
+    }
+    showConfirm({
+      title: 'Delete Cancelled Orders?',
+      message: `Permanently delete ${cancelledIds.length} cancelled order${cancelledIds.length > 1 ? 's' : ''}? This cannot be undone.`,
+      confirmText: 'Yes, delete them',
+      cancelText: 'Keep them',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/delivery/admin/bulk/delete`,
+            { deliveryIds: cancelledIds },
+            getAuthHeaders()
+          );
+          showSuccess(`Deleted ${response.data.deleted} order${response.data.deleted > 1 ? 's' : ''} 🗑️`);
+          setSelectedDeliveries([]);
+          fetchData();
+        } catch (error) {
+          showError('Failed to delete: ' + (error.response?.data?.error || error.message));
+        }
+      }
+    });
+  };
+
   // Bulk Export Selected
   const handleBulkExport = () => {
     if (selectedDeliveries.length === 0) {
@@ -1439,6 +1471,12 @@ Use the link to mark deliveries as:
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-xl font-semibold transition-all text-sm"
               >
                 ✕ Cancel
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                className="px-4 py-2 bg-gray-800 hover:bg-gray-900 rounded-xl font-semibold transition-all text-sm"
+              >
+                🗑️ Delete Cancelled
               </button>
               <button
                 onClick={handleBulkExport}

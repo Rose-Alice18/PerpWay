@@ -705,6 +705,24 @@ router.post('/admin/bulk/cancel', authenticateToken, requireAdmin, async (req, r
   }
 });
 
+// Bulk delete cancelled deliveries (admin only)
+router.post('/admin/bulk/delete', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { deliveryIds } = req.body;
+    if (!deliveryIds || !Array.isArray(deliveryIds) || deliveryIds.length === 0) {
+      return res.status(400).json({ error: 'deliveryIds array is required' });
+    }
+    const result = await DeliveryRequest.deleteMany({
+      _id: { $in: deliveryIds },
+      status: 'cancelled',
+    });
+    res.json({ success: true, deleted: result.deletedCount });
+  } catch (error) {
+    console.error('Bulk delete error:', error);
+    res.status(500).json({ error: 'Failed to bulk delete deliveries' });
+  }
+});
+
 // Delete a cancelled delivery (admin only)
 router.delete('/admin/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
