@@ -5815,6 +5815,8 @@ const SettingsTab = () => {
 
   const [driverTypeForm, setDriverTypeForm] = useState({ value: '', label: '', emoji: '🚗' });
   const [showAddDriverTypeModal, setShowAddDriverTypeModal] = useState(false);
+  const [editingDriverType, setEditingDriverType] = useState(null); // { value, label, emoji }
+  const [editDriverTypeForm, setEditDriverTypeForm] = useState({ label: '', emoji: '' });
 
   const handleAddDriverType = async () => {
     if (!driverTypeForm.value.trim() || !driverTypeForm.label.trim()) {
@@ -5829,6 +5831,21 @@ const SettingsTab = () => {
       showSuccess('Driver type added! It will appear in dropdowns and filters now 🚘');
     } catch (error) {
       showError(error.response?.data?.error || 'Failed to add driver type.');
+    }
+  };
+
+  const handleEditDriverType = async () => {
+    if (!editDriverTypeForm.label.trim()) {
+      showError('Label is required.');
+      return;
+    }
+    try {
+      await axios.put(`${API_URL}/api/settings/driver-types/${editingDriverType.value}`, editDriverTypeForm, getAuthHeaders());
+      setEditingDriverType(null);
+      fetchSettings();
+      showSuccess('Driver type updated!');
+    } catch (error) {
+      showError('Failed to update driver type.');
     }
   };
 
@@ -6012,12 +6029,20 @@ const SettingsTab = () => {
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">value: "{type.value}"</span>
                 </div>
-                <button
-                  onClick={() => handleDeleteDriverType(type.value)}
-                  className="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-xs font-semibold hover:bg-red-200 dark:hover:bg-red-900/50 transition-all"
-                >
-                  Remove
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setEditingDriverType(type); setEditDriverTypeForm({ label: type.label, emoji: type.emoji }); }}
+                    className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-semibold hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteDriverType(type.value)}
+                    className="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-xs font-semibold hover:bg-red-200 dark:hover:bg-red-900/50 transition-all"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             ))}
             {(settings.driverTypes || []).length === 0 && (
@@ -6026,6 +6051,64 @@ const SettingsTab = () => {
               </div>
             )}
           </div>
+
+          {/* Edit Driver Type Modal */}
+          <AnimatePresence>
+            {editingDriverType && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                onClick={() => setEditingDriverType(null)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Edit Driver Type</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 font-mono">value: "{editingDriverType.value}" <span className="text-gray-400">(cannot be changed)</span></p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Emoji</label>
+                      <input
+                        type="text"
+                        value={editDriverTypeForm.emoji}
+                        onChange={(e) => setEditDriverTypeForm({ ...editDriverTypeForm, emoji: e.target.value })}
+                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Label</label>
+                      <input
+                        type="text"
+                        value={editDriverTypeForm.label}
+                        onChange={(e) => setEditDriverTypeForm({ ...editDriverTypeForm, label: e.target.value })}
+                        className="w-full px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-ashesi-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={handleEditDriverType}
+                      className="flex-1 py-2.5 bg-ashesi-primary text-white rounded-xl font-semibold hover:bg-ashesi-primary/90 transition-all"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={() => setEditingDriverType(null)}
+                      className="flex-1 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-500 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Add Driver Type Modal */}
           <AnimatePresence>

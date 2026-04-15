@@ -179,6 +179,27 @@ router.post('/driver-types', verifyAdmin, async (req, res) => {
   }
 });
 
+// EDIT driver type (admin only)
+router.put('/driver-types/:value', verifyAdmin, async (req, res) => {
+  try {
+    const settings = await Settings.getSettings();
+    const type = settings.driverTypes.find(t => t.value === req.params.value);
+
+    if (!type) {
+      return res.status(404).json({ error: 'Driver type not found' });
+    }
+
+    if (req.body.label) type.label = req.body.label;
+    if (req.body.emoji) type.emoji = req.body.emoji;
+
+    await settings.save();
+    res.json({ message: 'Driver type updated', driverTypes: settings.driverTypes });
+  } catch (error) {
+    console.error('Error updating driver type:', error);
+    res.status(500).json({ error: 'Failed to update driver type' });
+  }
+});
+
 // DELETE driver type (admin only)
 router.delete('/driver-types/:value', verifyAdmin, async (req, res) => {
   try {
